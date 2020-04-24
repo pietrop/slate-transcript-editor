@@ -21,7 +21,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import {
   shortTimecode
-} from './util/timecode-converter';
+} from '../util/timecode-converter';
 
 import './style.css';
 
@@ -185,8 +185,8 @@ const TimedTextElement = props => {
           <code 
                     style={{cursor: 'pointer'}} 
                     className={['timecode', 'text-muted'].join(' ')}  
-                    onClick={(e)=>{handleTimedTextClick(e, props.element.start)}}>
-                    {shortTimecode(props.element.start)}</code><strong> {props.element.speaker.toUpperCase()}</strong>
+                    onClick={(e)=>{handleTimedTextClick(e, props.element.start)}}
+                    >{shortTimecode(props.element.start)}</code><strong> {props.element.speaker.toUpperCase()}</strong>
           </Col>
           <Col  xs={12} sm={12} md={9} lg={9} xl={7} className={'p-b-1 mx-auto'}>
           {props.children} 
@@ -241,7 +241,10 @@ const TimedTextElement = props => {
 
     const handleSave = ()=>{
       const editorContnet = getEditorContent('json-dpe');
-      props.handleSaveEditor(editorContnet)
+      if(props.handleSaveEditor){
+        props.handleSaveEditor(editorContnet)
+      }
+  
       // console.log(editorContnet)
     }
 
@@ -251,9 +254,7 @@ const TimedTextElement = props => {
           <br/>
             <Row>
                 <Col xs={{span:12, order:1}} sm={3} md={3} lg={3} xl={4}>
-                <section 
-                // style={{ marginTop: '5vh' }}
-                >
+                <section>
                     <video ref={videoRef}
                         src={
                             props.url
@@ -267,11 +268,7 @@ const TimedTextElement = props => {
                 
                 {value.length !== 0 ?<> 
                     <section 
-                    className="editor-wrapper-container" 
-                    style={{
-                        //  marginTop: '5vh',
-                        // height: '90vh' 
-                    }}> 
+                    className="editor-wrapper-container"> 
                      <Slate 
                      editor={editor} 
                      value={value} 
@@ -302,11 +299,7 @@ const TimedTextElement = props => {
                         </Slate>
                     </section>
                    </>: <section  
-                            className="text-center"
-                            style={{
-                                // marginTop: '5vh',
-                                // height: '90vh' 
-                            }}>
+                            className="text-center">
                           <i className="text-center">Loading...</i>
                       </section>}
 

@@ -19,3 +19,7 @@ to get text out of component with timecodes and speaker names in the interim */
   -ms-user-select: none;
   user-select: none;
 }
+
+.timecode:hover{
+  text-decoration: underline;
+}

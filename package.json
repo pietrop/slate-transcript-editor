@@ -5,12 +5,27 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "start":"npm run storybook",
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook -c .storybook -o .out",
     "deploy": "npm run build-storybook  && cp .nojekyll .out/.nojekyll && gh-pages -d .out"
   },
   "keywords": [],
-  "author": "",
+  "author": "Pietro Passarelli",
+  "contributors": [
+    {
+      "name": "Pietro Passarelli",
+      "url": "https://github.com/pietrop"
+    }
+  ],
+  "bugs": {
+    "url": "https://github.com/pietrop/slate-transcript-editor/issues"
+  },
+  "homepage": "https://github.com/pietrop/slate-transcript-editor",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pietrop/slate-transcript-editor.git"
+  },
   "license": "MIT",
   "devDependencies": {
     "@babel/core": "^7.9.0",
