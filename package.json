@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "storybook": "start-storybook -p 6006",
-    "build-storybook": "build-storybook"
+    "build-storybook": "build-storybook -c .storybook -o .out",
+    "deploy": "npm run build-storybook  && cp .nojekyll .out/.nojekyll && gh-pages -d .out"
   },
   "keywords": [],
   "author": "",
@@ -25,6 +26,7 @@
     "@fortawesome/react-fontawesome": "^0.1.5",
     "bootstrap-css-only": "^4.4.1",
     "draft-js": "^0.11.5",
+    "gh-pages": "^2.2.0",
     "react-bootstrap": "^1.0.1",
     "slate": "^0.57.1",
     "slate-react": "^0.57.1"

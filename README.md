@@ -2,7 +2,6 @@
 <!-- _One liner + link to confluence page_
 _Screenshot of UI - optional_ -->
 
-_Work in progress_
 
 Building on the sucess and lessons learned from [`@bbc/react-transcript-editor`](https://github.com/bbc/react-transcript-editor).
 Mostly to be used in the context of [autoEdit 3](http://autoedit.io)(digital paper edit), and other proejcts. 
@@ -13,6 +12,11 @@ Criterias
 - Only essential features for correction of timed text 
 - adapters to and from, are external, except for dpe (digital paper edit, adapter).
 - leverages existing libraries, such as [bootstrap](https://getbootstrap.com/), and [react-bootstrap](https://react-bootstrap.github.io/), to focus on the diffuclt problems, and not wasting time re-inventing the wheel or fiddling around with css.
+
+
+_Work in progress_
+
+[See project board for more details](https://github.com/pietrop/slate-transcript-editor/projects/1)
 
 ## Setup
 <!-- _stack - optional_

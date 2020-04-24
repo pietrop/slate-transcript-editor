@@ -114,3 +114,6 @@ typings/
 
 
 lib/
+
+.out/
+out1381/
