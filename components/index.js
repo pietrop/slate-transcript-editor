@@ -247,6 +247,7 @@ const TimedTextElement = props => {
 
     return (
         <Container fluid style={{backgroundColor: '#eee', height: '100vh'}}>
+          <h3 className={'text-truncate'} title={props.title}>{props.title}</h3>
           <br/>
             <Row>
                 <Col xs={{span:12, order:1}} sm={3} md={3} lg={3} xl={4}>
