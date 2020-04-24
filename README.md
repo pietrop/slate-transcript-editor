@@ -1,8 +1,10 @@
-## `@pietrop/slate-transcript-editor`
+## Slate transcript editor
 <!-- _One liner + link to confluence page_
 _Screenshot of UI - optional_ -->
 
 _Work in progress_
+
+Building on the sucess and lessons learned from [`@bbc/react-transcript-editor](https://github.com/bbc/react-transcript-editor).
 
 ## Setup
 <!-- _stack - optional_
