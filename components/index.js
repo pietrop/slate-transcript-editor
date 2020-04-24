@@ -14,9 +14,14 @@ import { Slate, Editable, withReact } from 'slate-react';
 import {
   faCog,
   faKeyboard,
+  faSave,
   faShare
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+
+import {
+  shortTimecode
+} from './util/timecode-converter';
 
 import './style.css';
 
@@ -62,7 +67,7 @@ const serialize = value => {
       value
         // Return the string content of each paragraph in the value's children.
         .map(n => {
-          return `${n.start} ${n.speaker}\n${Node.string(n)})` //+ Node.get('start', 'start');
+          return `${shortTimecode(n.start)} ${n.speaker}\n${Node.string(n)})` //+ Node.get('start', 'start');
         })
         // Join them all with line breaks denoting paragraphs.
         .join('\n\n')
@@ -176,14 +181,14 @@ export default function TranscriptEditor(props) {
 const TimedTextElement = props => {
     return (
       <Row {...props.attributes} >
-          <Col xs={12} sm={3} md={3} lg={3} xl={3}>
+          <Col xs={12} sm={12} md={3} lg={3} xl={3} className={'p-t-2'}>
           <code 
                     style={{cursor: 'pointer'}} 
-                    className={['timecode'].join(' ')}  
+                    className={['timecode', 'text-muted'].join(' ')}  
                     onClick={(e)=>{handleTimedTextClick(e, props.element.start)}}>
-                    {props.element.start}</code><strong> {props.element.speaker}</strong>
+                    {shortTimecode(props.element.start)}</code><strong> {props.element.speaker.toUpperCase()}</strong>
           </Col>
-          <Col  xs={12} sm={7} md={7} lg={7} xl={7}>
+          <Col  xs={12} sm={12} md={9} lg={9} xl={7} className={'p-b-1 mx-auto'}>
           {props.children} 
           </Col>
           </Row>
@@ -203,20 +208,20 @@ const TimedTextElement = props => {
       } 
     }
 
-    const handleExport = (type)=>{
+    const getEditorContent = (type)=>{
       const textExt = 'txt';
       switch(type) {
         case 'text':
-          download(slateToText(value), `${props.title}.${textExt}`);
+          return slateToText(value);
           break;
         case 'text-no-speakers':
-          download(slateToTextNoSpeakers(value), `${props.title}.${textExt}`);
+          return slateToTextNoSpeakers(value);
           break;
         case 'json-slate':
-          download( JSON.stringify(value,null,2), `${props.title}.${type}`);
+          return value;
           break;
         case 'json-dpe':
-          download( JSON.stringify(value,null,2), `${props.title}.${type}`);
+         return value;
            break;
         case 'word':
           // code block
@@ -224,15 +229,27 @@ const TimedTextElement = props => {
         default:
           // code block
       }
+    }
 
-  
+    const handleExport = (type, fileEext)=>{
+      let editorContnet = getEditorContent(type);
+      if(fileEext==='json'){
+        editorContnet =  JSON.stringify(editorContnet,null,2)
+      }
+      download( editorContnet, `${props.title}.${fileEext}`);
+    }
+
+    const handleSave = ()=>{
+      const editorContnet = getEditorContent('json-dpe');
+      props.handleSaveEditor(editorContnet)
+      // console.log(editorContnet)
     }
 
     return (
         <Container fluid style={{backgroundColor: '#eee', height: '100vh'}}>
           <br/>
             <Row>
-                <Col xs={12} sm={3} md={3} lg={3} xl={4}>
+                <Col xs={{span:12, order:1}} sm={3} md={3} lg={3} xl={4}>
                 <section 
                 // style={{ marginTop: '5vh' }}
                 >
@@ -245,7 +262,7 @@ const TimedTextElement = props => {
                         controls></video>
                    </section>
                 </Col>
-                <Col s={12} sm={7} md={7} lg={7} xl={6}>
+                <Col xs={{span:12, order:3}} sm={{span:7, order:2}} md={{span:7, order:2}} lg={{span:7, order:2}} xl={{span:6, order:2}}>
                 
                 {value.length !== 0 ?<> 
                     <section 
@@ -293,19 +310,29 @@ const TimedTextElement = props => {
                       </section>}
 
                 </Col>
-                <Col xs={12} sm={2} md={2} lg={2} xl={2}>
-                {/* <Button onClick={handleExport} variant="light">
-                  <FontAwesomeIcon icon={ faShare } />
-                </Button>  */}
+                <Col xs={{span:12, order:2}} sm={{span:2, order:3}} md={{span:2, order:3}} lg={{span:2, order:3}} xl={{span:2, order:3}}>
+                  <Row>
+                    <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
+                      <Button  onClick={handleSave} variant="light">
+                        <FontAwesomeIcon icon={ faSave } />
+                      </Button>
+                    </Col>
+                    <Col xs={2} sm={12} md={12} lg={12} xl={12}  className={'p-1 mx-auto'}>
+                      <DropdownButton id="dropdown-basic-button" title={<FontAwesomeIcon icon={ faShare } />} variant="light">
+                        <Dropdown.Item onClick={()=>{handleExport('text', 'txt')}}>Text</Dropdown.Item>
+                        <Dropdown.Item onClick={()=>{handleExport('text-no-speakers', 'txt')}}>Text (No Speakers)</Dropdown.Item>
+                        <Dropdown.Item onClick={()=>{handleExport('word','docx')}} disabled>Word</Dropdown.Item>
+                        <Dropdown.Divider />
+                        <Dropdown.Item onClick={()=>{handleExport('json-slate','json')}}>Json (slate)</Dropdown.Item>
+                        <Dropdown.Item onClick={()=>{handleExport('json-dpe','json')}} disabled>Json(dpe)</Dropdown.Item>
+                      </DropdownButton>
+                    </Col>
+                  </Row>
+              
 
-                <DropdownButton id="dropdown-basic-button" title={<FontAwesomeIcon icon={ faShare } />} variant="light">
-                <Dropdown.Item onClick={()=>{handleExport('text')}}>Text</Dropdown.Item>
-                <Dropdown.Item onClick={()=>{handleExport('text-no-speakers')}}>Text (No Speakers)</Dropdown.Item>
-                <Dropdown.Item onClick={()=>{handleExport('word')}} disabled>Word</Dropdown.Item>
-                <Dropdown.Divider />
-                <Dropdown.Item onClick={()=>{handleExport('json-slate')}}>Json (slate)</Dropdown.Item>
-                <Dropdown.Item onClick={()=>{handleExport('json-dpe')}} disabled>Json(dpe)</Dropdown.Item>
-              </DropdownButton>
+           
+                <br/>
+             
 
 
                 </Col>

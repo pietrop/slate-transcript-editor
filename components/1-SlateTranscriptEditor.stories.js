@@ -1,11 +1,6 @@
-import React, {useState, useEffect, useMemo} from 'react';
+import React from 'react';
 import { action } from '@storybook/addon-actions';
 import SlateTranscriptEditor from './index.js';
-
-import { createEditor } from 'slate';
-// https://docs.slatejs.org/walkthroughs/01-installing-slate
-// Import the Slate components and React plugin.
-import { Slate, Editable, withReact } from 'slate-react';
 
 
 export default {
@@ -18,7 +13,14 @@ const DEMO_MEDIA_URL_KATE =
 const DEMO_TITLE_KATE =
   "TED Talk | Kate Darling - Why we have an emotional connection to robots";
 import DEMO_TRANSCRIPT_KATE from "./sample-data/KateDarling-dpe.json";
-export const TranscriptEditorDemoKate = () => <SlateTranscriptEditor url={DEMO_MEDIA_URL_KATE} title={DEMO_TITLE_KATE} jsonData={DEMO_TRANSCRIPT_KATE}/>;
+export const TranscriptEditorDemoKate = () => {
+return <SlateTranscriptEditor 
+  url={DEMO_MEDIA_URL_KATE} 
+  title={DEMO_TITLE_KATE} 
+  jsonData={DEMO_TRANSCRIPT_KATE}
+  handleSaveEditor={(data)=>{console.log('saved callback::', data)}}
+  />
+};
 
 
 const DEMO_MEDIA_URL_ZUCK_5HOURS = "https://democratic-presidential-debate-stt-analyses.s3.us-east-2.amazonaws.com/Facebook+CEO+Mark+Zuckerberg+FULL+testimony+before+U.S.+senate-pXq-5L2ghhg.mp4";
@@ -32,23 +34,3 @@ import DEMO_TRANSCRIPT_ZUCK_5HOURS_DPE from "./sample-data/Facebook-CEO-Mark-Zuc
 export const TranscriptEditorDemoZuck5Hours = () => <SlateTranscriptEditor url={DEMO_MEDIA_URL_ZUCK_5HOURS} title={DEMO_TITLE_ZUCK_5HOURS} jsonData={DEMO_TRANSCRIPT_ZUCK_5HOURS_DPE}/>;
 
 
-const SlateSimpleEditor = () => {
-  const editor = useMemo(() => withReact(createEditor()), [])
-  // Add the initial value when setting up our state.
-  const [value, setValue] = useState([
-    {
-      type: 'paragraph',
-      children: [{ text: 'A line of text in a paragraph.' }],
-    },
-  ])
-
-  return (
-    <Slate editor={editor} value={value} onChange={value => setValue(value)}>
-      Test
-      <Editable />
-    </Slate>
-  )
-}
-
-
-export const SlateSimpleDemo = () => <SlateSimpleEditor/>
