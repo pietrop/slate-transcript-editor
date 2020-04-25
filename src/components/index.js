@@ -46,7 +46,9 @@ export default function TranscriptEditor(props) {
     const [value, setValue] = useState([])
 
     const handleTimeUpdated = (e) => {
-        setCurrentTime(e.target.currentTime)
+        setCurrentTime(e.target.currentTime);
+        // TODO: setting duration here as a workaround
+        setDuration(videoRef.current.duration);
     }
 
     useEffect(()=>{
@@ -56,7 +58,7 @@ export default function TranscriptEditor(props) {
 
     useEffect(() => { // Update the document title using the browser API
         if (videoRef && videoRef.current) {
-            setDuration(videoRef.current.duration);
+            // setDuration(videoRef.current.duration);
             videoRef.current.addEventListener("timeupdate", handleTimeUpdated);
         }
 
@@ -69,6 +71,7 @@ export default function TranscriptEditor(props) {
 
     useEffect(() => { // Update the document title using the browser API
         if (videoRef && videoRef.current) {
+          // Not working 
             setDuration(videoRef.current.duration);
         }
     },[videoRef]);
@@ -95,7 +98,7 @@ export default function TranscriptEditor(props) {
     //   }
     // }
 
-    const handleEditorOnChange = (e)=>{
+    // const handleEditorOnChange = (e)=>{
       // if( e.key!== 'Tab' 
       //   && e.key!== 'Shift'
       //   && e.key!== 'Enter' 
@@ -108,7 +111,7 @@ export default function TranscriptEditor(props) {
       //         once(playVideo)
       //     }
       // }
-    }
+    // }
 
 
     const renderElement = useCallback(props => {
@@ -235,6 +238,12 @@ export default function TranscriptEditor(props) {
                    </section>
                   </Row>
                   <Row>
+                  <Col xs={5} sm={5} md={5} lg={5} xl={5}  className={'p-1 mx-auto'}>
+                    <Button variant="light" disabled>
+                    <code className={'text-muted'}>{shortTimecode(currentTime)}</code><code className={'text-muted'}> {duration? `| ${shortTimecode(duration)}`: ''}</code> 
+                    </Button>
+                 
+                    </Col>
                   <Col xs={4} sm={4} md={4} lg={4} xl={4}  className={'p-1 mx-auto'}>
                   {/* <Form.Label>Playback Rate</Form.Label> */}
                       <Form.Control 
@@ -247,7 +256,7 @@ export default function TranscriptEditor(props) {
                           })}  
                       </Form.Control>
                   </Col>
-                  <Col xs={4} sm={4} md={4} lg={4} xl={4}  className={'p-1 mx-auto'}>
+                  <Col xs={2} sm={2} md={2} lg={2} xl={2}  className={'p-1 mx-auto'}>
                   <Button variant="light" onClick={handleSeekBack} title={`Seek back by ${SEEK_BACK_SEC} seconds`}>{SEEK_BACK_SEC} <FontAwesomeIcon icon={faUndo}/></Button>
                   </Col>
                   </Row>
@@ -273,7 +282,7 @@ export default function TranscriptEditor(props) {
                           renderElement={renderElement}
                          onKeyDown={event => {
                             console.log('Editable onKeyDown',event.key)
-                            handleEditorOnChange(event);
+                            // handleEditorOnChange(event);
                             if (event.key === '`' && event.ctrlKey) {
                                 event.preventDefault()
                                 // Determine whether any of the currently selected blocks are code blocks.
