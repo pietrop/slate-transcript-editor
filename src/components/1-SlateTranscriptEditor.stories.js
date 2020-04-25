@@ -34,7 +34,7 @@ export const TranscriptEditorDemoZuck2Hours = () =>{
     title={DEMO_TITLE_ZUCK_2HOURS} 
     jsonData={DEMO_TRANSCRIPT_ZUCK_2HOURS_DPE}
     handleSaveEditor={action('handleSaveEditor')}
-    handleAutoSaveEditor={action('handleAutoSaveEditor')}
+    // handleAutoSaveEditor={action('handleAutoSaveEditor')} // auto save has condierable performance lag on longer files, sudgest to not use for files over 45 min/1hour.
     saveFormat={'dpe'}
     />
 };
@@ -47,7 +47,7 @@ export const TranscriptEditorDemoZuck5Hours = () => {
     title={DEMO_TITLE_ZUCK_5HOURS} 
     jsonData={DEMO_TRANSCRIPT_ZUCK_5HOURS_DPE}
     handleSaveEditor={action('handleSaveEditor')}
-    handleAutoSaveEditor={action('handleAutoSaveEditor')}
+    // handleAutoSaveEditor={action('handleAutoSaveEditor')}
     saveFormat={'dpe'}
     />
 };

@@ -8,15 +8,18 @@ import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Form from 'react-bootstrap/Form';
 import Badge from 'react-bootstrap/Badge';
+import Tooltip from 'react-bootstrap/Tooltip';
+import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import { createEditor,Editor, Node, Transforms } from 'slate';
 // https://docs.slatejs.org/walkthroughs/01-installing-slate
 // Import the Slate components and React plugin.
-import { Slate, Editable, withReact } from 'slate-react';
+import { Slate, Editable, withReact, ReactEditor } from 'slate-react';
 import {
   faSave,
   faShare,
   faUndo,
-  faSync
+  faSync,
+  faQuestionCircle
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
@@ -29,57 +32,49 @@ import convertDpeToSlate from '../util/dpe-to-slate';
 import converSlateToDpe from '../util/export-adapters/slate-to-dpe/index.js';
 import slateToDocx from '../util/export-adapters/docx';
 import restoreTimecodes from '../util/restore-timcodes';
-
 import './style.css';
 
 const PLAYBACK_RATE_VALUES  = [0.2, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 3, 3.5];
 const SEEK_BACK_SEC = 15;
-// const PAUSE_WHILTE_TYPING_TIMEOUT_MILLISECONDS = 1000;
 const PAUSE_WHILTE_TYPING_TIMEOUT_MILLISECONDS = 500;
+const MAX_DURATION_FOR_PERFORMANCE_OPTIMIZATION_IN_SECONDS = 3600;
+const TOOTLIP_DELAY = 1000;
 
 const videoRef = React.createRef();
 
-const workerMessage = (event)=>{
-    console.log('message received from workerFor => ', event.data);
-}
-
-const workerError = (event)=>{
-  console.error('error received from workerFor => ', event);
-}
 
 export default function TranscriptEditor(props) {
     const [currentTime, setCurrentTime] = useState(0);
     const [duration, setDuration] = useState(0);
     const [playbackRate, setPlaybackRate] = useState(1);
     const editor = useMemo(() => withReact(createEditor()), []);
-    // const [saveTimer, setSaveTimer] = useState(null);
-    let saveTimer = null;
-    const [value, setValue] = useState([])
-
-    const handleTimeUpdated = (e) => {
-        setCurrentTime(e.target.currentTime);
-        // TODO: setting duration here as a workaround
-        setDuration(videoRef.current.duration);
-    }
-
-    // useEffect(()=>{
-    //     // resolved relative to main.js url path
-    //     const workerFor = new Worker('web-worker.js');
-    //     // listen to message event of worker
-    //     workerFor.addEventListener('message', workerMessage);
-    //     // listen to error event of worker
-    //     workerFor.addEventListener('error', workerError);
-
-    //     return function cleanupWorkers() {
-    //       workerFor.removeEventListener("error",workerMessage )
-    //       workerFor.removeEventListener("message", workerError)
-    //     }
-
-    // },[])
+    const [value, setValue] = useState([]);
+    const [showSpeakers, setShowSpeakers] = useState(true);
+    const [showTimecodes, setShowTimecodes] = useState(true);
 
     useEffect(()=>{
         const res = convertDpeToSlate(props.jsonData);
         setValue(res)
+        // const sampleValue = [
+        //   {
+        //     "start": 228.02,
+        //     "type": "timedText",
+        //     "children": [
+        //       {
+        //         "text": "Yeah, that it."
+        //       }
+        //     ]
+        //   },
+        //   {
+        //     "start": 320.68,
+        //     "type": "speaker",
+        //     "children": [
+        //       {
+        //         "text": "Speaker 1"
+        //       }
+        //     ]
+        //   }]
+        // setValue(sampleValue)
     },[])
 
     useEffect(() => { // Update the document title using the browser API
@@ -87,20 +82,28 @@ export default function TranscriptEditor(props) {
             // setDuration(videoRef.current.duration);
             videoRef.current.addEventListener("timeupdate", handleTimeUpdated);
         }
-
         return function cleanup() {
             // removeEventListener
             videoRef.current.removeEventListener("timeupdate", handleTimeUpdated)
         }
-
     }, []);
 
     useEffect(() => { // Update the document title using the browser API
         if (videoRef && videoRef.current) {
           // Not working 
             setDuration(videoRef.current.duration);
+            if(videoRef.current.duration>=MAX_DURATION_FOR_PERFORMANCE_OPTIMIZATION_IN_SECONDS){
+              setShowSpeakers(false);
+              showTimecodes(false);
+            }
         }
     },[videoRef]);
+
+    const handleTimeUpdated = (e) => {
+      setCurrentTime(e.target.currentTime);
+      // TODO: setting duration here as a workaround
+      setDuration(videoRef.current.duration);
+  }
 
     const handleSetPlaybackRate= (e)=>{
       console.log('handleSetPlaybackRate', e.target.value)
@@ -117,29 +120,6 @@ export default function TranscriptEditor(props) {
       }
     }
 
-    // const playVideo = ()=>{
-    //   console.log('playVideo')
-    //   if (videoRef && videoRef.current) {
-    //     videoRef.current.play()
-    //   }
-    // }
-
-    // const handleEditorOnChange = (e)=>{
-      // if( e.key!== 'Tab' 
-      //   && e.key!== 'Shift'
-      //   && e.key!== 'Enter' 
-      //   ){
-      //     if (videoRef && videoRef.current) {
-      //       // https://lodash.com/docs/4.17.15#debounce
-      //       // https://lodash.com/docs/4.17.15#throttle
-      //         videoRef.current.pause();
-      //         // throttle(playVideo, PAUSE_WHILTE_TYPING_TIMEOUT_MILLISECONDS, {trailing: true})
-      //         once(playVideo)
-      //     }
-      // }
-    // }
-
-
     const renderElement = useCallback(props => {
         switch (props.element.type) {
         // case 'speaker':
@@ -151,46 +131,68 @@ export default function TranscriptEditor(props) {
         }
       }, [])
 
+    const renderLeaf = useCallback(({ attributes, children, leaf }) => {
+      // console.log(attributes, children, leaf)
+      return (
+        <span
+        onDoubleClick={handleTimedTextClick}
+        className={'timecode text'}
+        data-start={children.props.parent.start}
+        title={children.props.parent.start}
+          {...attributes}
+          // style={{
+          //   fontWeight: leaf.bold ? 'bold' : 'normal',
+          //   fontStyle: leaf.italic ? 'italic' : 'normal',
+          // }}
+        >
+          {children}
+        </span>
+      )
+    }, [])
+
     const TimedTextElement = props => {
-      // console.log('TimedTextElement',props)
+      const path = ReactEditor.findPath(editor, props.element);
       const handleSetSpeakerName = (e)=>{
-        const resp = prompt('Change speaker name', props.element.speaker)
+        console.log('handleSetSpeakerName', e)
+        const res = prompt('Change speaker name', e.target.innerText);
+        if(res){
+          // Transforms.setNodes(editor, {type: 'paragraph', speaker: res})
 
-
-        const path = editor.selection.anchor.path;
-        console.log('path',path)
-        if(resp){
-          Transforms.setNodes(
-            editor,
-            { speaker: resp },
-            {
-              match: n => Editor.isBlock(editor, n),
-            }
-          )
+          Transforms.setNodes(editor, 
+            {type:'timedText',speaker: res, start:props.element.start}, {at: path}
+        );    
         }
-      
       }
+
+      // console.log('Node.get',Node.get(props))
         return (
-          <Row {...props.attributes} >
-              <Col xs={4} sm={2} md={4} lg={3} xl={2} className={'p-t-2 text-truncate'} >
+          <Row {...props.attributes}>
+              {showTimecodes 
+              && <Col contentEditable={false}  xs={4} sm={2} md={4} lg={3} xl={2} className={'p-t-2 text-truncate'} >
               <code 
+                  contentEditable={false}  
                   style={{cursor: 'pointer'}} 
-                  className={['timecode', 'text-muted'].join(' ')}  
-                  onClick={(e)=>{handleTimedTextClick(e, props.element.start)}}
-                  title={shortTimecode(props.element.start)}
-                  >{shortTimecode(props.element.start)}
+                  className={'timecode text-muted unselectable'} 
+                  onClick={handleTimedTextClick}
+                  title={props.element.startTimecode}
+                  data-start={props.element.start}
+                  >
+                    {props.element.startTimecode}
                   </code>
-                  </Col>
-                  <Col xs={8} sm={10} md={8} lg={3} xl={3} className={'p-t-2 text-truncate'} >
-                  <strong 
-                    className={'text-truncate'}
+                  </Col>}
+                  {showSpeakers 
+                  &&   <Col contentEditable={false}  xs={8} sm={10} md={8} lg={3} xl={3} className={'p-t-2 text-truncate'} >
+                  <span 
+                    contentEditable={false}  
+                    className={'text-truncate text-muted unselectable'}
                     style={{
                       cursor: 'pointer',
                       width: '100%'
                     }} 
                     title={props.element.speaker.toUpperCase()}
-                    onClick={handleSetSpeakerName}> {props.element.speaker.toUpperCase()}</strong>
-              </Col>
+                    onClick={handleSetSpeakerName}
+                    > {props.element.speaker.toUpperCase()}</span>
+              </Col>}
               <Col  xs={12} sm={12} md={12} lg={6} xl={7} className={'p-b-1 mx-auto'}>
               {props.children} 
               </Col>
@@ -202,11 +204,27 @@ export default function TranscriptEditor(props) {
         return <p {...props.attributes}>{props.children}</p>
     }
 
-    const handleTimedTextClick = (e, start)=>{
+
+
+    const handleTimedTextClick = (e)=>{
+      // console.log(e, e.target)
+      console.log(e)
       if(e.target.classList.contains('timecode')){
+      
+        const start = e.target.dataset.start;
         if (videoRef && videoRef.current) {
           videoRef.current.currentTime = parseInt(start);
           videoRef.current.play();
+        }
+      }else if(e.target.dataset.slateString){
+        if(e.target.parentNode.dataset.start){
+          const start = e.target.parentNode.dataset.start;
+          console.log(start);
+          if (videoRef && videoRef.current && start) {
+            videoRef.current.currentTime = parseInt(start);
+            videoRef.current.play();
+          }
+
         }
       } 
     }
@@ -257,12 +275,12 @@ export default function TranscriptEditor(props) {
       }
     }
 
-
     const handleRestoreTimecodes = ()=>{
       const alignedSlateData = restoreTimecodes({slateValue: value,jsonData: props.jsonData})
       setValue(alignedSlateData);
       return alignedSlateData;
     }
+
     return (
         <Container fluid style={{backgroundColor: '#eee', height: '100vh'}}>
           <h3 className={'text-truncate'} title={props.title}>{props.title}</h3>
@@ -288,7 +306,6 @@ export default function TranscriptEditor(props) {
                  
                     </Col>
                   <Col xs={4} sm={4} md={4} lg={4} xl={4}  className={'p-1 mx-auto'}>
-                  {/* <Form.Label>Playback Rate</Form.Label> */}
                       <Form.Control 
                         as="select" defaultValue={playbackRate}  
                         onChange={handleSetPlaybackRate}
@@ -300,7 +317,18 @@ export default function TranscriptEditor(props) {
                       </Form.Control>
                   </Col>
                   <Col xs={2} sm={2} md={2} lg={2} xl={2}  className={'p-1 mx-auto'}>
-                  <Button variant="light" onClick={handleSeekBack} title={`Seek back by ${SEEK_BACK_SEC} seconds`}>{SEEK_BACK_SEC} <FontAwesomeIcon icon={faUndo}/></Button>
+                  <OverlayTrigger delay={TOOTLIP_DELAY} placement={'bottom'} overlay={<Tooltip id="tooltip-disabled">
+                 { `Seek back by ${SEEK_BACK_SEC} seconds`}
+                    </Tooltip>}>
+                      <span className="d-inline-block">
+                      <Button variant="light" onClick={handleSeekBack}
+                      //  title={`Seek back by ${SEEK_BACK_SEC} seconds`}
+                       >{SEEK_BACK_SEC} <FontAwesomeIcon icon={faUndo}/></Button>
+                      </span>
+                    </OverlayTrigger>
+
+
+                  
                   </Col>
                   </Row>
                 
@@ -308,11 +336,24 @@ export default function TranscriptEditor(props) {
                 <Col xs={{span:12, order:3}} sm={{span:7, order:2}} md={{span:7, order:2}} lg={{span:8, order:2}} xl={{span:6, order:2}}>
                 
                 {value.length !== 0 ?<> 
-                    <section 
-                    className="editor-wrapper-container"> 
+                    <section className="editor-wrapper-container"> 
+                    <style scoped>
+                    {`
+                    .timecode[data-start^="${parseInt(currentTime)}"]{
+                      color: #343a40!important /* Bootstrap black, for dark */
+                    }
+
+                    .timecode:not([data-start^="${parseInt(currentTime)}"]){
+                      color: #6c757d; /*Bootstrap grey for secondary*/
+                    }                    
+                    `}
+                  </style>
+
                      <Slate 
                      editor={editor} 
                      value={value} 
+                    //  onClick={(e)=>{console.log('click',e)}}
+                    //  onChange={value => setValue(value)}
                      onChange={(value) => {
                         if(props.handleAutoSaveEditor){
                           props.handleAutoSaveEditor(value);
@@ -322,24 +363,9 @@ export default function TranscriptEditor(props) {
                         }}
                      >
                         <Editable
+                        //  onClick={(e)=>{console.log('click',e.target)}}
                           renderElement={renderElement}
-                         onKeyDown={event => {
-                            console.log('Editable onKeyDown',event.key)
-                            // handleEditorOnChange(event);
-                            if (event.key === '`' && event.ctrlKey) {
-                                event.preventDefault()
-                                // Determine whether any of the currently selected blocks are code blocks.
-                                const [match] = Editor.nodes(editor, {
-                                  match: n => n.type === 'code',
-                                })
-                                // Toggle the block type depending on whether there's already a match.
-                                Transforms.setNodes(
-                                  editor,
-                                  { type: match ? 'paragraph' : 'code' },
-                                  { match: n => Editor.isBlock(editor, n) }
-                                )
-                              }
-                          }}
+                          renderLeaf={renderLeaf}
                           />
                         </Slate>
                     </section>
@@ -350,13 +376,34 @@ export default function TranscriptEditor(props) {
 
                 </Col>
                 <Col xs={{span:12, order:2}} sm={{span:2, order:3}} md={{span:2, order:3}} lg={{span:1, order:3}} xl={{span:2, order:3}}>
+                 
                   <Row>
+                  <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
+                  <OverlayTrigger  placement={'bottom'} overlay={<Tooltip id="tooltip-disabled">
+                    Double click on a word to jump to that paragraph!
+                    </Tooltip>}>
+                      <span className="d-inline-block">
+                        <Button variant="light" style={{ pointerEvents: 'none' }}>
+                        <FontAwesomeIcon icon={ faQuestionCircle } />
+                        </Button>
+                      </span>
+                    </OverlayTrigger>
+
+                    </Col>
                     <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
+                      {/* <OverlayTrigger  placement={'bottom'} overlay={<Tooltip id="tooltip-disabled">
+                      Save
+                    </Tooltip>}>
+                      <span className="d-inline-block"> */}
                       <Button title="save" onClick={handleSave} variant="light">
                         <FontAwesomeIcon icon={ faSave } />
                       </Button>
+                      {/* </span>
+                    </OverlayTrigger> */}
                     </Col>
-                    <Col xs={2} sm={12} md={12} lg={12} xl={12} title="export options" className={'p-1 mx-auto'}>
+                    <Col xs={2} sm={12} md={12} lg={12} xl={12} 
+                    title="export options"
+                     className={'p-1 mx-auto'}>
                       <DropdownButton id="dropdown-basic-button" title={<FontAwesomeIcon icon={ faShare } />} variant="light">
                       {/* TODO: need to run re-alignement if exportin with timecodes true, otherwise they'll be inaccurate */}
                         <Dropdown.Item onClick={()=>{handleExport({type:'text', ext:  'txt',speakers:false, timecodes: false })}}>Text <code>.txt</code></Dropdown.Item>
@@ -371,11 +418,22 @@ export default function TranscriptEditor(props) {
                         <Dropdown.Item onClick={()=>{handleExport({type:'json-slate', ext: 'json',speakers:true, timecodes: true})}}>Json (slate)</Dropdown.Item>
                         <Dropdown.Item onClick={()=>{handleExport({type:'json-dpe', ext: 'json',speakers:true, timecodes: true})}}>Json(dpe)</Dropdown.Item>
                       </DropdownButton>
+        
                     </Col>
                     <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
-                      <Button title="restore timecodes, for transcript over 1hour it could temporarily freeze the UI for a few seconds"  onClick={handleRestoreTimecodes} variant="light">
+                    <OverlayTrigger delay={TOOTLIP_DELAY} placement={'bottom'} overlay={<Tooltip id="tooltip-disabled">
+                    Restore timecodes. At the moment for transcript over 1hour it could temporarily freeze the UI for a few seconds
+                    </Tooltip>}>
+                      <span className="d-inline-block">
+
+                     <Button 
+                    //  title="restore timecodes, for transcript over 1hour it could temporarily freeze the UI for a few seconds" 
+                      onClick={handleRestoreTimecodes} variant="light">
                         <FontAwesomeIcon icon={ faSync } />
                       </Button>
+                      </span>
+                    </OverlayTrigger>
+                   
                     </Col>
                   </Row>
                 <br/>

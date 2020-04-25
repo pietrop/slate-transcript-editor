@@ -27,7 +27,7 @@ const slateToText = ({value, speakers, timecodes}) => {
         // Return the string content of each paragraph in the value's children.
         .map(n => {
           // return  `${timecodes? `${ speakers? n.speaker:''}\t[${shortTimecode(n.start)}]\t`:''}\t${Node.string(n)}`
-          return `${timecodes? `${shortTimecode(n.start)}\t`:''}${ speakers? n.speaker:''}${speakers||timecodes?'\n':''}${Node.string(n)}` //+ Node.get('start', 'start');
+          return `${timecodes? `${shortTimecode(n.start)}\t`:''}${ speakers? n.speaker.toUpperCase():''}${speakers||timecodes?'\n':''}${Node.string(n)}` //+ Node.get('start', 'start');
         })
         // Join them all with line breaks denoting paragraphs.
         .join('\n\n')
