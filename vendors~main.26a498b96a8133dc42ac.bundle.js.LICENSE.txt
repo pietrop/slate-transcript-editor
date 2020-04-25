@@ -71,6 +71,8 @@ See the Apache Version 2.0 License for specific language governing permissions
 and limitations under the License.
 ***************************************************************************** */
 
+/*! http://mths.be/fromcodepoint v0.1.0 by @mathias */
+
 /*! https://mths.be/esrever v0.2.0 by @mathias */
 
 /** @license React v0.19.1
@@ -99,3 +101,7 @@ and limitations under the License.
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  */
+
+//! stable.js 0.1.8, https://github.com/Two-Screen/stable
+
+//! © 2018 Angry Bytes and contributors. MIT licensed.
