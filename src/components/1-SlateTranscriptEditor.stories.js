@@ -19,6 +19,8 @@ return <SlateTranscriptEditor
   title={DEMO_TITLE_KATE} 
   jsonData={DEMO_TRANSCRIPT_KATE}
   handleSaveEditor={action('handleSaveEditor')}
+  handleAutoSaveEditor={action('handleAutoSaveEditor')}
+  saveFormat={'dpe'} // dpe or slate - dpe, runs alignement before exporting, slate, is just the raw data.
   />
 };
 
@@ -32,6 +34,8 @@ export const TranscriptEditorDemoZuck2Hours = () =>{
     title={DEMO_TITLE_ZUCK_2HOURS} 
     jsonData={DEMO_TRANSCRIPT_ZUCK_2HOURS_DPE}
     handleSaveEditor={action('handleSaveEditor')}
+    handleAutoSaveEditor={action('handleAutoSaveEditor')}
+    saveFormat={'dpe'}
     />
 };
 
@@ -43,6 +47,8 @@ export const TranscriptEditorDemoZuck5Hours = () => {
     title={DEMO_TITLE_ZUCK_5HOURS} 
     jsonData={DEMO_TRANSCRIPT_ZUCK_5HOURS_DPE}
     handleSaveEditor={action('handleSaveEditor')}
+    handleAutoSaveEditor={action('handleAutoSaveEditor')}
+    saveFormat={'dpe'}
     />
 };
 
