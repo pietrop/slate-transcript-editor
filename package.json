@@ -41,7 +41,7 @@
     "@fortawesome/react-fontawesome": "^0.1.5",
     "align-diarized-text": "^1.0.2",
     "bootstrap-css-only": "^4.4.1",
-    "docx": "^5.0.2",
+    "docx": "4.7.1",
     "draft-js": "^0.11.5",
     "gh-pages": "^2.2.0",
     "lodash.debounce": "^4.0.8",

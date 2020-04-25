@@ -73,8 +73,8 @@ We are using [this template for ADR](https://gist.github.com/iaincollins/92923cc
 _Coding style convention ref optional, eg which linter to use_
 _Linting, github pre-push hook - optional_ -->
 
-- npm 
-- node
+- npm `6.13.6`
+- node `12`
 - storybook 
 
 ## Build

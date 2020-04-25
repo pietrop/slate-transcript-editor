@@ -7,6 +7,7 @@ import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Form from 'react-bootstrap/Form';
+import Badge from 'react-bootstrap/Badge';
 import { createEditor,Editor, Node, Transforms } from 'slate';
 // https://docs.slatejs.org/walkthroughs/01-installing-slate
 // Import the Slate components and React plugin.
@@ -26,6 +27,7 @@ import slateToText from '../util/export-adapters/txt';
 import download from '../util/downlaod/index.js';
 import convertDpeToSlate from '../util/dpe-to-slate';
 import converSlateToDpe from '../util/export-adapters/slate-to-dpe/index.js';
+import slateToDocx from '../util/export-adapters/docx';
 
 import './style.css';
 
@@ -35,6 +37,14 @@ const SEEK_BACK_SEC = 15;
 const PAUSE_WHILTE_TYPING_TIMEOUT_MILLISECONDS = 500;
 
 const videoRef = React.createRef();
+
+const workerMessage = (event)=>{
+    console.log('message received from workerFor => ', event.data);
+}
+
+const workerError = (event)=>{
+  console.error('error received from workerFor => ', event);
+}
 
 export default function TranscriptEditor(props) {
     const [currentTime, setCurrentTime] = useState(0);
@@ -51,6 +61,21 @@ export default function TranscriptEditor(props) {
         setDuration(videoRef.current.duration);
     }
 
+    // useEffect(()=>{
+    //     // resolved relative to main.js url path
+    //     const workerFor = new Worker('web-worker.js');
+    //     // listen to message event of worker
+    //     workerFor.addEventListener('message', workerMessage);
+    //     // listen to error event of worker
+    //     workerFor.addEventListener('error', workerError);
+
+    //     return function cleanupWorkers() {
+    //       workerFor.removeEventListener("error",workerMessage )
+    //       workerFor.removeEventListener("message", workerError)
+    //     }
+
+    // },[])
+
     useEffect(()=>{
         const res = convertDpeToSlate(props.jsonData);
         setValue(res)
@@ -63,7 +88,7 @@ export default function TranscriptEditor(props) {
         }
 
         return function cleanup() {
-            removeEventListener
+            // removeEventListener
             videoRef.current.removeEventListener("timeupdate", handleTimeUpdated)
         }
 
@@ -78,7 +103,7 @@ export default function TranscriptEditor(props) {
 
     const handleSetPlaybackRate= (e)=>{
       console.log('handleSetPlaybackRate', e.target.value)
-      // const tmpNewPlaybackRateValue = parseFloat( e.target.value)
+      const tmpNewPlaybackRateValue = parseFloat( e.target.value)
       if (videoRef && videoRef.current) {
         videoRef.current.playbackRate = tmpNewPlaybackRateValue;
         setPlaybackRate(tmpNewPlaybackRateValue)
@@ -126,8 +151,13 @@ export default function TranscriptEditor(props) {
       }, [])
 
     const TimedTextElement = props => {
+      // console.log('TimedTextElement',props)
       const handleSetSpeakerName = (e)=>{
         const resp = prompt('Change speaker name', props.element.speaker)
+
+
+        const path = editor.selection.anchor.path;
+        console.log('path',path)
         if(resp){
           Transforms.setNodes(
             editor,
@@ -183,7 +213,11 @@ export default function TranscriptEditor(props) {
     const getEditorContent = ({type, speakers,timecodes })=>{
       switch(type) {
         case 'text':
-          return slateToText({value, speakers, timecodes});
+         let tmpValue = value;
+          if(timecodes){
+            tmpValue =  handleRestoreTimecodes();
+          }
+          return slateToText({value:tmpValue, speakers, timecodes});
           break;
         case 'json-slate':
           return value;
@@ -192,7 +226,12 @@ export default function TranscriptEditor(props) {
          return converSlateToDpe(value, props.jsonData);
            break;
         case 'word':
+          let docTmpValue = value;
+          if(timecodes){
+            docTmpValue =  handleRestoreTimecodes();
+          }
           // code block
+          return slateToDocx({value:docTmpValue, speakers, timecodes, title: props.title});
           break;
         default:
           // code block
@@ -204,7 +243,9 @@ export default function TranscriptEditor(props) {
       if(ext==='json'){
         editorContnet =  JSON.stringify(editorContnet,null,2)
       }
-      download( editorContnet, `${props.title}.${ext}`);
+      if(ext!=='docx'){
+        download( editorContnet, `${props.title}.${ext}`);
+      }
     }
 
     const handleSave = ()=>{
@@ -216,9 +257,11 @@ export default function TranscriptEditor(props) {
     }
 
     const handleRestoreTimecodes = ()=>{
+    
       const aligneDpeData = converSlateToDpe(value,props.jsonData);
       const alignedSlateData= convertDpeToSlate(aligneDpeData)
-      setValue(alignedSlateData)
+      setValue(alignedSlateData);
+      return alignedSlateData;
     }
     return (
         <Container fluid style={{backgroundColor: '#eee', height: '100vh'}}>
@@ -239,9 +282,9 @@ export default function TranscriptEditor(props) {
                   </Row>
                   <Row>
                   <Col xs={5} sm={5} md={5} lg={5} xl={5}  className={'p-1 mx-auto'}>
-                    <Button variant="light" disabled>
-                    <code className={'text-muted'}>{shortTimecode(currentTime)}</code><code className={'text-muted'}> {duration? `| ${shortTimecode(duration)}`: ''}</code> 
-                    </Button>
+                    <Badge variant="light" pill>
+                    <code className={'text-muted'}>{shortTimecode(currentTime)}</code><code className={'text-muted'}>{duration?` | ${shortTimecode(duration)}`: ''}</code> 
+                    </Badge>
                  
                     </Col>
                   <Col xs={4} sm={4} md={4} lg={4} xl={4}  className={'p-1 mx-auto'}>
@@ -316,11 +359,14 @@ export default function TranscriptEditor(props) {
                     <Col xs={2} sm={12} md={12} lg={12} xl={12} title="export options" className={'p-1 mx-auto'}>
                       <DropdownButton id="dropdown-basic-button" title={<FontAwesomeIcon icon={ faShare } />} variant="light">
                       {/* TODO: need to run re-alignement if exportin with timecodes true, otherwise they'll be inaccurate */}
-                        <Dropdown.Item onClick={()=>{handleExport({type: 'text',ext: 'txt', speakers:true, timecodes: true })}} disable>Text</Dropdown.Item>
-                        <Dropdown.Item onClick={()=>{handleExport({type:'text', ext:  'txt',speakers:true, timecodes: false })}}>Text (No timecodes)</Dropdown.Item>
-                        <Dropdown.Item onClick={()=>{handleExport({type:'text', ext:  'txt',speakers:false, timecodes: false })}}>Text (No Speakers or timecodes)</Dropdown.Item>
+                        <Dropdown.Item onClick={()=>{handleExport({type:'text', ext:  'txt',speakers:false, timecodes: false })}}>Text </Dropdown.Item>
+                        <Dropdown.Item onClick={()=>{handleExport({type:'text', ext:  'txt',speakers:true, timecodes: false })}}>Text (Speakers)</Dropdown.Item>
+                        <Dropdown.Item onClick={()=>{handleExport({type: 'text',ext: 'txt', speakers:true, timecodes: true })}} disable>Text (Speakers or timecodes)</Dropdown.Item>
                          {/* TODO: need to run re-alignement if exportin with timecodes true */}
-                        <Dropdown.Item onClick={()=>{handleExport({type:'word', ext: 'docx', speakers:true, timecodes: true})}} disabled>Word</Dropdown.Item>
+                         <Dropdown.Divider />
+                          <Dropdown.Item onClick={()=>{handleExport({type:'word', ext: 'docx', speakers:false, timecodes: false})}}>Word</Dropdown.Item>
+                          <Dropdown.Item onClick={()=>{handleExport({type:'word', ext: 'docx', speakers:true, timecodes: false})}}>Word (Speakers)</Dropdown.Item>
+                          <Dropdown.Item onClick={()=>{handleExport({type:'word', ext: 'docx', speakers:true, timecodes: true})}}>Word (Speakers or timecodes)</Dropdown.Item>
                         <Dropdown.Divider />
                         <Dropdown.Item onClick={()=>{handleExport({type:'json-slate', ext: 'json',speakers:true, timecodes: true})}}>Json (slate)</Dropdown.Item>
                         <Dropdown.Item onClick={()=>{handleExport({type:'json-dpe', ext: 'json',speakers:true, timecodes: true})}}>Json(dpe)</Dropdown.Item>
