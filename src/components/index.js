@@ -14,7 +14,8 @@ import { Slate, Editable, withReact } from 'slate-react';
 import {
   faSave,
   faShare,
-  faUndo
+  faUndo,
+  faSync
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
@@ -211,8 +212,11 @@ export default function TranscriptEditor(props) {
       }
     }
 
- 
-
+    const handleRestoreTimecodes = ()=>{
+      const aligneDpeData = converSlateToDpe(value,props.jsonData);
+      const alignedSlateData= convertDpeToSlate(aligneDpeData)
+      setValue(alignedSlateData)
+    }
     return (
         <Container fluid style={{backgroundColor: '#eee', height: '100vh'}}>
           <h3 className={'text-truncate'} title={props.title}>{props.title}</h3>
@@ -267,23 +271,23 @@ export default function TranscriptEditor(props) {
                      >
                         <Editable
                           renderElement={renderElement}
-                        //  onKeyDown={event => {
-                            // console.log('Editable onKeyDown',event.key)
-                            // handleEditorOnChange(event);
-                            // if (event.key === '`' && event.ctrlKey) {
-                            //     event.preventDefault()
-                            //     // Determine whether any of the currently selected blocks are code blocks.
-                            //     const [match] = Editor.nodes(editor, {
-                            //       match: n => n.type === 'code',
-                            //     })
-                            //     // Toggle the block type depending on whether there's already a match.
-                            //     Transforms.setNodes(
-                            //       editor,
-                            //       { type: match ? 'paragraph' : 'code' },
-                            //       { match: n => Editor.isBlock(editor, n) }
-                            //     )
-                            //   }
-                          // }}
+                         onKeyDown={event => {
+                            console.log('Editable onKeyDown',event.key)
+                            handleEditorOnChange(event);
+                            if (event.key === '`' && event.ctrlKey) {
+                                event.preventDefault()
+                                // Determine whether any of the currently selected blocks are code blocks.
+                                const [match] = Editor.nodes(editor, {
+                                  match: n => n.type === 'code',
+                                })
+                                // Toggle the block type depending on whether there's already a match.
+                                Transforms.setNodes(
+                                  editor,
+                                  { type: match ? 'paragraph' : 'code' },
+                                  { match: n => Editor.isBlock(editor, n) }
+                                )
+                              }
+                          }}
                           />
                         </Slate>
                     </section>
@@ -296,11 +300,11 @@ export default function TranscriptEditor(props) {
                 <Col xs={{span:12, order:2}} sm={{span:2, order:3}} md={{span:2, order:3}} lg={{span:1, order:3}} xl={{span:2, order:3}}>
                   <Row>
                     <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
-                      <Button  onClick={handleSave} variant="light">
+                      <Button title="save" onClick={handleSave} variant="light">
                         <FontAwesomeIcon icon={ faSave } />
                       </Button>
                     </Col>
-                    <Col xs={2} sm={12} md={12} lg={12} xl={12}  className={'p-1 mx-auto'}>
+                    <Col xs={2} sm={12} md={12} lg={12} xl={12} title="export options" className={'p-1 mx-auto'}>
                       <DropdownButton id="dropdown-basic-button" title={<FontAwesomeIcon icon={ faShare } />} variant="light">
                       {/* TODO: need to run re-alignement if exportin with timecodes true, otherwise they'll be inaccurate */}
                         <Dropdown.Item onClick={()=>{handleExport({type: 'text',ext: 'txt', speakers:true, timecodes: true })}} disable>Text</Dropdown.Item>
@@ -313,15 +317,13 @@ export default function TranscriptEditor(props) {
                         <Dropdown.Item onClick={()=>{handleExport({type:'json-dpe', ext: 'json',speakers:true, timecodes: true})}}>Json(dpe)</Dropdown.Item>
                       </DropdownButton>
                     </Col>
-                    
+                    <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
+                      <Button title="restore timecodes, for transcript over 1hour it could temporarily freeze the UI for a few seconds"  onClick={handleRestoreTimecodes} variant="light">
+                        <FontAwesomeIcon icon={ faSync } />
+                      </Button>
+                    </Col>
                   </Row>
-              
-
-              
                 <br/>
-             
-
-
                 </Col>
             </Row>
 

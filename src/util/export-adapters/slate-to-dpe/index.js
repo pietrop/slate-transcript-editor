@@ -32,7 +32,27 @@ const converSlateToDpe = (data,sttJson)=>{
             id: paragraph.id
         }
     }).flat()
-   return {words, paragraphs};
+
+      // TODO: this function needs to be brough into alignDiraizedText
+    // and applied to paragraphs - to avoid boundaries overlapp
+    function adjustTimecodesBoundaries(words) {
+        return words.map((word, index, arr) => {
+          // excluding first element
+          if (index != 0 ) {
+            const previousWord = arr[index - 1];
+            const currentWord = word;
+            if (previousWord.end > currentWord.start) {
+              word.start = previousWord.end;
+            }
+      
+            return word;
+          }
+      
+          return word;
+        });
+      }
+      const paragraphsWithAdjustedBoundaries = adjustTimecodesBoundaries(paragraphs)
+   return {words, paragraphs:paragraphsWithAdjustedBoundaries};
 }
 
 export default converSlateToDpe;
