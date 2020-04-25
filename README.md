@@ -6,11 +6,11 @@ _Screenshot of UI - optional_ -->
 Building on the sucess and lessons learned from [`@bbc/react-transcript-editor`](https://github.com/bbc/react-transcript-editor).
 Mostly to be used in the context of [autoEdit 3](http://autoedit.io)(digital paper edit), and other proejcts. 
 
-Criterias
+Criterias/Principles
 - Easy to reason around
-- Can handle transcript and media over 1 hour without lose in performance 
+- Can handle transcript and media over 1 hour without loss in performance 
 - Only essential features for correction of timed text 
-- adapters to and from, are external, except for dpe (digital paper edit, adapter).
+- adapters to and from other STT services, are external, except for dpe (digital paper edit, adapter).
 - leverages existing libraries, such as [bootstrap](https://getbootstrap.com/), and [react-bootstrap](https://react-bootstrap.github.io/), to focus on the diffuclt problems, and not wasting time re-inventing the wheel or fiddling around with css.
 
 
@@ -22,10 +22,12 @@ _Work in progress_
 <!-- _stack - optional_
 _How to build and run the code/app_ -->
 
-git clone
-
-cd 
-
+```
+git clone git@github.com:pietrop/slate-transcript-editor.git
+```
+```
+cd slate-transcript-editor
+```
 ```
 npm install
 ```
@@ -54,7 +56,12 @@ See storybook -->
 ## System Architecture
 <!-- _High level overview of system architecture_ -->
 
-Uses [slate](https://slatejs.org), see [docs](https://docs.slatejs.org/)
+- Uses [slate](https://slatejs.org) as editor, see their [docs](https://docs.slatejs.org/).
+<!-- - takes dpe as input -->
+- Uses [`align-diarized-text`](https://github.com/pietrop/align-diarized-text) for restoring timecodes. This lib combined [`stt-align-node`](https://github.com/bbc/stt-align-node) with [`alignment-from-stt`](https://github.com/pietrop/alignment-from-stt) to restore timecodes **and** preserve speaker labels.
+
+- It `align-diarized-text` when export of formats that require timecodes, eg `dpe` json, or `docx` and `txt` with timecodes. Also for the 'realignement'/sync UI btn.
+- If you export or save as slate json, at the moment it doesn't run alignement. The function to perform the alignement is also exported by the module, so that you can performe this computational intensive alignement elsewhere if needed, eg server side. 
 
 ## Documentation
 

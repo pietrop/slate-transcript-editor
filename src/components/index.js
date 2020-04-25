@@ -28,6 +28,7 @@ import download from '../util/downlaod/index.js';
 import convertDpeToSlate from '../util/dpe-to-slate';
 import converSlateToDpe from '../util/export-adapters/slate-to-dpe/index.js';
 import slateToDocx from '../util/export-adapters/docx';
+import restoreTimecodes from '../util/restore-timcodes';
 
 import './style.css';
 
@@ -256,10 +257,9 @@ export default function TranscriptEditor(props) {
       }
     }
 
+
     const handleRestoreTimecodes = ()=>{
-    
-      const aligneDpeData = converSlateToDpe(value,props.jsonData);
-      const alignedSlateData= convertDpeToSlate(aligneDpeData)
+      const alignedSlateData = restoreTimecodes({slateValue: value,jsonData: props.jsonData})
       setValue(alignedSlateData);
       return alignedSlateData;
     }
@@ -359,14 +359,14 @@ export default function TranscriptEditor(props) {
                     <Col xs={2} sm={12} md={12} lg={12} xl={12} title="export options" className={'p-1 mx-auto'}>
                       <DropdownButton id="dropdown-basic-button" title={<FontAwesomeIcon icon={ faShare } />} variant="light">
                       {/* TODO: need to run re-alignement if exportin with timecodes true, otherwise they'll be inaccurate */}
-                        <Dropdown.Item onClick={()=>{handleExport({type:'text', ext:  'txt',speakers:false, timecodes: false })}}>Text </Dropdown.Item>
+                        <Dropdown.Item onClick={()=>{handleExport({type:'text', ext:  'txt',speakers:false, timecodes: false })}}>Text <code>.txt</code></Dropdown.Item>
                         <Dropdown.Item onClick={()=>{handleExport({type:'text', ext:  'txt',speakers:true, timecodes: false })}}>Text (Speakers)</Dropdown.Item>
-                        <Dropdown.Item onClick={()=>{handleExport({type: 'text',ext: 'txt', speakers:true, timecodes: true })}} disable>Text (Speakers or timecodes)</Dropdown.Item>
+                        <Dropdown.Item onClick={()=>{handleExport({type: 'text',ext: 'txt', speakers:true, timecodes: true })}} disable>Text (Speakers & timecodes)</Dropdown.Item>
                          {/* TODO: need to run re-alignement if exportin with timecodes true */}
                          <Dropdown.Divider />
-                          <Dropdown.Item onClick={()=>{handleExport({type:'word', ext: 'docx', speakers:false, timecodes: false})}}>Word</Dropdown.Item>
+                          <Dropdown.Item onClick={()=>{handleExport({type:'word', ext: 'docx', speakers:false, timecodes: false})}}>Word <code>.docx</code></Dropdown.Item>
                           <Dropdown.Item onClick={()=>{handleExport({type:'word', ext: 'docx', speakers:true, timecodes: false})}}>Word (Speakers)</Dropdown.Item>
-                          <Dropdown.Item onClick={()=>{handleExport({type:'word', ext: 'docx', speakers:true, timecodes: true})}}>Word (Speakers or timecodes)</Dropdown.Item>
+                          <Dropdown.Item onClick={()=>{handleExport({type:'word', ext: 'docx', speakers:true, timecodes: true})}}>Word (Speakers & timecodes)</Dropdown.Item>
                         <Dropdown.Divider />
                         <Dropdown.Item onClick={()=>{handleExport({type:'json-slate', ext: 'json',speakers:true, timecodes: true})}}>Json (slate)</Dropdown.Item>
                         <Dropdown.Item onClick={()=>{handleExport({type:'json-dpe', ext: 'json',speakers:true, timecodes: true})}}>Json(dpe)</Dropdown.Item>
