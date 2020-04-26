@@ -307,7 +307,8 @@ export default function TranscriptEditor(props) {
                         }
                         width={'100%'}
                         height={'auto'}
-                        controls></video>
+                        controls 
+                        playsinline></video>
                    </section>
                   </Row>
                   <Row>
