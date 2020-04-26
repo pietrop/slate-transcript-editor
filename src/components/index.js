@@ -10,6 +10,8 @@ import Form from 'react-bootstrap/Form';
 import Badge from 'react-bootstrap/Badge';
 import Tooltip from 'react-bootstrap/Tooltip';
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
+import ListGroup from 'react-bootstrap/ListGroup';
+import Accordion from 'react-bootstrap/Accordion';
 import { createEditor,Editor, Node, Transforms } from 'slate';
 // https://docs.slatejs.org/walkthroughs/01-installing-slate
 // Import the Slate components and React plugin.
@@ -32,6 +34,8 @@ import convertDpeToSlate from '../util/dpe-to-slate';
 import converSlateToDpe from '../util/export-adapters/slate-to-dpe/index.js';
 import slateToDocx from '../util/export-adapters/docx';
 import restoreTimecodes from '../util/restore-timcodes';
+import pluck from '../util/pluk';
+
 import './style.css';
 
 const PLAYBACK_RATE_VALUES  = [0.2, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 3, 3.5];
@@ -51,30 +55,18 @@ export default function TranscriptEditor(props) {
     const [value, setValue] = useState([]);
     const [showSpeakers, setShowSpeakers] = useState(true);
     const [showTimecodes, setShowTimecodes] = useState(true);
+    const [speakerOptions, setSpeakerOptions] = useState([]);
 
     useEffect(()=>{
+    
         const res = convertDpeToSlate(props.jsonData);
-        setValue(res)
-        // const sampleValue = [
-        //   {
-        //     "start": 228.02,
-        //     "type": "timedText",
-        //     "children": [
-        //       {
-        //         "text": "Yeah, that it."
-        //       }
-        //     ]
-        //   },
-        //   {
-        //     "start": 320.68,
-        //     "type": "speaker",
-        //     "children": [
-        //       {
-        //         "text": "Speaker 1"
-        //       }
-        //     ]
-        //   }]
-        // setValue(sampleValue)
+        setValue(res);
+
+        const getUniqueSpeakers = pluck('speaker')
+        const uniqueSpeakers = getUniqueSpeakers(props.jsonData.paragraphs)
+       
+        setSpeakerOptions(uniqueSpeakers);
+
     },[])
 
     useEffect(() => { // Update the document title using the browser API
@@ -120,12 +112,14 @@ export default function TranscriptEditor(props) {
       }
     }
 
-    const renderElement = useCallback(props => {
+    const renderElement = useCallback((props, value) => {
+      console.log('renderElement', value)
+      console.log('renderElement props', props)
         switch (props.element.type) {
         // case 'speaker':
         //     return <SpeakerElement {...props} />
         case 'timedText':
-            return <TimedTextElement {...props} />
+            return <TimedTextElement {...props} value={value} />
           default:
             return <DefaultElement {...props} />
         }
@@ -151,16 +145,32 @@ export default function TranscriptEditor(props) {
     }, [])
 
     const TimedTextElement = props => {
+      console.log('TimedTextElement',props, props.value);
+
       const path = ReactEditor.findPath(editor, props.element);
       const handleSetSpeakerName = (e)=>{
         console.log('handleSetSpeakerName', e)
-        const res = prompt('Change speaker name', e.target.innerText);
-        if(res){
-          // Transforms.setNodes(editor, {type: 'paragraph', speaker: res})
-
-          Transforms.setNodes(editor, 
-            {type:'timedText',speaker: res, start:props.element.start}, {at: path}
-        );    
+        const oldSpeakerName = props.element.speaker.toUpperCase();
+        const newSpeakerName = prompt('Change speaker name', e.target.innerText);
+        if(newSpeakerName){
+          const isUpdateAllSpeakerInstances = confirm(`Would you like to replace all occurrences of ${oldSpeakerName} with ${newSpeakerName}?`);
+          if(isUpdateAllSpeakerInstances){
+            console.log('value 1', props.value)
+            // TODO: move as separate function - update all speaker
+           const newValue = props.value.map((paragraph)=>{
+              if(paragraph.speaker === oldSpeakerName){
+                paragraph.speaker = newSpeakerName;
+              }
+              return paragraph;
+            })
+            console.log('value 2',newValue)
+            setValue(newValue)
+          }
+          else{
+            Transforms.setNodes(editor, 
+              {type:'timedText',speaker: newSpeakerName, start: props.element.start}, {at: path}
+            );    
+          }
         }
       }
 
@@ -192,6 +202,14 @@ export default function TranscriptEditor(props) {
                     title={props.element.speaker.toUpperCase()}
                     onClick={handleSetSpeakerName}
                     > {props.element.speaker.toUpperCase()}</span>
+
+{/* <Form.Control as="select" size="sm" custom>
+{speakerOptions && speakerOptions.map((speakerName)=>{
+  return <option  value={speakerName.toUpperCase()}>
+    {speakerName.toUpperCase()}</option>
+  })}
+    </Form.Control> */}
+
               </Col>}
               <Col  xs={12} sm={12} md={12} lg={6} xl={7} className={'p-b-1 mx-auto'}>
               {props.children} 
@@ -326,10 +344,27 @@ export default function TranscriptEditor(props) {
                        >{SEEK_BACK_SEC} <FontAwesomeIcon icon={faUndo}/></Button>
                       </span>
                     </OverlayTrigger>
-
-
-                  
                   </Col>
+                  </Row>
+                  <Row>
+                   
+                  <Col xs={12} sm={12} md={12} lg={12} xl={12}  className={'p-1 mx-auto'}>
+                      <Accordion>
+                        <Accordion.Toggle as={Button} variant="link" eventKey="0">
+                          <Badge variant="light">Speakers</Badge>
+                        </Accordion.Toggle>
+                        <Accordion.Collapse eventKey="0">
+                          <ListGroup>
+                          {speakerOptions.map((speakerName)=>{
+                            return <ListGroup.Item className={'text-truncate'} title={speakerName.toUpperCase()}>{speakerName.toUpperCase()}</ListGroup.Item>
+                          })}
+                          </ListGroup>
+                        </Accordion.Collapse>
+                      </Accordion>
+
+
+
+                    </Col>
                   </Row>
                 
                 </Col>
@@ -364,7 +399,8 @@ export default function TranscriptEditor(props) {
                      >
                         <Editable
                         //  onClick={(e)=>{console.log('click',e.target)}}
-                          renderElement={renderElement}
+                          // renderElement={renderElement.bind( value)}
+                          renderElement={(e) => renderElement(e, value)}
                           renderLeaf={renderLeaf}
                           />
                         </Slate>
