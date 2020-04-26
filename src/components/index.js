@@ -55,19 +55,20 @@ export default function TranscriptEditor(props) {
     const [value, setValue] = useState([]);
     const [showSpeakers, setShowSpeakers] = useState(true);
     const [showTimecodes, setShowTimecodes] = useState(true);
-    const [speakerOptions, setSpeakerOptions] = useState([]);
+    // const [speakerOptions, setSpeakerOptions] = useState([]);
 
     useEffect(()=>{
     
         const res = convertDpeToSlate(props.jsonData);
         setValue(res);
 
-        const getUniqueSpeakers = pluck('speaker')
-        const uniqueSpeakers = getUniqueSpeakers(props.jsonData.paragraphs)
-       
-        setSpeakerOptions(uniqueSpeakers);
-
     },[])
+
+  //   useEffect(()=>{
+  //     const getUniqueSpeakers = pluck('speaker')
+  //     const uniqueSpeakers = getUniqueSpeakers(props.jsonData.paragraphs)
+  //     setSpeakerOptions(uniqueSpeakers);
+  // },[])
 
     useEffect(() => { // Update the document title using the browser API
         if (videoRef && videoRef.current) {
@@ -202,13 +203,6 @@ export default function TranscriptEditor(props) {
                     title={props.element.speaker.toUpperCase()}
                     onClick={handleSetSpeakerName}
                     > {props.element.speaker.toUpperCase()}</span>
-
-{/* <Form.Control as="select" size="sm" custom>
-{speakerOptions && speakerOptions.map((speakerName)=>{
-  return <option  value={speakerName.toUpperCase()}>
-    {speakerName.toUpperCase()}</option>
-  })}
-    </Form.Control> */}
 
               </Col>}
               <Col  xs={12} sm={12} md={12} lg={6} xl={7} className={'p-b-1 mx-auto'}>
@@ -348,7 +342,7 @@ export default function TranscriptEditor(props) {
                   </Row>
                   <Row>
                    
-                  <Col xs={12} sm={12} md={12} lg={12} xl={12}  className={'p-1 mx-auto'}>
+                  {/* <Col xs={12} sm={12} md={12} lg={12} xl={12}  className={'p-1 mx-auto'}>
                       <Accordion>
                         <Accordion.Toggle as={Button} variant="link" eventKey="0">
                           <Badge variant="light">Speakers</Badge>
@@ -361,10 +355,7 @@ export default function TranscriptEditor(props) {
                           </ListGroup>
                         </Accordion.Collapse>
                       </Accordion>
-
-
-
-                    </Col>
+                    </Col> */}
                   </Row>
                 
                 </Col>
