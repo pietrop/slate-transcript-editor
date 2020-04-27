@@ -25,11 +25,8 @@ import {
   faICursor,
   faMehBlank,
   faPause,
-  faCog,
-  faCheck
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-
 import {
   shortTimecode
 } from '../util/timecode-converter';
@@ -53,7 +50,6 @@ const TOOTLIP_LONGER_DELAY = 2000;
 
 const videoRef = React.createRef();
 
-
 export default function SlateTranscriptEditor(props) {
     const [currentTime, setCurrentTime] = useState(0);
     const [duration, setDuration] = useState(0);
@@ -73,21 +69,6 @@ export default function SlateTranscriptEditor(props) {
         const res = convertDpeToSlate(props.jsonData);
         setValue(res);
     },[])
-
-    // this.saveTimer;
-
-    // useEffect(() => {
-    //   if (saveTimer !== undefined) {
-    //     clearTimeout(saveTimer);
-    //   }
-
-    //   saveTimer = setTimeout(() => {
-    //     console.log('pause typing')
-    //   }, 1000);
-  
-    //   // if this effect run again, because `value` changed, we remove the previous timeout
-    //   return () => clearTimeout(saveTimer)
-    // }, [])
 
     useEffect(()=>{
       console.log('getUniqueSpeakers')
@@ -536,7 +517,6 @@ export default function SlateTranscriptEditor(props) {
                       </Tooltip>}>
                         <span className="d-inline-block">
                       <Button 
-                        //  title="restore timecodes, for transcript over 1hour it could temporarily freeze the UI for a few seconds" 
                           onClick={breakParagraph} variant="light">
                           <FontAwesomeIcon icon={ faICursor } />
                         </Button>
@@ -549,7 +529,6 @@ export default function SlateTranscriptEditor(props) {
                       </Tooltip>}>
                         <span className="d-inline-block">
                       <Button 
-                        //  title="restore timecodes, for transcript over 1hour it could temporarily freeze the UI for a few seconds" 
                           onClick={insertTextInaudible} variant="light">
                           <FontAwesomeIcon icon={ faMehBlank } />
                         </Button>
@@ -562,7 +541,6 @@ export default function SlateTranscriptEditor(props) {
                       </Tooltip>}>
                         <span className="d-inline-block">
                       <Button 
-                      //  title="restore timecodes, for transcript over 1hour it could temporarily freeze the UI for a few seconds" 
                         onClick={handleRestoreTimecodes} variant="light">
                           <FontAwesomeIcon icon={ faSync } />
                         </Button>
@@ -575,14 +553,9 @@ export default function SlateTranscriptEditor(props) {
                       </Tooltip>}>
                         <span className="d-inline-block">
                       <Button 
-                      //  title="restore timecodes, for transcript over 1hour it could temporarily freeze the UI for a few seconds" 
                         onClick={handleSetPauseWhileTyping} variant={isPauseWhiletyping? 'info': 'light'}>
                           <FontAwesomeIcon icon={ faPause }  />
                         </Button>
-
-                        {/* <DropdownButton id="dropdown-basic-button" title={ <FontAwesomeIcon icon={ faPause } />} variant="light">
-                          <Dropdown.Item onClick={handleSetPauseWhileTyping}></Dropdown.Item>
-                          </DropdownButton> */}
                         </span>
                       </OverlayTrigger>
                     </Col>
