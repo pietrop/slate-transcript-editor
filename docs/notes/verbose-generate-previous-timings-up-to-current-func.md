@@ -1,4 +1,6 @@
-```js
+# verbose-generate-previous-timings-up-to-current-func
+
+```javascript
   /**
      * See explanation in `src/utils/dpe-to-slate/index.js` for how this function works with css injection
      * to provide current paragaph's highlight.
@@ -13,12 +15,13 @@
       const stringlistOfTimesUpToCurrentTimeInt  = listOfTimesUpToCurrentTimeInt.join(' ');
       return stringlistOfTimesUpToCurrentTimeInt;
     }
-
 ```
 
-One line 
-```js
+One line
+
+```javascript
   const generatePreviousTimingsUpToCurrent = (currentTime)=>{
       return    [...Array(parseInt(props.jsonData.words[props.jsonData.words.length-1].start)).keys()].splice(0, currentTime,0).join(' ');
     }
 ```
+
