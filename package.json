@@ -1,6 +1,6 @@
 {
   "name": "slate-transcript-editor",
-  "version": "0.0.3",
+  "version": "0.0.5",
   "description": "A React component to make correcting automated transcriptions of audio and video easier and faster. Using the Slate Editor",
   "main": "index.js",
   "scripts": {
@@ -33,21 +33,22 @@
   "devDependencies": {
     "@babel/cli": "^7.8.4",
     "@babel/core": "^7.9.0",
+    "@babel/preset-react": "^7.9.4",
     "@storybook/addon-actions": "^5.3.18",
     "@storybook/addon-links": "^5.3.18",
     "@storybook/addons": "^5.3.18",
     "@storybook/react": "^5.3.18",
     "babel-loader": "^8.1.0",
     "babel-plugin-transform-react-jsx": "^6.24.1",
-    "cross-env": "^7.0.2",
     "bootstrap-css-only": "^4.4.1",
+    "cross-env": "^7.0.2",
     "gh-pages": "^2.2.0"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^1.2.15",
     "@fortawesome/free-solid-svg-icons": "^5.12.1",
     "@fortawesome/react-fontawesome": "^0.1.5",
-    "align-diarized-text": "^1.0.2",
+    "align-diarized-text": "^1.0.3",
     "docx": "4.7.1",
     "react-bootstrap": "^1.0.1",
     "sbd": "^1.0.18",

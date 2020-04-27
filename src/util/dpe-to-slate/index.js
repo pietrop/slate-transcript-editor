@@ -1,6 +1,4 @@
-import {
-  shortTimecode
-} from '../timecode-converter';
+import {shortTimecode} from '../timecode-converter';
 
 /**
  * 
@@ -21,9 +19,8 @@ import {
  * eg if `time` is 6, the list would be [0, 1, 2, 3, 4, 5]
  * @param {Number} time - float, time in seconds
  */
-const generatePreviousTimings=(time)=>{
-  // https://stackoverflow.com/questions/3746725/how-to-create-an-array-containing-1-n
- return [...Array(parseInt(time)).keys()];
+const generatePreviousTimings = (time) => { // https://stackoverflow.com/questions/3746725/how-to-create-an-array-containing-1-n
+    return [...Array(parseInt(time)).keys()];
 }
 
 /**
@@ -34,38 +31,35 @@ const generatePreviousTimings=(time)=>{
  * @param {Number} time - float, time in seconds
  * @returns {String}
  */
-const generatePreviousTimingsUpToCurrent = (totalTimingsInt, time)=>{
-  return totalTimingsInt.splice(0, time,0).join(' ')
+const generatePreviousTimingsUpToCurrent = (totalTimingsInt, time) => {
+    return totalTimingsInt.splice(0, time, 0).join(' ')
 }
 
-const convertDpeToSlate = (data)=>{
-    const paaragraphs = data.paragraphs.map((paragraph)=>{
-      const words = data.words.filter((word)=>{
-        if ((word.start >= paragraph.start  ) && ( word.end <= paragraph.end  )) {
+const convertDpeToSlate = ({words, paragraphs} ) => {
+    return paragraphs.map((paragraph) => {
+      
+        const wordsFiltered = words.filter((word) => {
+        if ((word.start >= paragraph.start) && (word.end<= paragraph.end  )) {
           return word
         }
       })
 
-      // console.log(getWordTimingsBeforeCurrentParagraph(data, 10))
-      const lastWordStartTime = words[words.length-1].start;
+      const lastWordIndex = words.length-1;
+      const lastWordStartTime = words[lastWordIndex].start;
       const totalTimingsInt = generatePreviousTimings(lastWordStartTime);
-
-      const text = words.map((w)=>{return w.text}).join(' ');
-      return {
-        speaker: paragraph.speaker,
-        start: paragraph.start,
-        previousTimings: generatePreviousTimingsUpToCurrent(totalTimingsInt, paragraph.start),
-        // pre-computing the display of the formatting here so that it doesn't need to convert it in leaf render
-        startTimecode: shortTimecode(paragraph.start),
-        type: 'timedText',
-        children: [{text }],
-        // words: words
+      const text = wordsFiltered.map((w)=> { return w.text }).join(' ');
+      
+        return {
+            speaker: paragraph.speaker,
+            start: paragraph.start,
+            previousTimings: generatePreviousTimingsUpToCurrent(totalTimingsInt, paragraph.start),
+            // pre-computing the display of the formatting here so that it doesn't need to convert it in leaf render
+            startTimecode: shortTimecode(paragraph.start),
+            type: 'timedText',
+            children: [ { text }],
+        }
       }
-  })
-
-   return paaragraphs;
-}
-
+    )}
 
 
 export default convertDpeToSlate;

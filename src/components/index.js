@@ -310,7 +310,8 @@ export default function SlateTranscriptEditor(props) {
     }
 
     const handleRestoreTimecodes = ()=>{
-      const alignedSlateData = restoreTimecodes({slateValue: value,transcriptData: props.transcriptData})
+      const alignedSlateData = restoreTimecodes({slateValue: value,transcriptData: props.transcriptData});
+      console.log('alignedSlateData',alignedSlateData);
       setValue(alignedSlateData);
       return alignedSlateData;
     }

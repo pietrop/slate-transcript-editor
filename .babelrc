@@ -3,5 +3,6 @@
     "ignore": [
       "src/components/*.storiesjs",
       "src/components/sample-data/**"
-    ]
+    ],
+    "presets":["@babel/preset-react"]
   }
