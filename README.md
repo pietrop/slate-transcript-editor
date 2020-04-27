@@ -75,7 +75,7 @@ See storybook `*.stories.js` in `src/components`/ for more examples
 | mediaUrl              | string url to media file - audio or video                                                           |yes|String|
 |`handleSaveEditor`     |function to handle when user clicks save btn in the UI                                               |no|Function|
 |`handleAutoSaveChanges`| returns content of transcription after there's a change, auto save has condierable performance lag on longer files, sudgest to not use for files over 45 min/1hour. |no|Function|
-| `autoSaveContentType` | specify the file format for data returned by `handleAutoSaveChanges`,falls back on `slate`. or `dpe`|no|String  |
+| `autoSaveContentType` | specify the file format for data returned by `handleAutoSaveChanges`,falls back on `slate`. or `digitalpaperedit`|no|String  |
 | `isEditable`          | set to true if you want to be able to edit the text                                                 |no|Boolean |
 | `showTimecodes`       | set to true if you want to show timecodes in the  transcript at paragraph level                     |no|Boolean |
 | `showSpeakers`        | set to true if you want to show speaker labels in the  transcript at paragraph level                |no|Boolean |

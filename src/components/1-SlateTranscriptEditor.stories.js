@@ -14,7 +14,7 @@ export const demo = () => {
   transcriptData={DEMO_TRANSCRIPT_KATE}
   handleSaveEditor={action('handleSaveEditor')}
   handleAutoSaveChanges={action('handleAutoSaveChanges')}
-  autoSaveContentType={'dpe'} // dpe or slate - dpe, runs alignement before exporting, slate, is just the raw data.
+  autoSaveContentType={'digitalpaperedit'} // digitalpaperedit or slate - digitalpaperedit, runs alignement before exporting, slate, is just the raw data.
   />
 };
 
@@ -34,7 +34,7 @@ export const OptionalTitle = () => {
     transcriptData={DEMO_TRANSCRIPT_KATE}
     handleSaveEditor={action('handleSaveEditor')}
     handleAutoSaveChanges={action('handleAutoSaveChanges')}
-    autoSaveContentType={'dpe'} // dpe or slate - dpe, runs alignement before exporting, slate, is just the raw data.
+    autoSaveContentType={'digitalpaperedit'} // digitalpaperedit or slate - digitalpaperedit, runs alignement before exporting, slate, is just the raw data.
     showTimecodes={true}
     showSpeakers={false}
     />
@@ -47,7 +47,7 @@ export const NoSpeakers = () => {
     transcriptData={DEMO_TRANSCRIPT_KATE}
     handleSaveEditor={action('handleSaveEditor')}
     handleAutoSaveChanges={action('handleAutoSaveChanges')}
-    autoSaveContentType={'dpe'} // dpe or slate - dpe, runs alignement before exporting, slate, is just the raw data.
+    autoSaveContentType={'digitalpaperedit'} // digitalpaperedit or slate - digitalpaperedit, runs alignement before exporting, slate, is just the raw data.
     showTimecodes={true}
     showSpeakers={false}
     />
@@ -60,7 +60,7 @@ export const NoTimecodes = () => {
       transcriptData={DEMO_TRANSCRIPT_KATE}
       handleSaveEditor={action('handleSaveEditor')}
       handleAutoSaveChanges={action('handleAutoSaveChanges')}
-      autoSaveContentType={'dpe'} // dpe or slate - dpe, runs alignement before exporting, slate, is just the raw data.
+      autoSaveContentType={'digitalpaperedit'} // digitalpaperedit or slate - digitalpaperedit, runs alignement before exporting, slate, is just the raw data.
       showTimecodes={false}
       showSpeakers={true}
       />
@@ -73,7 +73,7 @@ export const NoSpeakersAndTimecodes = () => {
         transcriptData={DEMO_TRANSCRIPT_KATE}
         handleSaveEditor={action('handleSaveEditor')}
         handleAutoSaveChanges={action('handleAutoSaveChanges')}
-        autoSaveContentType={'dpe'} // dpe or slate - dpe, runs alignement before exporting, slate, is just the raw data.
+        autoSaveContentType={'digitalpaperedit'} // digitalpaperedit or slate - digitalpaperedit, runs alignement before exporting, slate, is just the raw data.
         showTimecodes={false}
         showSpeakers={false}
         />
@@ -85,7 +85,7 @@ export const ReadOnly = () => {
           transcriptData={DEMO_TRANSCRIPT_KATE}
           handleSaveEditor={action('handleSaveEditor')}
           handleAutoSaveChanges={action('handleAutoSaveChanges')}
-          autoSaveContentType={'dpe'} // dpe or slate - dpe, runs alignement before exporting, slate, is just the raw data.
+          autoSaveContentType={'digitalpaperedit'} // digitalpaperedit or slate - digitalpaperedit, runs alignement before exporting, slate, is just the raw data.
           isEditable={false}
           />
 };
@@ -96,7 +96,7 @@ export const Audio = () => {
             transcriptData={DEMO_TRANSCRIPT_KATE}
             handleSaveEditor={action('handleSaveEditor')}
             handleAutoSaveChanges={action('handleAutoSaveChanges')}
-            autoSaveContentType={'dpe'} // dpe or slate - dpe, runs alignement before exporting, slate, is just the raw data.
+            autoSaveContentType={'digitalpaperedit'} // digitalpaperedit or slate - digitalpaperedit, runs alignement before exporting, slate, is just the raw data.
             isEditable={true}
             mediaType={'audio'}
             />

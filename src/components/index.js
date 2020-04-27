@@ -271,7 +271,7 @@ export default function SlateTranscriptEditor(props) {
           return slateToText({value:tmpValue, speakers, timecodes});
         case 'json-slate':
           return value;
-        case 'json-dpe':
+        case 'json-digitalpaperedit':
          return converSlateToDpe(value, props.transcriptData);
         case 'word':
           let docTmpValue = value;
@@ -347,7 +347,7 @@ export default function SlateTranscriptEditor(props) {
     }
 
     const handleSubtitlesExport = ({type, ext})=>{
-      let editorContnet = getEditorContent({type:'json-dpe', speakers:true, timecodes:true });
+      let editorContnet = getEditorContent({type:'json-digitalpaperedit', speakers:true, timecodes:true });
       console.log('editorContnet',editorContnet)
       const subtitlesJson = subtitlesGenerator({ words: editorContnet.words, type });
       console.log('subtitlesJson',subtitlesJson)
@@ -541,7 +541,7 @@ export default function SlateTranscriptEditor(props) {
                             <Dropdown.Item onClick={()=>{handleExport({type:'word', ext: 'docx', speakers:true, timecodes: true})}}>Word (Speakers & timecodes)</Dropdown.Item>
                           <Dropdown.Divider />
                           <Dropdown.Item onClick={()=>{handleExport({type:'json-slate', ext: 'json',speakers:true, timecodes: true})}}>SlateJs (<code>.json</code>)</Dropdown.Item>
-                          <Dropdown.Item onClick={()=>{handleExport({type:'json-dpe', ext: 'json',speakers:true, timecodes: true})}}>DPE (<code>.json</code>)</Dropdown.Item>
+                          <Dropdown.Item onClick={()=>{handleExport({type:'json-digitalpaperedit', ext: 'json',speakers:true, timecodes: true})}}>DPE (<code>.json</code>)</Dropdown.Item>
                         </DropdownButton>
                         </span>
                       </OverlayTrigger>

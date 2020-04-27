@@ -18,7 +18,7 @@ export const Hours2 = () =>{
     title={DEMO_TITLE_ZUCK_2HOURS} 
     transcriptData={DEMO_TRANSCRIPT_ZUCK_2HOURS_DPE}
     handleSaveEditor={action('handleSaveEditor')}
-    autoSaveContentType={'dpe'}
+    autoSaveContentType={'digitalpaperedit'}
     showTitle={true} 
     />
 };
@@ -31,7 +31,7 @@ export const Hours5 = () => {
     title={DEMO_TITLE_ZUCK_5HOURS} 
     transcriptData={DEMO_TRANSCRIPT_ZUCK_5HOURS_DPE}
     handleSaveEditor={action('handleSaveEditor')}
-    autoSaveContentType={'dpe'}
+    autoSaveContentType={'digitalpaperedit'}
     showTitle={true} 
     />
 };
