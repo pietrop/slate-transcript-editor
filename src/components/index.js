@@ -185,10 +185,8 @@ export default function SlateTranscriptEditor(props) {
             { at: pathToCurrentNode }
           );    
         }
-      }
-  
+      }  
     }
-
 
     const TimedTextElement = props => {
         let textLg = 12;
@@ -234,9 +232,7 @@ export default function SlateTranscriptEditor(props) {
                     title={props.element.speaker.toUpperCase()}
                     onClick={handleSetSpeakerName.bind(this, props.element)}
                     > {props.element.speaker.toUpperCase()}</span>
-
               </Col>}
-            
               <Col  xs={12} sm={12} md={12} lg={textLg} xl={textXl} className={'p-b-1 mx-auto'}>
               {props.children} 
               </Col>
@@ -263,7 +259,6 @@ export default function SlateTranscriptEditor(props) {
             videoRef.current.currentTime = parseInt(start);
             videoRef.current.play();
           }
-
         }
       } 
     }
@@ -355,7 +350,7 @@ export default function SlateTranscriptEditor(props) {
     }
 
     return (
-        <Container fluid style={{backgroundColor: '#eee', height: '100vh'}}>
+        <Container fluid style={{backgroundColor: '#eee', height: '100vh', paddingTop: '1em'}}>
           <style scoped>
           {`
               /* Next words */
@@ -364,9 +359,9 @@ export default function SlateTranscriptEditor(props) {
               }
           `}
           </style>
-             <OverlayTrigger delay={TOOTLIP_LONGER_DELAY} placement={'bottom'} overlay={<Tooltip id="tooltip-disabled"> {props.title}</Tooltip>}>
-                  <h3 className={'text-truncate text-center'}><small className="text-muted">{props.title}</small></h3> 
-              </OverlayTrigger>
+            {props.showTitle?  <OverlayTrigger  delay={TOOTLIP_LONGER_DELAY} placement={'bottom'} overlay={<Tooltip id="tooltip-disabled"> {props.title}</Tooltip>}>
+                  <h3 className={'text-truncate text-left'}><small className="text-muted">{props.title}</small></h3> 
+              </OverlayTrigger> :  null}
             <Row>
                 <Col xs={{span:12, order:1}} sm={3} md={3} lg={3} xl={4}>
                   <Row>
@@ -534,7 +529,8 @@ export default function SlateTranscriptEditor(props) {
                       </Tooltip>}>
                       <Button 
                           onClick={breakParagraph} variant="light">
-                          <FontAwesomeIcon icon={ faICursor } />
+                          {/* <FontAwesomeIcon icon={ faICursor } /> */}
+                          ↵
                         </Button>
                       </OverlayTrigger>
                     </Col>

@@ -23,3 +23,8 @@ select whole editor for range, from [Slate slack](https://slate-js.slack.com/arc
 ```js
 Editor.range(editor, [])
 ```
+
+```js
+const wholeTranscriptSelection =  Editor.range(editor, []);
+Transforms.setSelection(editor, wholeTranscriptSelection)
+```
