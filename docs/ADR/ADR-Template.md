@@ -1,4 +1,4 @@
-# [short title of solved problem and solution]
+# [short title of solved problem and solution] - ADR Template
 
 * Status: [accepted | superseded by [ADR-0005](0005-example.md) | deprecated | …] <!-- optional -->
 * Deciders: [list everyone involved in the decision] <!-- optional -->
