@@ -302,7 +302,7 @@ export default function SlateTranscriptEditor(props) {
     }
 
     const handleSave = ()=>{
-      const format = props.autoSaveContentType? props.autoSaveContentType: 'slate';
+      const format = props.autoSaveContentType? props.autoSaveContentType: 'digitalpaperedit';
       const editorContnet = getEditorContent({type:`json-${format}`});
       if(props.handleSaveEditor){
         props.handleSaveEditor(editorContnet)
