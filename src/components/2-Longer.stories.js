@@ -18,7 +18,6 @@ export const Hours2 = () =>{
     title={DEMO_TITLE_ZUCK_2HOURS} 
     transcriptData={DEMO_TRANSCRIPT_ZUCK_2HOURS_DPE}
     handleSaveEditor={action('handleSaveEditor')}
-    // handleAutoSaveChanges={action('handleAutoSaveChanges')} // auto save has condierable performance lag on longer files, sudgest to not use for files over 45 min/1hour.
     autoSaveContentType={'dpe'}
     showTitle={true} 
     />
@@ -32,7 +31,6 @@ export const Hours5 = () => {
     title={DEMO_TITLE_ZUCK_5HOURS} 
     transcriptData={DEMO_TRANSCRIPT_ZUCK_5HOURS_DPE}
     handleSaveEditor={action('handleSaveEditor')}
-    // handleAutoSaveChanges={action('handleAutoSaveChanges')}
     autoSaveContentType={'dpe'}
     showTitle={true} 
     />

@@ -67,13 +67,12 @@ or with more options, see table below
 
 See storybook `*.stories.js` in `src/components`/ for more examples 
 
-
 | Attributes            | Description                                                                                        |required|type|
 | :-------------------- | :--------------------------------------------------------------------------------------------------| :---: | :---: |
 | transcriptData        | Transcript json                                                                                     |yes|Json|
 | mediaUrl              | string url to media file - audio or video                                                           |yes|String|
 |`handleSaveEditor`     |function to handle when user clicks save btn in the UI                                               |no|Function|
-|`handleAutoSaveChanges`| returns content of transcription after a change                                                     |no|Function|
+|`handleAutoSaveChanges`| returns content of transcription after there's a change, auto save has condierable performance lag on longer files, sudgest to not use for files over 45 min/1hour. |no|Function|
 | `autoSaveContentType` | specify the file format for data returned by `handleAutoSaveChanges`,falls back on `slate`. or `dpe`|no|String  |
 | `isEditable`          | set to true if you want to be able to edit the text                                                 |no|Boolean |
 | `showTimecodes`       | set to true if you want to show timecodes in the  transcript at paragraph level                     |no|Boolean |
@@ -85,7 +84,6 @@ See storybook `*.stories.js` in `src/components`/ for more examples
 
  <!-- TODO: link to storybook here --> 
  <!-- for more details on how to use. -->
-
 
 _see storybook for example code_
 
@@ -107,7 +105,7 @@ npm install bootstrap-css-only
 eg [bootstrap-css-only](https://www.npmjs.com/package/bootstrap-css-only) is convinient because it doesn't ship with JQuery, that is not a dependency of [react-bootstrap](https://react-bootstrap.github.io/)
 
 and then import in your app 
-```
+```js
 import 'bootstrap-css-only';
 ```
 
@@ -145,23 +143,32 @@ If you have nvm you can run `nvm use` to change to the node version for this rep
 Following storybook [Distribute UI across an organization]](https://www.learnstorybook.com/design-systems-for-developers/react/en/distribute/) guide.
 
 ### build storybook 
-_TBC_
+
+```
+npm run build-storybook
+```
 
 ## Tests
 <!-- _How to carry out tests_ -->
 _TBC_
+
 ## Deployment
 <!-- _How to deploy the code/app into test/staging/production_ -->
-
 ### Deployment module
 
-<!-- ```
+To publish module to npm 
+```
 npm run publish:public
-``` -->
-_TBC_
+```
+
+and for a test run use
+```
+npm run publish:dry:run
+```
+
 ### Deployment storybook
 
-<!-- TODO publish storybook to github pages -->
+To publish storybook to github pages
 ```
 npm run deploy:ghpages
 ```
