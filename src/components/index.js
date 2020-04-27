@@ -42,8 +42,6 @@ import pluck from '../util/pluk';
 import subtitlesGenerator from '../util/export-adapters/subtitles-generator/index.js';
 import subtitlesExportOptionsList from '../util/export-adapters/subtitles-generator/list.js';
 
-import './style.css';
-
 const PLAYBACK_RATE_VALUES  = [0.2, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 3, 3.5];
 const SEEK_BACK_SEC = 15;
 const PAUSE_WHILTE_TYPING_TIMEOUT_MILLISECONDS = 1500;
@@ -358,6 +356,35 @@ export default function SlateTranscriptEditor(props) {
               }
           `}
           </style>
+          <style scope>
+            {`.editor-wrapper-container{
+                padding: 8px 16px;
+                background: #f9f9f9;
+                box-shadow: 0 0 10px #ccc;
+                height: 90vh;
+                overflow: auto;
+              }
+              /* https://developer.mozilla.org/en-US/docs/Web/CSS/user-select
+              TODO: only working in Chrome, not working in Firefox, and Safari - OSX
+              if selecting text, not showing selection
+              Commented out because it means cannot select speakers and timecode anymore
+              which is the intended default behavior but needs to come with export
+              functionality to export as plain text, word etc.. otherwise user won't be able
+              to get text out of component with timecodes and speaker names in the interim */
+              .unselectable {
+                -moz-user-select: none;
+                -webkit-user-select: none;
+                -ms-user-select: none;
+                user-select: none;
+              }
+              .timecode:hover{
+                text-decoration: underline;
+              }
+              .timecode.text:hover{
+                text-decoration:none;
+              }
+              `}
+                        </style>
             {props.showTitle?  <OverlayTrigger  delay={TOOTLIP_LONGER_DELAY} placement={'bottom'} overlay={<Tooltip id="tooltip-disabled"> {props.title}</Tooltip>}>
                   <h3 className={'text-truncate text-left'}><small className="text-muted">{props.title}</small></h3> 
               </OverlayTrigger> :  null}
