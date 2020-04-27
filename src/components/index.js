@@ -39,6 +39,7 @@ import converSlateToDpe from '../util/export-adapters/slate-to-dpe/index.js';
 import slateToDocx from '../util/export-adapters/docx';
 import restoreTimecodes from '../util/restore-timcodes';
 import pluck from '../util/pluk';
+import { withHistory } from 'slate-history';
 
 import './style.css';
 
@@ -56,7 +57,7 @@ export default function SlateTranscriptEditor(props) {
     const [currentTime, setCurrentTime] = useState(0);
     const [duration, setDuration] = useState(0);
     const [playbackRate, setPlaybackRate] = useState(1);
-    const editor = useMemo(() => withReact(createEditor()), []);
+    const editor = useMemo(() => withReact(withHistory(createEditor())), []);
     const [value, setValue] = useState([]);
     const defaultShowSpeakersPreference = (typeof props.showSpeakers === 'boolean')? props.showSpeakers : true;
     const defaultShowTimecodesPreference = (typeof props.showTimecodes === 'boolean')? props.showTimecodes : true;
