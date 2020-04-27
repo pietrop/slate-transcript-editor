@@ -1,4 +1,5 @@
 import React, {useState, useEffect, useMemo,useCallback} from 'react';
+import path from 'path';
 import Button from 'react-bootstrap/Button';
 import DropdownButton from 'react-bootstrap/DropdownButton';
 import Dropdown from 'react-bootstrap/Dropdown';
@@ -49,7 +50,7 @@ const MAX_DURATION_FOR_PERFORMANCE_OPTIMIZATION_IN_SECONDS = 3600;
 const TOOTLIP_DELAY = 1000;
 const TOOTLIP_LONGER_DELAY = 2000;
 
-const videoRef = React.createRef();
+const mediaRef = React.createRef();
 
 export default function SlateTranscriptEditor(props) {
     const [currentTime, setCurrentTime] = useState(0);
@@ -67,7 +68,7 @@ export default function SlateTranscriptEditor(props) {
     const [isPauseWhiletyping, setIsPauseWhiletyping] = useState(false);
 
     useEffect(()=>{
-        const res = convertDpeToSlate(props.jsonData);
+        const res = convertDpeToSlate(props.transcriptData);
         setValue(res);
     },[])
 
@@ -79,26 +80,26 @@ export default function SlateTranscriptEditor(props) {
   },[showSpeakersCheatShet])
 
     useEffect(() => { // Update the document title using the browser API
-        if (videoRef && videoRef.current) {
-            // setDuration(videoRef.current.duration);
-            videoRef.current.addEventListener("timeupdate", handleTimeUpdated);
+        if (mediaRef && mediaRef.current) {
+            // setDuration(mediaRef.current.duration);
+            mediaRef.current.addEventListener("timeupdate", handleTimeUpdated);
         }
         return function cleanup() {
             // removeEventListener
-            videoRef.current.removeEventListener("timeupdate", handleTimeUpdated)
+            mediaRef.current.removeEventListener("timeupdate", handleTimeUpdated)
         }
     }, []);
 
     useEffect(() => { // Update the document title using the browser API
-        if (videoRef && videoRef.current) {
+        if (mediaRef && mediaRef.current) {
           // Not working 
-            setDuration(videoRef.current.duration);
-            if(videoRef.current.duration>=MAX_DURATION_FOR_PERFORMANCE_OPTIMIZATION_IN_SECONDS){
+            setDuration(mediaRef.current.duration);
+            if(mediaRef.current.duration>=MAX_DURATION_FOR_PERFORMANCE_OPTIMIZATION_IN_SECONDS){
               setShowSpeakers(false);
               showTimecodes(false);
             }
         }
-    },[videoRef]);
+    },[mediaRef]);
 
     const handleSetShowSpeakersCheatShet = ()=>{
        setShowSpeakersCheatShet(!showSpeakersCheatShet)
@@ -107,20 +108,20 @@ export default function SlateTranscriptEditor(props) {
     const handleTimeUpdated = (e) => {
       setCurrentTime(e.target.currentTime);
       // TODO: setting duration here as a workaround
-      setDuration(videoRef.current.duration);
+      setDuration(mediaRef.current.duration);
   }
 
     const handleSetPlaybackRate= (e)=>{
       const tmpNewPlaybackRateValue = parseFloat( e.target.value)
-      if (videoRef && videoRef.current) {
-        videoRef.current.playbackRate = tmpNewPlaybackRateValue;
+      if (mediaRef && mediaRef.current) {
+        mediaRef.current.playbackRate = tmpNewPlaybackRateValue;
         setPlaybackRate(tmpNewPlaybackRateValue)
       }
     }
 
     const handleSeekBack = ()=>{
-      if (videoRef && videoRef.current) {
-        videoRef.current.currentTime = videoRef.current.currentTime - SEEK_BACK_SEC;
+      if (mediaRef && mediaRef.current) {
+        mediaRef.current.currentTime = mediaRef.current.currentTime - SEEK_BACK_SEC;
       }
     }
 
@@ -245,16 +246,16 @@ export default function SlateTranscriptEditor(props) {
       if(e.target.classList.contains('timecode')){
       
         const start = e.target.dataset.start;
-        if (videoRef && videoRef.current) {
-          videoRef.current.currentTime = parseInt(start);
-          videoRef.current.play();
+        if (mediaRef && mediaRef.current) {
+          mediaRef.current.currentTime = parseInt(start);
+          mediaRef.current.play();
         }
       }else if(e.target.dataset.slateString){
         if(e.target.parentNode.dataset.start){
           const start = e.target.parentNode.dataset.start;
-          if (videoRef && videoRef.current && start) {
-            videoRef.current.currentTime = parseInt(start);
-            videoRef.current.play();
+          if (mediaRef && mediaRef.current && start) {
+            mediaRef.current.currentTime = parseInt(start);
+            mediaRef.current.play();
           }
         }
       } 
@@ -271,7 +272,7 @@ export default function SlateTranscriptEditor(props) {
         case 'json-slate':
           return value;
         case 'json-dpe':
-         return converSlateToDpe(value, props.jsonData);
+         return converSlateToDpe(value, props.transcriptData);
         case 'word':
           let docTmpValue = value;
           if(timecodes){
@@ -284,18 +285,24 @@ export default function SlateTranscriptEditor(props) {
       }
     }
 
+    const getFileTitle = ()=>{
+      if(props.title){
+        return props.title;
+      }
+        return path.basename(props.mediaUrl).trim();
+    }
     const handleExport = ({type, ext, speakers,timecodes })=>{
       let editorContnet = getEditorContent({type, speakers,timecodes });
       if(ext==='json'){
         editorContnet =  JSON.stringify(editorContnet,null,2)
       }
       if(ext!=='docx'){
-        download( editorContnet, `${props.title}.${ext}`);
+        download( editorContnet, `${getFileTitle()}.${ext}`);
       }
     }
 
     const handleSave = ()=>{
-      const format = props.saveFormat? props.saveFormat: 'slate';
+      const format = props.autoSaveContentType? props.autoSaveContentType: 'slate';
       const editorContnet = getEditorContent({type:`json-${format}`});
       if(props.handleSaveEditor){
         props.handleSaveEditor(editorContnet)
@@ -303,7 +310,7 @@ export default function SlateTranscriptEditor(props) {
     }
 
     const handleRestoreTimecodes = ()=>{
-      const alignedSlateData = restoreTimecodes({slateValue: value,jsonData: props.jsonData})
+      const alignedSlateData = restoreTimecodes({slateValue: value,transcriptData: props.transcriptData})
       setValue(alignedSlateData);
       return alignedSlateData;
     }
@@ -325,7 +332,7 @@ export default function SlateTranscriptEditor(props) {
      * @param {Number} currentTime - float in seconds
      */
     const generatePreviousTimingsUpToCurrent = (currentTime)=>{
-      const lastWordStartTime = props.jsonData.words[props.jsonData.words.length-1].start;
+      const lastWordStartTime = props.transcriptData.words[props.transcriptData.words.length-1].start;
       const lastWordStartTimeInt = parseInt(lastWordStartTime);
       const emptyListOfTimes = Array(lastWordStartTimeInt);
       const listOfTimesInt = [...emptyListOfTimes.keys()]
@@ -343,15 +350,27 @@ export default function SlateTranscriptEditor(props) {
       console.log('editorContnet',editorContnet)
       const subtitlesJson = subtitlesGenerator({ words: editorContnet.words, type });
       console.log('subtitlesJson',subtitlesJson)
-      download( subtitlesJson, `${props.title}.${ext}`);
+      download( subtitlesJson, `${getFileTitle()}.${ext}`);
     }
 
+    const getMediaType = ()=>{
+      const clipExt = path.extname(props.mediaUrl);
+      let tmpMediaType =  props.mediaType? props.mediaType: 'video';
+      if(clipExt ==='.wav' 
+        || clipExt ==='.mp3' 
+        || clipExt ==='.m4a' 
+        || clipExt ==='.flac' 
+        || clipExt ==='.aiff'){
+          tmpMediaType = 'audio'
+      }
+      return tmpMediaType;
+    }
     return (
         <Container fluid style={{backgroundColor: '#eee', height: '100vh', paddingTop: '1em'}}>
           <style scoped>
           {`
               /* Next words */
-              .timecode[data-previous-timings*="${videoRef && videoRef.current&& videoRef.current.duration&&  generatePreviousTimingsUpToCurrent(parseInt(currentTime))}"]{
+              .timecode[data-previous-timings*="${mediaRef && mediaRef.current&& mediaRef.current.duration&&  generatePreviousTimingsUpToCurrent(parseInt(currentTime))}"]{
                   color:  #9E9E9E;
               }
           `}
@@ -391,16 +410,14 @@ export default function SlateTranscriptEditor(props) {
             <Row>
                 <Col xs={{span:12, order:1}} sm={3} md={3} lg={3} xl={4}>
                   <Row>
-                  <section>
-                    <video ref={videoRef}
-                        src={
-                            props.url
-                        }
+                        <video 
+                        ref={mediaRef}
+                        src={props.mediaUrl}
                         width={'100%'}
-                        height={'auto'}
+                        height={getMediaType()==='audio'?'40em':'auto'}
                         controls 
-                        playsInline></video>
-                   </section>
+                        playsInline>
+                        </video>
                   </Row>
                   <Row>
                   <Col xs={5} sm={4} md={4} lg={4} xl={4}  className={'p-1 mx-auto'}>
@@ -434,7 +451,7 @@ export default function SlateTranscriptEditor(props) {
                   </Row>
                   <Row>
                   <Col xs={12} sm={12} md={12} lg={12} xl={12}  className={'p-1 mx-auto'}>
-                      <Accordion onClick={handleSetShowSpeakersCheatShet}>
+                      <Accordion onClick={ handleSetShowSpeakersCheatShet}>
                         <Accordion.Toggle as={Button} variant="link" eventKey="0">
                           <Badge variant="light">Speakers</Badge>
                         </Accordion.Toggle>
@@ -458,13 +475,14 @@ export default function SlateTranscriptEditor(props) {
                       editor={editor} 
                       value={value} 
                       onChange={(value) => {
-                          if(props.handleAutoSaveEditor){
-                            props.handleAutoSaveEditor(value);
+                          if(props.handleAutoSaveChanges){
+                            props.handleAutoSaveChanges(value);
                           }
                             return  setValue(value)
                           }}
                       >
                         <Editable
+                          readOnly={typeof props.isEditable === 'boolean'? !props.isEditable : false}
                           renderElement={renderElement}
                           renderLeaf={renderLeaf}
                           onKeyDown={event => {
@@ -477,8 +495,8 @@ export default function SlateTranscriptEditor(props) {
                               // also pause while typing might introduce performance issues on longer transcripts
                               // if on every keystroke it's creating and destroing a timer. 
                               // should find a more efficient way to "debounce" or "throttle" this functionality 
-                              if(videoRef && videoRef.current){
-                                videoRef.current.pause();
+                              if(mediaRef && mediaRef.current){
+                                mediaRef.current.pause();
                               }
 
                               if (saveTimer !== null) {
@@ -486,8 +504,8 @@ export default function SlateTranscriptEditor(props) {
                               }
                         
                               const tmpSaveTimer = setTimeout(() => {
-                                if(videoRef && videoRef.current){
-                                  videoRef.current.play();
+                                if(mediaRef && mediaRef.current){
+                                  mediaRef.current.play();
                                 }
                               }, PAUSE_WHILTE_TYPING_TIMEOUT_MILLISECONDS);
                                 setSaveTimer(tmpSaveTimer)

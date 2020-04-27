@@ -1,0 +1,7 @@
+{
+    "plugins": ["transform-react-jsx"],
+    "ignore": [
+      "src/components/*.storiesjs",
+      "src/components/sample-data/**"
+    ]
+  }

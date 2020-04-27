@@ -7,7 +7,7 @@
      * @param {Number} currentTime - float in seconds
      */
     const generatePreviousTimingsUpToCurrent = (currentTime)=>{
-      const lastWordStartTime = props.jsonData.words[props.jsonData.words.length-1].start;
+      const lastWordStartTime = props.transcriptData.words[props.transcriptData.words.length-1].start;
       const lastWordStartTimeInt = parseInt(lastWordStartTime);
       const emptyListOfTimes = Array(lastWordStartTimeInt);
       const listOfTimesInt = [...emptyListOfTimes.keys()]
@@ -21,7 +21,7 @@ One line
 
 ```javascript
   const generatePreviousTimingsUpToCurrent = (currentTime)=>{
-      return    [...Array(parseInt(props.jsonData.words[props.jsonData.words.length-1].start)).keys()].splice(0, currentTime,0).join(' ');
+      return    [...Array(parseInt(props.transcriptData.words[props.transcriptData.words.length-1].start)).keys()].splice(0, currentTime,0).join(' ');
     }
 ```
 

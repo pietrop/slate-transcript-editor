@@ -52,24 +52,37 @@ Visit [http://localhost:6006/](http://localhost:6006/)
 _TBC_
 
 
-<!-- ```
-npm install @pietrop/slate-transcript-editor
+```js
+npm install slate-transcript-editor
 // you need to import bootstrap separatly 
 import 'bootstrap-css-only';
 
 <SlateTranscriptEditor 
-  url={DEMO_MEDIA_URL_KATE} 
-  title={DEMO_TITLE_KATE} 
-  jsonData={DEMO_TRANSCRIPT_KATE}
-  handleSaveEditor={action('handleSaveEditor')}
-  handleAutoSaveEditor={action('handleAutoSaveEditor')} // auto save introduces a perfromance cost - not reccomended for transcriptions over 1 hour
-  saveFormat={'dpe'} // dpe or slate - dpe, runs alignement before exporting, slate, is just the raw data. Optional, slate default
-  showTimecodes={false} // optional - default to true
-  showSpeakers={true} // optional  - default to true
-  showTitle={true} // optional - defaults to false
+  mediaUrl={DEMO_MEDIA_URL_KATE} 
+  transcriptData={DEMO_TRANSCRIPT_KATE}
+  handleSaveEditor=// optional - function to handle when user clicks save btn in the UI
   />
 ```
-See storybook -->
+or with more options, see table below 
+
+See storybook `*.stories.js` in `src/components`/ for more examples 
+
+
+| Attributes            | Description                                                                                        |required|type|
+| :-------------------- | :--------------------------------------------------------------------------------------------------| :---: | :---: |
+| transcriptData        | Transcript json                                                                                     |yes|Json|
+| mediaUrl              | string url to media file - audio or video                                                           |yes|String|
+|`handleSaveEditor`     |function to handle when user clicks save btn in the UI                                               |no|Function|
+|`handleAutoSaveChanges`| returns content of transcription after a change                                                     |no|Function|
+| `autoSaveContentType` | specify the file format for data returned by `handleAutoSaveChanges`,falls back on `slate`. or `dpe`|no|String  |
+| `isEditable`          | set to true if you want to be able to edit the text                                                 |no|Boolean |
+| `showTimecodes`       | set to true if you want to show timecodes in the  transcript at paragraph level                     |no|Boolean |
+| `showSpeakers`        | set to true if you want to show speaker labels in the  transcript at paragraph level                |no|Boolean |
+| `title`               | defaults to empty String, also used in file names for exported files.                               |no|String  |
+| `showTitle`           | Whether to display the provided title                                                               |no|String  |
+| `ref`                 | if you want to have access to internal functions such as retrieving content from the editor. eg to save to a server/db. | no | React ref |
+| `mediaType`            | can be `audio` or `video`, if not provided, it defaults to video, but the component also uses the url file type to determine and adjust the player (`.wav`, `.mp3`,`.m4a`,`.flac`,`.aiff` are recognised as audio ) |    no    | String |
+
  <!-- TODO: link to storybook here --> 
  <!-- for more details on how to use. -->
 
@@ -98,7 +111,7 @@ and then import in your app
 import 'bootstrap-css-only';
 ```
 
-Alternativly this gives you the extra flexibility of pick your own styling from [bootswatch](https://bootswatch.com/) ([npm](https://www.npmjs.com/package/bootswatch)) or you can write your own overriding the boostrap classes (see [bootstrap](https://getbootstrap.com/docs/4.0/getting-started/theming/) and [react-bootstrap](https://react-bootstrap.github.io/getting-started/theming/) on themeing) for more info. 
+Alternativly this gives you the extra flexibility to <!-- pick your own styling from [bootswatch](https://bootswatch.com/) ([npm](https://www.npmjs.com/package/bootswatch)) or you can  --> write your own overriding the boostrap classes (see [bootstrap](https://getbootstrap.com/docs/4.0/getting-started/theming/) and [react-bootstrap](https://react-bootstrap.github.io/getting-started/theming/) on themeing) for more info. 
 
 ## Documentation
 
@@ -128,7 +141,8 @@ If you have nvm you can run `nvm use` to change to the node version for this rep
 ## Build
 <!-- _How to run build_ -->
 ### build module
-_TBC_
+
+Following storybook [Distribute UI across an organization]](https://www.learnstorybook.com/design-systems-for-developers/react/en/distribute/) guide.
 
 ### build storybook 
 _TBC_
