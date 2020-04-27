@@ -16,6 +16,7 @@ import { createEditor,Editor, Node, Transforms } from 'slate';
 // https://docs.slatejs.org/walkthroughs/01-installing-slate
 // Import the Slate components and React plugin.
 import { Slate, Editable, withReact, ReactEditor } from 'slate-react';
+import { withHistory } from 'slate-history';
 import {
   faSave,
   faShare,
@@ -25,7 +26,8 @@ import {
   faICursor,
   faMehBlank,
   faPause,
-  faMusic
+  faMusic,
+  faClosedCaptioning
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -38,7 +40,8 @@ import converSlateToDpe from '../util/export-adapters/slate-to-dpe/index.js';
 import slateToDocx from '../util/export-adapters/docx';
 import restoreTimecodes from '../util/restore-timcodes';
 import pluck from '../util/pluk';
-import { withHistory } from 'slate-history';
+import subtitlesGenerator from '../util/export-adapters/subtitles-generator/index.js';
+import subtitlesExportOptionsList from '../util/export-adapters/subtitles-generator/list.js';
 
 import './style.css';
 
@@ -343,6 +346,14 @@ export default function SlateTranscriptEditor(props) {
       setIsPauseWhiletyping(!isPauseWhiletyping)
     }
 
+    const handleSubtitlesExport = ({type, ext})=>{
+      let editorContnet = getEditorContent({type:'json-dpe', speakers:true, timecodes:true });
+      console.log('editorContnet',editorContnet)
+      const subtitlesJson = subtitlesGenerator({ words: editorContnet.words, type });
+      console.log('subtitlesJson',subtitlesJson)
+      download( subtitlesJson, `${props.title}.${ext}`);
+    }
+
     return (
         <Container fluid style={{backgroundColor: '#eee', height: '100vh'}}>
           <style scoped>
@@ -472,29 +483,6 @@ export default function SlateTranscriptEditor(props) {
                  
                   <Row>
                   <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
-                  <OverlayTrigger  placement={'bottom'} overlay={<Tooltip id="tooltip-disabled">
-                    Double click on a paragraph to jump to the corresponding point at the beginning of that paragraph in the media
-                    </Tooltip>}>
-                      <span className="d-inline-block">
-                        <Button variant="light" style={{ pointerEvents: 'none' }}>
-                        <FontAwesomeIcon icon={ faInfoCircle } />
-                        </Button>
-                      </span>
-                    </OverlayTrigger>
-
-                    </Col>
-                    <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
-                      <OverlayTrigger OverlayTrigger delay={TOOTLIP_LONGER_DELAY} placement={'bottom'} overlay={<Tooltip id="tooltip-disabled">
-                        Save
-                      </Tooltip>}>
-                        <span className="d-inline-block">
-                        <Button onClick={handleSave} variant="light">
-                          <FontAwesomeIcon icon={ faSave } />
-                        </Button>
-                        </span>
-                      </OverlayTrigger>
-                      </Col>
-                      <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
                           <OverlayTrigger OverlayTrigger delay={TOOTLIP_LONGER_DELAY} placement={'bottom'} overlay={<Tooltip id="tooltip-disabled">
                         Export options
                       </Tooltip>}>
@@ -516,6 +504,31 @@ export default function SlateTranscriptEditor(props) {
                         </span>
                       </OverlayTrigger>
                     </Col>
+                      <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
+                          <OverlayTrigger OverlayTrigger delay={TOOTLIP_LONGER_DELAY} placement={'bottom'} overlay={<Tooltip id="tooltip-disabled">
+                        Export in caption format
+                      </Tooltip>}>
+                        <span className="d-inline-block">
+                        <DropdownButton id="dropdown-basic-button" title={<FontAwesomeIcon icon={ faClosedCaptioning } />} variant="light">
+
+                          {subtitlesExportOptionsList.map(({type,label, ext})=>{
+                            return <Dropdown.Item onClick={()=>{handleSubtitlesExport({type, ext})}}>{label} <code>.{ext}</code></Dropdown.Item>
+                          })}
+                        </DropdownButton>
+                        </span>
+                      </OverlayTrigger>
+                    </Col>
+                    <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
+                      <OverlayTrigger OverlayTrigger delay={TOOTLIP_LONGER_DELAY} placement={'bottom'} overlay={<Tooltip id="tooltip-disabled">
+                        Save
+                      </Tooltip>}>
+                        <span className="d-inline-block">
+                        <Button onClick={handleSave} variant="light">
+                          <FontAwesomeIcon icon={ faSave } />
+                        </Button>
+                        </span>
+                      </OverlayTrigger>
+                      </Col>
                     <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
                       <OverlayTrigger delay={TOOTLIP_DELAY} placement={'bottom'} overlay={<Tooltip id="tooltip-disabled">
                         To insert a paragraph break, and split a pargraph in two, put the cursor at a point where you'd want to add a paragraph break in the text and either click this button or hit enter key
@@ -558,12 +571,23 @@ export default function SlateTranscriptEditor(props) {
                       </Tooltip>}>
                         <span className="d-inline-block">
                       <Button 
-                        onClick={handleSetPauseWhileTyping} variant={isPauseWhiletyping? 'info': 'light'}>
+                        onClick={handleSetPauseWhileTyping} variant={isPauseWhiletyping? 'secondary': 'light'}>
                           <FontAwesomeIcon icon={ faPause }  />
                         </Button>
                         </span>
                       </OverlayTrigger>
                       </Col>
+                      <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
+                      <OverlayTrigger  placement={'bottom'} overlay={<Tooltip id="tooltip-disabled">
+                        Double click on a paragraph to jump to the corresponding point at the beginning of that paragraph in the media
+                        </Tooltip>}>
+                          <span className="d-inline-block">
+                            <Button variant="light" style={{ pointerEvents: 'none' }} block>
+                            <FontAwesomeIcon icon={ faInfoCircle } />
+                            </Button>
+                          </span>
+                        </OverlayTrigger>
+                        </Col>
                       {/* <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
                       <OverlayTrigger delay={TOOTLIP_DELAY} placement={'bottom'} overlay={<Tooltip id="tooltip-disabled">
                          Insert a ♫ in the text
