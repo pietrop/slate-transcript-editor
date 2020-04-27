@@ -24,6 +24,7 @@ import {
   faInfoCircle,
   faICursor,
   faMehBlank,
+  faPause,
   faCog,
   faCheck
 } from '@fortawesome/free-solid-svg-icons';
@@ -45,7 +46,7 @@ import './style.css';
 
 const PLAYBACK_RATE_VALUES  = [0.2, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 3, 3.5];
 const SEEK_BACK_SEC = 15;
-const PAUSE_WHILTE_TYPING_TIMEOUT_MILLISECONDS = 500;
+const PAUSE_WHILTE_TYPING_TIMEOUT_MILLISECONDS = 1500;
 const MAX_DURATION_FOR_PERFORMANCE_OPTIMIZATION_IN_SECONDS = 3600;
 const TOOTLIP_DELAY = 1000;
 const TOOTLIP_LONGER_DELAY = 2000;
@@ -65,11 +66,28 @@ export default function SlateTranscriptEditor(props) {
     const [showTimecodes, setShowTimecodes] = useState(defaultShowTimecodesPreference);
     const [speakerOptions, setSpeakerOptions] = useState([]);
     const [showSpeakersCheatShet, setShowSpeakersCheatShet] = useState(false);
+    const [saveTimer, setSaveTimer] = useState(null);
+    const [isPauseWhiletyping, setIsPauseWhiletyping] = useState(false);
 
     useEffect(()=>{
         const res = convertDpeToSlate(props.jsonData);
         setValue(res);
     },[])
+
+    // this.saveTimer;
+
+    // useEffect(() => {
+    //   if (saveTimer !== undefined) {
+    //     clearTimeout(saveTimer);
+    //   }
+
+    //   saveTimer = setTimeout(() => {
+    //     console.log('pause typing')
+    //   }, 1000);
+  
+    //   // if this effect run again, because `value` changed, we remove the previous timeout
+    //   return () => clearTimeout(saveTimer)
+    // }, [])
 
     useEffect(()=>{
       console.log('getUniqueSpeakers')
@@ -335,6 +353,10 @@ export default function SlateTranscriptEditor(props) {
       return stringlistOfTimesUpToCurrentTimeInt;
     }
 
+    const handleSetPauseWhileTyping = ()=>{
+      setIsPauseWhiletyping(!isPauseWhiletyping)
+    }
+
     return (
         <Container fluid style={{backgroundColor: '#eee', height: '100vh'}}>
           <style scoped>
@@ -425,6 +447,32 @@ export default function SlateTranscriptEditor(props) {
                         <Editable
                           renderElement={renderElement}
                           renderLeaf={renderLeaf}
+                          onKeyDown={event => {
+                            if(isPauseWhiletyping){
+                              // logic for pause while typing 
+                              // https://schier.co/blog/wait-for-user-to-stop-typing-using-javascript
+                              // TODO: currently eve the video was paused, and pause while typing is on,
+                              // it will play it when stopped typing. so added btn to turn feature on off. 
+                              // and disabled as default. 
+                              // also pause while typing might introduce performance issues on longer transcripts
+                              // if on every keystroke it's creating and destroing a timer. 
+                              // should find a more efficient way to "debounce" or "throttle" this functionality 
+                              if(videoRef && videoRef.current){
+                                videoRef.current.pause();
+                              }
+
+                              if (saveTimer !== null) {
+                                clearTimeout(saveTimer);
+                              }
+                        
+                              const tmpSaveTimer = setTimeout(() => {
+                                if(videoRef && videoRef.current){
+                                  videoRef.current.play();
+                                }
+                              }, PAUSE_WHILTE_TYPING_TIMEOUT_MILLISECONDS);
+                                setSaveTimer(tmpSaveTimer)
+                              }
+                          }}
                           />
                         </Slate>
                     </section>
@@ -518,6 +566,23 @@ export default function SlateTranscriptEditor(props) {
                         onClick={handleRestoreTimecodes} variant="light">
                           <FontAwesomeIcon icon={ faSync } />
                         </Button>
+                        </span>
+                      </OverlayTrigger>
+                    </Col>
+                    <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
+                      <OverlayTrigger delay={TOOTLIP_DELAY} placement={'bottom'} overlay={<Tooltip id="tooltip-disabled">
+                      Pause while typing
+                      </Tooltip>}>
+                        <span className="d-inline-block">
+                      <Button 
+                      //  title="restore timecodes, for transcript over 1hour it could temporarily freeze the UI for a few seconds" 
+                        onClick={handleSetPauseWhileTyping} variant={isPauseWhiletyping? 'info': 'light'}>
+                          <FontAwesomeIcon icon={ faPause }  />
+                        </Button>
+
+                        {/* <DropdownButton id="dropdown-basic-button" title={ <FontAwesomeIcon icon={ faPause } />} variant="light">
+                          <Dropdown.Item onClick={handleSetPauseWhileTyping}></Dropdown.Item>
+                          </DropdownButton> */}
                         </span>
                       </OverlayTrigger>
                     </Col>
