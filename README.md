@@ -49,11 +49,13 @@ Visit [http://localhost:6006/](http://localhost:6006/)
 
 ### Usage - prod
 
-_TBC_
+```
+npm install slate-transcript-editor
+```
 
 
 ```js
-npm install slate-transcript-editor
+import  SlateTranscriptEditor  from 'slate-transcript-editor';
 // you need to import bootstrap separatly 
 import 'bootstrap-css-only';
 
