@@ -1,5 +1,5 @@
 # Takeaways form draftJs vs Slate
-Some notes on Takeaways form draftJs vs Slate
+Some notes on Takeaways form draftJs vs Slate for making timed text editors.
 
 Making a timed text editor is not the same thing as making a rich text editor, there are inherent set of feature that come with the domain, that most rich text editor library had most likely not anticipated at their inception. The rich text editor that is the most lean and efficient is probably the better candidate to be extended in that direction.
 

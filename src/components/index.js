@@ -364,7 +364,9 @@ export default function SlateTranscriptEditor(props) {
               }
           `}
           </style>
-             {props.showTitle ? <><h3 className={'text-truncate'} title={props.title}>{props.title}</h3><br/></> : null }
+             <OverlayTrigger delay={TOOTLIP_LONGER_DELAY} placement={'bottom'} overlay={<Tooltip id="tooltip-disabled"> {props.title}</Tooltip>}>
+                  <h3 className={'text-truncate text-center'}><small className="text-muted">{props.title}</small></h3> 
+              </OverlayTrigger>
             <Row>
                 <Col xs={{span:12, order:1}} sm={3} md={3} lg={3} xl={4}>
                   <Row>
@@ -403,7 +405,7 @@ export default function SlateTranscriptEditor(props) {
                     </Tooltip>}>
                       <span className="d-inline-block">
                       <Button variant="light" onClick={handleSeekBack}
-                      //  title={`Seek back by ${SEEK_BACK_SEC} seconds`}
+                      block
                        >{SEEK_BACK_SEC} <FontAwesomeIcon icon={faUndo}/></Button>
                       </span>
                     </OverlayTrigger>
@@ -489,17 +491,17 @@ export default function SlateTranscriptEditor(props) {
                         <span className="d-inline-block">
                         <DropdownButton id="dropdown-basic-button" title={<FontAwesomeIcon icon={ faShare } />} variant="light">
                         {/* TODO: need to run re-alignement if exportin with timecodes true, otherwise they'll be inaccurate */}
-                          <Dropdown.Item onClick={()=>{handleExport({type:'text', ext:  'txt',speakers:false, timecodes: false })}}>Text <code>.txt</code></Dropdown.Item>
+                          <Dropdown.Item onClick={()=>{handleExport({type:'text', ext:  'txt',speakers:false, timecodes: false })}}>Text (<code>.txt</code>)</Dropdown.Item>
                           <Dropdown.Item onClick={()=>{handleExport({type:'text', ext:  'txt',speakers:true, timecodes: false })}}>Text (Speakers)</Dropdown.Item>
                           <Dropdown.Item onClick={()=>{handleExport({type: 'text',ext: 'txt', speakers:true, timecodes: true })}} disable>Text (Speakers & timecodes)</Dropdown.Item>
                           {/* TODO: need to run re-alignement if exportin with timecodes true */}
                           <Dropdown.Divider />
-                            <Dropdown.Item onClick={()=>{handleExport({type:'word', ext: 'docx', speakers:false, timecodes: false})}}>Word <code>.docx</code></Dropdown.Item>
+                            <Dropdown.Item onClick={()=>{handleExport({type:'word', ext: 'docx', speakers:false, timecodes: false})}}>Word (<code>.docx</code>)</Dropdown.Item>
                             <Dropdown.Item onClick={()=>{handleExport({type:'word', ext: 'docx', speakers:true, timecodes: false})}}>Word (Speakers)</Dropdown.Item>
                             <Dropdown.Item onClick={()=>{handleExport({type:'word', ext: 'docx', speakers:true, timecodes: true})}}>Word (Speakers & timecodes)</Dropdown.Item>
                           <Dropdown.Divider />
-                          <Dropdown.Item onClick={()=>{handleExport({type:'json-slate', ext: 'json',speakers:true, timecodes: true})}}>Json (slate)</Dropdown.Item>
-                          <Dropdown.Item onClick={()=>{handleExport({type:'json-dpe', ext: 'json',speakers:true, timecodes: true})}}>Json(dpe)</Dropdown.Item>
+                          <Dropdown.Item onClick={()=>{handleExport({type:'json-slate', ext: 'json',speakers:true, timecodes: true})}}>SlateJs (<code>.json</code>)</Dropdown.Item>
+                          <Dropdown.Item onClick={()=>{handleExport({type:'json-dpe', ext: 'json',speakers:true, timecodes: true})}}>DPE (<code>.json</code>)</Dropdown.Item>
                         </DropdownButton>
                         </span>
                       </OverlayTrigger>
@@ -508,84 +510,70 @@ export default function SlateTranscriptEditor(props) {
                           <OverlayTrigger OverlayTrigger delay={TOOTLIP_LONGER_DELAY} placement={'bottom'} overlay={<Tooltip id="tooltip-disabled">
                         Export in caption format
                       </Tooltip>}>
-                        <span className="d-inline-block">
-                        <DropdownButton id="dropdown-basic-button" title={<FontAwesomeIcon icon={ faClosedCaptioning } />} variant="light">
+                  
+                        <DropdownButton  id="dropdown-basic-button" title={<FontAwesomeIcon icon={ faClosedCaptioning } />} variant="light">
 
                           {subtitlesExportOptionsList.map(({type,label, ext})=>{
-                            return <Dropdown.Item onClick={()=>{handleSubtitlesExport({type, ext})}}>{label} <code>.{ext}</code></Dropdown.Item>
+                            return <Dropdown.Item onClick={()=>{handleSubtitlesExport({type, ext})}}>{label} (<code>.{ext}</code>)</Dropdown.Item>
                           })}
                         </DropdownButton>
-                        </span>
                       </OverlayTrigger>
                     </Col>
                     <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
                       <OverlayTrigger OverlayTrigger delay={TOOTLIP_LONGER_DELAY} placement={'bottom'} overlay={<Tooltip id="tooltip-disabled">
                         Save
                       </Tooltip>}>
-                        <span className="d-inline-block">
                         <Button onClick={handleSave} variant="light">
                           <FontAwesomeIcon icon={ faSave } />
                         </Button>
-                        </span>
                       </OverlayTrigger>
                       </Col>
                     <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
                       <OverlayTrigger delay={TOOTLIP_DELAY} placement={'bottom'} overlay={<Tooltip id="tooltip-disabled">
                         To insert a paragraph break, and split a pargraph in two, put the cursor at a point where you'd want to add a paragraph break in the text and either click this button or hit enter key
                       </Tooltip>}>
-                        <span className="d-inline-block">
                       <Button 
                           onClick={breakParagraph} variant="light">
                           <FontAwesomeIcon icon={ faICursor } />
                         </Button>
-                        </span>
                       </OverlayTrigger>
                     </Col>
                     <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
                       <OverlayTrigger delay={TOOTLIP_DELAY} placement={'bottom'} overlay={<Tooltip id="tooltip-disabled">
                       Put the cursor at a point where you'd want to add [INAUDIBLE] text, and click this button
                       </Tooltip>}>
-                        <span className="d-inline-block">
-                      <Button 
-                          onClick={insertTextInaudible} variant="light">
+                        <Button onClick={insertTextInaudible} variant="light">
                           <FontAwesomeIcon icon={ faMehBlank } />
                         </Button>
-                        </span>
-                      </OverlayTrigger>
-                    </Col>
-                    <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
-                      <OverlayTrigger delay={TOOTLIP_DELAY} placement={'bottom'} overlay={<Tooltip id="tooltip-disabled">
-                      Restore timecodes. At the moment for transcript over 1hour it could temporarily freeze the UI for a few seconds
-                      </Tooltip>}>
-                        <span className="d-inline-block">
-                      <Button 
-                        onClick={handleRestoreTimecodes} variant="light">
-                          <FontAwesomeIcon icon={ faSync } />
-                        </Button>
-                        </span>
                       </OverlayTrigger>
                     </Col>
                     <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
                       <OverlayTrigger delay={TOOTLIP_DELAY} placement={'bottom'} overlay={<Tooltip id="tooltip-disabled">
                     Turn {isPauseWhiletyping? 'off' : 'on'} pause while typing functionality. As you start typing the media while pause playback until you stop. Not reccomended on longer transcript as it might present performance issues.
                       </Tooltip>}>
-                        <span className="d-inline-block">
-                      <Button 
-                        onClick={handleSetPauseWhileTyping} variant={isPauseWhiletyping? 'secondary': 'light'}>
+                      <Button onClick={handleSetPauseWhileTyping} variant={isPauseWhiletyping? 'secondary': 'light'}>
                           <FontAwesomeIcon icon={ faPause }  />
                         </Button>
-                        </span>
                       </OverlayTrigger>
                       </Col>
+                      <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
+                      <OverlayTrigger delay={TOOTLIP_DELAY} placement={'bottom'} overlay={<Tooltip id="tooltip-disabled">
+                      Restore timecodes. At the moment for transcript over 1hour it could temporarily freeze the UI for a few seconds
+                      </Tooltip>}>
+                      <Button onClick={handleRestoreTimecodes} variant="light">
+                          <FontAwesomeIcon icon={ faSync } />
+                        </Button>
+                      </OverlayTrigger>
+                    </Col>
                       <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
                       <OverlayTrigger  placement={'bottom'} overlay={<Tooltip id="tooltip-disabled">
                         Double click on a paragraph to jump to the corresponding point at the beginning of that paragraph in the media
                         </Tooltip>}>
-                          <span className="d-inline-block">
-                            <Button variant="light" style={{ pointerEvents: 'none' }} block>
+                          {/* <span className="d-inline-block"> */}
+                            <Button variant="light">
                             <FontAwesomeIcon icon={ faInfoCircle } />
                             </Button>
-                          </span>
+                          {/* </span> */}
                         </OverlayTrigger>
                         </Col>
                       {/* <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>

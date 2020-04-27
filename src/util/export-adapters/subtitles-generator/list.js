@@ -1,12 +1,12 @@
 const subtitlesExportOptionsList = [
-    { type: "srt", label: "Srt - Captions", ext:'srt' },
-    { type: "ttml", label: "TTML - Captions", ext:'ttml' },
-    { type: "premiereTTML", label: "TTML for Adobe Premiere - Captions", ext:'ttml' },
-    { type: "itt", label: "iTT - Captions", ext:'itt' },
-    { type: "csv", label: "CSV - Captions",ext:'csv'  },
-    { type: "vtt", label: "VTT - Captions",ext:'vtt' },
-    { type: "pre-segment-txt", label: "Pre segmented txt - Captions",ext:'txt' },
-    { type: "json-captions", label: "Json - Captions",ext:'json' }
+    { type: "srt", label: "Srt", ext:'srt' },
+    { type: "vtt", label: "VTT",ext:'vtt' },
+    { type: "itt", label: "iTT", ext:'itt' },
+    { type: "ttml", label: "TTML", ext:'ttml' },
+    { type: "premiereTTML", label: "TTML for Adobe Premiere", ext:'ttml' },
+    { type: "csv", label: "CSV",ext:'csv'  },
+    { type: "json-captions", label: "Json",ext:'json' },
+    { type: "pre-segment-txt", label: "Pre segmented txt",ext:'txt' }
   ];
 
   export default subtitlesExportOptionsList;
