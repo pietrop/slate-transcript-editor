@@ -52,9 +52,10 @@ Visit [http://localhost:6006/](http://localhost:6006/)
 _TBC_
 
 
-
 <!-- ```
 npm install @pietrop/slate-transcript-editor
+// you need to import bootstrap separatly 
+import 'bootstrap-css-only';
 
 <SlateTranscriptEditor 
   url={DEMO_MEDIA_URL_KATE} 
@@ -84,6 +85,20 @@ _see storybook for example code_
 
 - It `align-diarized-text` when export of formats that require timecodes, eg `dpe` json, or `docx` and `txt` with timecodes. Also for the 'realignement'/sync UI btn.
 - If you export or save as slate json, at the moment it doesn't run alignement. The function to perform the alignement is also exported by the module, so that you can performe this computational intensive alignement elsewhere if needed, eg server side. 
+
+### CSS 
+The project uses [bootstrap](https://getbootstrap.com/), and [react-bootstrap](https://react-bootstrap.github.io/). And you'll need to include your own stylesheet in your React app. 
+```
+npm install bootstrap-css-only
+```
+eg [bootstrap-css-only](https://www.npmjs.com/package/bootstrap-css-only) is convinient because it doesn't ship with JQuery, that is not a dependency of [react-bootstrap](https://react-bootstrap.github.io/)
+
+and then import in your app 
+```
+import 'bootstrap-css-only';
+```
+
+Alternativly this gives you the extra flexibility of pick your own styling from [bootswatch](https://bootswatch.com/) ([npm](https://www.npmjs.com/package/bootswatch)) or you can write your own overriding the boostrap classes (see [bootstrap](https://getbootstrap.com/docs/4.0/getting-started/theming/) and [react-bootstrap](https://react-bootstrap.github.io/getting-started/theming/) on themeing) for more info. 
 
 ## Documentation
 
@@ -134,5 +149,5 @@ _TBC_
 
 <!-- TODO publish storybook to github pages -->
 ```
-npm run pubslish:storybook
+npm run deploy:ghpages
 ```

@@ -1,5 +1,4 @@
 import React, {useState, useEffect, useMemo,useCallback} from 'react';
-import 'bootstrap-css-only';
 import Button from 'react-bootstrap/Button';
 import DropdownButton from 'react-bootstrap/DropdownButton';
 import Dropdown from 'react-bootstrap/Dropdown';

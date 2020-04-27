@@ -1,7 +1,7 @@
 import React from 'react';
 import { action } from '@storybook/addon-actions';
 import SlateTranscriptEditor from './index.js';
-
+import 'bootstrap-css-only';
 
 export default {
   title: 'SlateTranscriptEditor',

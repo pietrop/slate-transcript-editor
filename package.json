@@ -8,7 +8,11 @@
     "start": "npm run storybook",
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook -c .storybook -o .out",
-    "pubslish:storybook": "npm run build-storybook  && cp .nojekyll .out/.nojekyll && gh-pages -d .out"
+    "deploy:ghpages": "npm run build-storybook  && cp .nojekyll .out/.nojekyll && gh-pages -d .out",
+    "build:component": "webpack --config webpack.config.js",
+    "pre:publish": "npm run build:component && /bin/cp -rf package.json dist && /bin/cp -rf README.md dist",
+    "publish:public": "npm run pre:publish && npm publish dist --access public",
+    "publish:dry:run": "npm publish --dry-run"
   },
   "keywords": [],
   "author": "Pietro Passarelli",

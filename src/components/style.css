@@ -5,7 +5,6 @@
   height: 90vh;
   overflow: auto;
 }
-
 /* https://developer.mozilla.org/en-US/docs/Web/CSS/user-select
 TODO: only working in Chrome, not working in Firefox, and Safari - OSX
 if selecting text, not showing selection
@@ -26,11 +25,3 @@ to get text out of component with timecodes and speaker names in the interim */
 .timecode.text:hover{
   text-decoration:none;
 }
-
-
-/* a.editInline {
-  display:none;
-}
-li:hover a.editInline {
-  display:inline-block;
-} */
