@@ -571,7 +571,7 @@ export default function SlateTranscriptEditor(props) {
                     </Col>
                     <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
                       <OverlayTrigger delay={TOOTLIP_DELAY} placement={'bottom'} overlay={<Tooltip id="tooltip-disabled">
-                      Pause while typing
+                    Turn {isPauseWhiletyping? 'off' : 'on'} pause while typing functionality. As you start typing the media while pause playback until you stop. Not reccomended on longer transcript as it might present performance issues.
                       </Tooltip>}>
                         <span className="d-inline-block">
                       <Button 
