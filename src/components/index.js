@@ -21,7 +21,11 @@ import {
   faShare,
   faUndo,
   faSync,
-  faQuestionCircle
+  faInfoCircle,
+  faICursor,
+  faMehBlank,
+  faCog,
+  faCheck
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
@@ -43,32 +47,35 @@ const SEEK_BACK_SEC = 15;
 const PAUSE_WHILTE_TYPING_TIMEOUT_MILLISECONDS = 500;
 const MAX_DURATION_FOR_PERFORMANCE_OPTIMIZATION_IN_SECONDS = 3600;
 const TOOTLIP_DELAY = 1000;
+const TOOTLIP_LONGER_DELAY = 2000;
 
 const videoRef = React.createRef();
 
 
-export default function TranscriptEditor(props) {
+export default function SlateTranscriptEditor(props) {
     const [currentTime, setCurrentTime] = useState(0);
     const [duration, setDuration] = useState(0);
     const [playbackRate, setPlaybackRate] = useState(1);
     const editor = useMemo(() => withReact(createEditor()), []);
     const [value, setValue] = useState([]);
-    const [showSpeakers, setShowSpeakers] = useState(true);
-    const [showTimecodes, setShowTimecodes] = useState(true);
-    // const [speakerOptions, setSpeakerOptions] = useState([]);
+    const defaultShowSpeakersPreference = (typeof props.showSpeakers === 'boolean')? props.showSpeakers : true;
+    const defaultShowTimecodesPreference = (typeof props.showTimecodes === 'boolean')? props.showTimecodes : true;
+    const [showSpeakers, setShowSpeakers] = useState(defaultShowSpeakersPreference);
+    const [showTimecodes, setShowTimecodes] = useState(defaultShowTimecodesPreference);
+    const [speakerOptions, setSpeakerOptions] = useState([]);
+    const [showSpeakersCheatShet, setShowSpeakersCheatShet] = useState(false);
 
     useEffect(()=>{
-    
         const res = convertDpeToSlate(props.jsonData);
         setValue(res);
-
     },[])
 
-  //   useEffect(()=>{
-  //     const getUniqueSpeakers = pluck('speaker')
-  //     const uniqueSpeakers = getUniqueSpeakers(props.jsonData.paragraphs)
-  //     setSpeakerOptions(uniqueSpeakers);
-  // },[])
+    useEffect(()=>{
+      console.log('getUniqueSpeakers')
+      const getUniqueSpeakers = pluck('speaker');
+      const uniqueSpeakers = getUniqueSpeakers(value);
+      setSpeakerOptions(uniqueSpeakers);
+  },[showSpeakersCheatShet])
 
     useEffect(() => { // Update the document title using the browser API
         if (videoRef && videoRef.current) {
@@ -92,6 +99,10 @@ export default function TranscriptEditor(props) {
         }
     },[videoRef]);
 
+    const handleSetShowSpeakersCheatShet = ()=>{
+       setShowSpeakersCheatShet(!showSpeakersCheatShet)
+    }
+
     const handleTimeUpdated = (e) => {
       setCurrentTime(e.target.currentTime);
       // TODO: setting duration here as a workaround
@@ -99,7 +110,6 @@ export default function TranscriptEditor(props) {
   }
 
     const handleSetPlaybackRate= (e)=>{
-      console.log('handleSetPlaybackRate', e.target.value)
       const tmpNewPlaybackRateValue = parseFloat( e.target.value)
       if (videoRef && videoRef.current) {
         videoRef.current.playbackRate = tmpNewPlaybackRateValue;
@@ -113,69 +123,86 @@ export default function TranscriptEditor(props) {
       }
     }
 
-    const renderElement = useCallback((props, value) => {
-      console.log('renderElement', value)
-      console.log('renderElement props', props)
+    const renderElement = useCallback((props) => {
         switch (props.element.type) {
-        // case 'speaker':
-        //     return <SpeakerElement {...props} />
         case 'timedText':
-            return <TimedTextElement {...props} value={value} />
+            return <TimedTextElement {...props} />
           default:
             return <DefaultElement {...props} />
         }
       }, [])
 
     const renderLeaf = useCallback(({ attributes, children, leaf }) => {
-      // console.log(attributes, children, leaf)
       return (
         <span
         onDoubleClick={handleTimedTextClick}
         className={'timecode text'}
         data-start={children.props.parent.start}
+        data-previous-timings={children.props.parent.previousTimings}
         title={children.props.parent.start}
           {...attributes}
-          // style={{
-          //   fontWeight: leaf.bold ? 'bold' : 'normal',
-          //   fontStyle: leaf.italic ? 'italic' : 'normal',
-          // }}
         >
           {children}
         </span>
       )
     }, [])
 
-    const TimedTextElement = props => {
-      console.log('TimedTextElement',props, props.value);
 
-      const path = ReactEditor.findPath(editor, props.element);
-      const handleSetSpeakerName = (e)=>{
-        console.log('handleSetSpeakerName', e)
-        const oldSpeakerName = props.element.speaker.toUpperCase();
-        const newSpeakerName = prompt('Change speaker name', e.target.innerText);
-        if(newSpeakerName){
-          const isUpdateAllSpeakerInstances = confirm(`Would you like to replace all occurrences of ${oldSpeakerName} with ${newSpeakerName}?`);
-          if(isUpdateAllSpeakerInstances){
-            console.log('value 1', props.value)
-            // TODO: move as separate function - update all speaker
-           const newValue = props.value.map((paragraph)=>{
-              if(paragraph.speaker === oldSpeakerName){
-                paragraph.speaker = newSpeakerName;
-              }
-              return paragraph;
-            })
-            console.log('value 2',newValue)
-            setValue(newValue)
-          }
-          else{
-            Transforms.setNodes(editor, 
-              {type:'timedText',speaker: newSpeakerName, start: props.element.start}, {at: path}
-            );    
-          }
+    // 
+
+    /**
+     * `handleSetSpeakerName` is outside of TimedTextElement 
+     * to improve the overall performance of the editor, 
+     * especially on long transcripts 
+     * @param {*} element - props.element, from `renderElement` function 
+     */
+    const handleSetSpeakerName = (element)=>{
+      const pathToCurrentNode = ReactEditor.findPath(editor, element);
+      const oldSpeakerName = element.speaker.toUpperCase();
+      const newSpeakerName = prompt('Change speaker name', oldSpeakerName);
+      if(newSpeakerName){
+        const isUpdateAllSpeakerInstances = confirm(`Would you like to replace all occurrences of ${oldSpeakerName} with ${newSpeakerName}?`);
+        if(isUpdateAllSpeakerInstances){
+          const rangeForTheWholeEditor =  Editor.range(editor, []);
+          // Apply transformation to the whole doc, where speaker matches old spekaer name, and set it to new one 
+          Transforms.setNodes(
+            editor,
+            {type:'timedText',speaker: newSpeakerName},
+            {
+              at: rangeForTheWholeEditor,
+              match: (node) => ((node.type==="timedText") && (node.speaker === oldSpeakerName))
+            }
+          )
+        }
+        else{
+          // only apply speaker name transformation to current element
+          Transforms.setNodes(editor, 
+            {type:'timedText',speaker: newSpeakerName}, 
+            { at: pathToCurrentNode }
+          );    
         }
       }
+  
+    }
 
-      // console.log('Node.get',Node.get(props))
+
+    const TimedTextElement = props => {
+        let textLg = 12;
+        let textXl = 12;
+        if(!showSpeakers && !showTimecodes){
+          textLg = 12
+          textXl = 12
+        }else if (showSpeakers && !showTimecodes){
+          textLg = 9
+          textXl = 9
+        }else if (!showSpeakers && showTimecodes ){
+          textLg = 9
+          textXl = 10
+        }else if(showSpeakers && showTimecodes){
+          textLg = 6 
+          textXl = 7
+        }
+
         return (
           <Row {...props.attributes}>
               {showTimecodes 
@@ -201,11 +228,12 @@ export default function TranscriptEditor(props) {
                       width: '100%'
                     }} 
                     title={props.element.speaker.toUpperCase()}
-                    onClick={handleSetSpeakerName}
+                    onClick={handleSetSpeakerName.bind(this, props.element)}
                     > {props.element.speaker.toUpperCase()}</span>
 
               </Col>}
-              <Col  xs={12} sm={12} md={12} lg={6} xl={7} className={'p-b-1 mx-auto'}>
+            
+              <Col  xs={12} sm={12} md={12} lg={textLg} xl={textXl} className={'p-b-1 mx-auto'}>
               {props.children} 
               </Col>
               </Row>
@@ -216,11 +244,7 @@ export default function TranscriptEditor(props) {
         return <p {...props.attributes}>{props.children}</p>
     }
 
-
-
     const handleTimedTextClick = (e)=>{
-      // console.log(e, e.target)
-      console.log(e)
       if(e.target.classList.contains('timecode')){
       
         const start = e.target.dataset.start;
@@ -231,7 +255,6 @@ export default function TranscriptEditor(props) {
       }else if(e.target.dataset.slateString){
         if(e.target.parentNode.dataset.start){
           const start = e.target.parentNode.dataset.start;
-          console.log(start);
           if (videoRef && videoRef.current && start) {
             videoRef.current.currentTime = parseInt(start);
             videoRef.current.play();
@@ -249,23 +272,19 @@ export default function TranscriptEditor(props) {
             tmpValue =  handleRestoreTimecodes();
           }
           return slateToText({value:tmpValue, speakers, timecodes});
-          break;
         case 'json-slate':
           return value;
-          break;
         case 'json-dpe':
          return converSlateToDpe(value, props.jsonData);
-           break;
         case 'word':
           let docTmpValue = value;
           if(timecodes){
             docTmpValue =  handleRestoreTimecodes();
           }
-          // code block
           return slateToDocx({value:docTmpValue, speakers, timecodes, title: props.title});
-          break;
         default:
-          // code block
+          // some default, unlikely to be called
+          return {};
       }
     }
 
@@ -293,10 +312,39 @@ export default function TranscriptEditor(props) {
       return alignedSlateData;
     }
 
+    const breakParagraph = () =>{
+      Editor.insertBreak(editor)
+    }
+    const insertTextInaudible = () =>{
+      Transforms.insertText(editor, '[INAUDIBLE]');
+    }
+
+    /**
+     * See explanation in `src/utils/dpe-to-slate/index.js` for how this function works with css injection
+     * to provide current paragaph's highlight.
+     * @param {Number} currentTime - float in seconds
+     */
+    const generatePreviousTimingsUpToCurrent = (currentTime)=>{
+      const lastWordStartTime = props.jsonData.words[props.jsonData.words.length-1].start;
+      const lastWordStartTimeInt = parseInt(lastWordStartTime);
+      const emptyListOfTimes = Array(lastWordStartTimeInt);
+      const listOfTimesInt = [...emptyListOfTimes.keys()]
+      const listOfTimesUpToCurrentTimeInt =  listOfTimesInt.splice(0, currentTime,0)
+      const stringlistOfTimesUpToCurrentTimeInt  = listOfTimesUpToCurrentTimeInt.join(' ');
+      return stringlistOfTimesUpToCurrentTimeInt;
+    }
+
     return (
         <Container fluid style={{backgroundColor: '#eee', height: '100vh'}}>
-          <h3 className={'text-truncate'} title={props.title}>{props.title}</h3>
-          <br/>
+          <style scoped>
+          {`
+              /* Next words */
+              .timecode[data-previous-timings*="${videoRef && videoRef.current&& videoRef.current.duration&&  generatePreviousTimingsUpToCurrent(parseInt(currentTime))}"]{
+                  color:  #9E9E9E;
+              }
+          `}
+          </style>
+             {props.showTitle ? <><h3 className={'text-truncate'} title={props.title}>{props.title}</h3><br/></> : null }
             <Row>
                 <Col xs={{span:12, order:1}} sm={3} md={3} lg={3} xl={4}>
                   <Row>
@@ -312,7 +360,7 @@ export default function TranscriptEditor(props) {
                    </section>
                   </Row>
                   <Row>
-                  <Col xs={5} sm={5} md={5} lg={5} xl={5}  className={'p-1 mx-auto'}>
+                  <Col xs={5} sm={4} md={4} lg={4} xl={4}  className={'p-1 mx-auto'}>
                     <Badge variant="light" pill>
                     <code className={'text-muted'}>{shortTimecode(currentTime)}</code><code className={'text-muted'}>{duration?` | ${shortTimecode(duration)}`: ''}</code> 
                     </Badge>
@@ -329,7 +377,7 @@ export default function TranscriptEditor(props) {
                           })}  
                       </Form.Control>
                   </Col>
-                  <Col xs={2} sm={2} md={2} lg={2} xl={2}  className={'p-1 mx-auto'}>
+                  <Col xs={3} sm={3} md={3} lg={3} xl={3}  className={'p-1 mx-auto'}>
                   <OverlayTrigger delay={TOOTLIP_DELAY} placement={'bottom'} overlay={<Tooltip id="tooltip-disabled">
                  { `Seek back by ${SEEK_BACK_SEC} seconds`}
                     </Tooltip>}>
@@ -342,9 +390,8 @@ export default function TranscriptEditor(props) {
                   </Col>
                   </Row>
                   <Row>
-                   
-                  {/* <Col xs={12} sm={12} md={12} lg={12} xl={12}  className={'p-1 mx-auto'}>
-                      <Accordion>
+                  <Col xs={12} sm={12} md={12} lg={12} xl={12}  className={'p-1 mx-auto'}>
+                      <Accordion onClick={handleSetShowSpeakersCheatShet}>
                         <Accordion.Toggle as={Button} variant="link" eventKey="0">
                           <Badge variant="light">Speakers</Badge>
                         </Accordion.Toggle>
@@ -356,7 +403,7 @@ export default function TranscriptEditor(props) {
                           </ListGroup>
                         </Accordion.Collapse>
                       </Accordion>
-                    </Col> */}
+                    </Col>
                   </Row>
                 
                 </Col>
@@ -364,35 +411,18 @@ export default function TranscriptEditor(props) {
                 
                 {value.length !== 0 ?<> 
                     <section className="editor-wrapper-container"> 
-                    <style scoped>
-                    {`
-                    .timecode[data-start^="${parseInt(currentTime)}"]{
-                      color: #343a40!important /* Bootstrap black, for dark */
-                    }
-
-                    .timecode:not([data-start^="${parseInt(currentTime)}"]){
-                      color: #6c757d; /*Bootstrap grey for secondary*/
-                    }                    
-                    `}
-                  </style>
-
                      <Slate 
-                     editor={editor} 
-                     value={value} 
-                    //  onClick={(e)=>{console.log('click',e)}}
-                    //  onChange={value => setValue(value)}
-                     onChange={(value) => {
-                        if(props.handleAutoSaveEditor){
-                          props.handleAutoSaveEditor(value);
-                        }
-                          // const content = JSON.stringify(value, null,2)
-                          return  setValue(value)
-                        }}
-                     >
+                      editor={editor} 
+                      value={value} 
+                      onChange={(value) => {
+                          if(props.handleAutoSaveEditor){
+                            props.handleAutoSaveEditor(value);
+                          }
+                            return  setValue(value)
+                          }}
+                      >
                         <Editable
-                        //  onClick={(e)=>{console.log('click',e.target)}}
-                          // renderElement={renderElement.bind( value)}
-                          renderElement={(e) => renderElement(e, value)}
+                          renderElement={renderElement}
                           renderLeaf={renderLeaf}
                           />
                         </Slate>
@@ -408,66 +438,92 @@ export default function TranscriptEditor(props) {
                   <Row>
                   <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
                   <OverlayTrigger  placement={'bottom'} overlay={<Tooltip id="tooltip-disabled">
-                    Double click on a word to jump to that paragraph!
+                    Double click on a paragraph to jump to the corresponding point at the beginning of that paragraph in the media
                     </Tooltip>}>
                       <span className="d-inline-block">
                         <Button variant="light" style={{ pointerEvents: 'none' }}>
-                        <FontAwesomeIcon icon={ faQuestionCircle } />
+                        <FontAwesomeIcon icon={ faInfoCircle } />
                         </Button>
                       </span>
                     </OverlayTrigger>
 
                     </Col>
                     <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
-                      {/* <OverlayTrigger  placement={'bottom'} overlay={<Tooltip id="tooltip-disabled">
-                      Save
-                    </Tooltip>}>
-                      <span className="d-inline-block"> */}
-                      <Button title="save" onClick={handleSave} variant="light">
-                        <FontAwesomeIcon icon={ faSave } />
-                      </Button>
-                      {/* </span>
-                    </OverlayTrigger> */}
-                    </Col>
-                    <Col xs={2} sm={12} md={12} lg={12} xl={12} 
-                    title="export options"
-                     className={'p-1 mx-auto'}>
-                      <DropdownButton id="dropdown-basic-button" title={<FontAwesomeIcon icon={ faShare } />} variant="light">
-                      {/* TODO: need to run re-alignement if exportin with timecodes true, otherwise they'll be inaccurate */}
-                        <Dropdown.Item onClick={()=>{handleExport({type:'text', ext:  'txt',speakers:false, timecodes: false })}}>Text <code>.txt</code></Dropdown.Item>
-                        <Dropdown.Item onClick={()=>{handleExport({type:'text', ext:  'txt',speakers:true, timecodes: false })}}>Text (Speakers)</Dropdown.Item>
-                        <Dropdown.Item onClick={()=>{handleExport({type: 'text',ext: 'txt', speakers:true, timecodes: true })}} disable>Text (Speakers & timecodes)</Dropdown.Item>
-                         {/* TODO: need to run re-alignement if exportin with timecodes true */}
-                         <Dropdown.Divider />
-                          <Dropdown.Item onClick={()=>{handleExport({type:'word', ext: 'docx', speakers:false, timecodes: false})}}>Word <code>.docx</code></Dropdown.Item>
-                          <Dropdown.Item onClick={()=>{handleExport({type:'word', ext: 'docx', speakers:true, timecodes: false})}}>Word (Speakers)</Dropdown.Item>
-                          <Dropdown.Item onClick={()=>{handleExport({type:'word', ext: 'docx', speakers:true, timecodes: true})}}>Word (Speakers & timecodes)</Dropdown.Item>
-                        <Dropdown.Divider />
-                        <Dropdown.Item onClick={()=>{handleExport({type:'json-slate', ext: 'json',speakers:true, timecodes: true})}}>Json (slate)</Dropdown.Item>
-                        <Dropdown.Item onClick={()=>{handleExport({type:'json-dpe', ext: 'json',speakers:true, timecodes: true})}}>Json(dpe)</Dropdown.Item>
-                      </DropdownButton>
-        
+                      <OverlayTrigger OverlayTrigger delay={TOOTLIP_LONGER_DELAY} placement={'bottom'} overlay={<Tooltip id="tooltip-disabled">
+                        Save
+                      </Tooltip>}>
+                        <span className="d-inline-block">
+                        <Button onClick={handleSave} variant="light">
+                          <FontAwesomeIcon icon={ faSave } />
+                        </Button>
+                        </span>
+                      </OverlayTrigger>
+                      </Col>
+                      <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
+                          <OverlayTrigger OverlayTrigger delay={TOOTLIP_LONGER_DELAY} placement={'bottom'} overlay={<Tooltip id="tooltip-disabled">
+                        Export options
+                      </Tooltip>}>
+                        <span className="d-inline-block">
+                        <DropdownButton id="dropdown-basic-button" title={<FontAwesomeIcon icon={ faShare } />} variant="light">
+                        {/* TODO: need to run re-alignement if exportin with timecodes true, otherwise they'll be inaccurate */}
+                          <Dropdown.Item onClick={()=>{handleExport({type:'text', ext:  'txt',speakers:false, timecodes: false })}}>Text <code>.txt</code></Dropdown.Item>
+                          <Dropdown.Item onClick={()=>{handleExport({type:'text', ext:  'txt',speakers:true, timecodes: false })}}>Text (Speakers)</Dropdown.Item>
+                          <Dropdown.Item onClick={()=>{handleExport({type: 'text',ext: 'txt', speakers:true, timecodes: true })}} disable>Text (Speakers & timecodes)</Dropdown.Item>
+                          {/* TODO: need to run re-alignement if exportin with timecodes true */}
+                          <Dropdown.Divider />
+                            <Dropdown.Item onClick={()=>{handleExport({type:'word', ext: 'docx', speakers:false, timecodes: false})}}>Word <code>.docx</code></Dropdown.Item>
+                            <Dropdown.Item onClick={()=>{handleExport({type:'word', ext: 'docx', speakers:true, timecodes: false})}}>Word (Speakers)</Dropdown.Item>
+                            <Dropdown.Item onClick={()=>{handleExport({type:'word', ext: 'docx', speakers:true, timecodes: true})}}>Word (Speakers & timecodes)</Dropdown.Item>
+                          <Dropdown.Divider />
+                          <Dropdown.Item onClick={()=>{handleExport({type:'json-slate', ext: 'json',speakers:true, timecodes: true})}}>Json (slate)</Dropdown.Item>
+                          <Dropdown.Item onClick={()=>{handleExport({type:'json-dpe', ext: 'json',speakers:true, timecodes: true})}}>Json(dpe)</Dropdown.Item>
+                        </DropdownButton>
+                        </span>
+                      </OverlayTrigger>
                     </Col>
                     <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
-                    <OverlayTrigger delay={TOOTLIP_DELAY} placement={'bottom'} overlay={<Tooltip id="tooltip-disabled">
-                    Restore timecodes. At the moment for transcript over 1hour it could temporarily freeze the UI for a few seconds
-                    </Tooltip>}>
-                      <span className="d-inline-block">
-
-                     <Button 
-                    //  title="restore timecodes, for transcript over 1hour it could temporarily freeze the UI for a few seconds" 
-                      onClick={handleRestoreTimecodes} variant="light">
-                        <FontAwesomeIcon icon={ faSync } />
-                      </Button>
-                      </span>
-                    </OverlayTrigger>
-                   
+                      <OverlayTrigger delay={TOOTLIP_DELAY} placement={'bottom'} overlay={<Tooltip id="tooltip-disabled">
+                        To insert a paragraph break, and split a pargraph in two, put the cursor at a point where you'd want to add a paragraph break in the text and either click this button or hit enter key
+                      </Tooltip>}>
+                        <span className="d-inline-block">
+                      <Button 
+                        //  title="restore timecodes, for transcript over 1hour it could temporarily freeze the UI for a few seconds" 
+                          onClick={breakParagraph} variant="light">
+                          <FontAwesomeIcon icon={ faICursor } />
+                        </Button>
+                        </span>
+                      </OverlayTrigger>
+                    </Col>
+                    <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
+                      <OverlayTrigger delay={TOOTLIP_DELAY} placement={'bottom'} overlay={<Tooltip id="tooltip-disabled">
+                      Put the cursor at a point where you'd want to add [INAUDIBLE] text, and click this button
+                      </Tooltip>}>
+                        <span className="d-inline-block">
+                      <Button 
+                        //  title="restore timecodes, for transcript over 1hour it could temporarily freeze the UI for a few seconds" 
+                          onClick={insertTextInaudible} variant="light">
+                          <FontAwesomeIcon icon={ faMehBlank } />
+                        </Button>
+                        </span>
+                      </OverlayTrigger>
+                    </Col>
+                    <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
+                      <OverlayTrigger delay={TOOTLIP_DELAY} placement={'bottom'} overlay={<Tooltip id="tooltip-disabled">
+                      Restore timecodes. At the moment for transcript over 1hour it could temporarily freeze the UI for a few seconds
+                      </Tooltip>}>
+                        <span className="d-inline-block">
+                      <Button 
+                      //  title="restore timecodes, for transcript over 1hour it could temporarily freeze the UI for a few seconds" 
+                        onClick={handleRestoreTimecodes} variant="light">
+                          <FontAwesomeIcon icon={ faSync } />
+                        </Button>
+                        </span>
+                      </OverlayTrigger>
                     </Col>
                   </Row>
                 <br/>
                 </Col>
             </Row>
-
         </Container>
     );
 }

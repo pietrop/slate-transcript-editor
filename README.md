@@ -2,6 +2,7 @@
 <!-- _One liner + link to confluence page_
 _Screenshot of UI - optional_ -->
 
+_Work in progress_
 
 Building on the sucess and lessons learned from [`@bbc/react-transcript-editor`](https://github.com/bbc/react-transcript-editor).
 Mostly to be used in the context of [autoEdit 3](http://autoedit.io)(digital paper edit), and other proejcts. 
@@ -14,9 +15,9 @@ Criterias/Principles
 - leverages existing libraries, such as [bootstrap](https://getbootstrap.com/), and [react-bootstrap](https://react-bootstrap.github.io/), to focus on the diffuclt problems, and not wasting time re-inventing the wheel or fiddling around with css.
 
 
-_Work in progress_
+[See project board for more details](https://github.com/pietrop/slate-transcript-editor/projects/1) of ongoing work.
 
-[See project board for more details](https://github.com/pietrop/slate-transcript-editor/projects/1)
+See [draftJs vs slateJs](/docs/notes/draftJs-vs-slateJs.md) in doc/notes for some considations that inspired this version.
 
 ## Setup
 <!-- _stack - optional_
@@ -39,6 +40,10 @@ npm install
 ```
 npm run storybook
 ```
+or
+```
+npm start
+```
 
 Visit [http://localhost:6006/](http://localhost:6006/)
 
@@ -46,12 +51,29 @@ Visit [http://localhost:6006/](http://localhost:6006/)
 
 _TBC_
 
+
+
 <!-- ```
 npm install @pietrop/slate-transcript-editor
+
+<SlateTranscriptEditor 
+  url={DEMO_MEDIA_URL_KATE} 
+  title={DEMO_TITLE_KATE} 
+  jsonData={DEMO_TRANSCRIPT_KATE}
+  handleSaveEditor={action('handleSaveEditor')}
+  handleAutoSaveEditor={action('handleAutoSaveEditor')} // auto save introduces a perfromance cost - not reccomended for transcriptions over 1 hour
+  saveFormat={'dpe'} // dpe or slate - dpe, runs alignement before exporting, slate, is just the raw data. Optional, slate default
+  showTimecodes={false} // optional - default to true
+  showSpeakers={true} // optional  - default to true
+  showTitle={true} // optional - defaults to false
+  />
 ```
 See storybook -->
  <!-- TODO: link to storybook here --> 
  <!-- for more details on how to use. -->
+
+
+_see storybook for example code_
 
 ## System Architecture
 <!-- _High level overview of system architecture_ -->
@@ -84,6 +106,8 @@ _Linting, github pre-push hook - optional_ -->
 - node `12`
 - storybook 
 
+If you have nvm you can run `nvm use` to change to the node version for this repo.
+
 ## Build
 <!-- _How to run build_ -->
 ### build module
@@ -107,4 +131,6 @@ _TBC_
 ### Deployment storybook
 
 <!-- TODO publish storybook to github pages -->
-_TBC_
+```
+npm run pubslish:storybook
+```

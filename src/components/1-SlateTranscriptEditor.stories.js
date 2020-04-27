@@ -24,6 +24,46 @@ return <SlateTranscriptEditor
   />
 };
 
+export const TranscriptEditorDemoKateNoSpeakers = () => {
+  return <SlateTranscriptEditor 
+    showTitle={true} // optional - defaults to false
+    url={DEMO_MEDIA_URL_KATE} 
+    title={DEMO_TITLE_KATE} 
+    jsonData={DEMO_TRANSCRIPT_KATE}
+    handleSaveEditor={action('handleSaveEditor')}
+    handleAutoSaveEditor={action('handleAutoSaveEditor')}
+    saveFormat={'dpe'} // dpe or slate - dpe, runs alignement before exporting, slate, is just the raw data.
+    showTimecodes={true}
+    showSpeakers={false}
+    />
+  };
+
+  export const TranscriptEditorDemoKateNoTimecodes = () => {
+    return <SlateTranscriptEditor 
+      url={DEMO_MEDIA_URL_KATE} 
+      title={DEMO_TITLE_KATE} 
+      jsonData={DEMO_TRANSCRIPT_KATE}
+      handleSaveEditor={action('handleSaveEditor')}
+      handleAutoSaveEditor={action('handleAutoSaveEditor')}
+      saveFormat={'dpe'} // dpe or slate - dpe, runs alignement before exporting, slate, is just the raw data.
+      showTimecodes={false}
+      showSpeakers={true}
+      />
+    };
+
+    export const TranscriptEditorDemoKateNoSpeakersAndTimecodes = () => {
+      return <SlateTranscriptEditor 
+        url={DEMO_MEDIA_URL_KATE} 
+        title={DEMO_TITLE_KATE} 
+        jsonData={DEMO_TRANSCRIPT_KATE}
+        handleSaveEditor={action('handleSaveEditor')}
+        handleAutoSaveEditor={action('handleAutoSaveEditor')}
+        saveFormat={'dpe'} // dpe or slate - dpe, runs alignement before exporting, slate, is just the raw data.
+        showTimecodes={false}
+        showSpeakers={false}
+        />
+      };
+
 const DEMO_MEDIA_URL_ZUCK_5HOURS = "https://democratic-presidential-debate-stt-analyses.s3.us-east-2.amazonaws.com/Facebook+CEO+Mark+Zuckerberg+FULL+testimony+before+U.S.+senate-pXq-5L2ghhg.mp4";
 
 const DEMO_TITLE_ZUCK_2HOURS ="Facebook CEO Mark Zuckerberg | 2 Hours | full testimony before U.S. Senate ";
@@ -36,6 +76,7 @@ export const TranscriptEditorDemoZuck2Hours = () =>{
     handleSaveEditor={action('handleSaveEditor')}
     // handleAutoSaveEditor={action('handleAutoSaveEditor')} // auto save has condierable performance lag on longer files, sudgest to not use for files over 45 min/1hour.
     saveFormat={'dpe'}
+    showTitle={true} 
     />
 };
 
@@ -49,6 +90,7 @@ export const TranscriptEditorDemoZuck5Hours = () => {
     handleSaveEditor={action('handleSaveEditor')}
     // handleAutoSaveEditor={action('handleAutoSaveEditor')}
     saveFormat={'dpe'}
+    showTitle={true} 
     />
 };
 
