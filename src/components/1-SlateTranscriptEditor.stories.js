@@ -66,7 +66,7 @@ export const TranscriptEditorDemoKateNoSpeakers = () => {
 
 const DEMO_MEDIA_URL_ZUCK_5HOURS = "https://democratic-presidential-debate-stt-analyses.s3.us-east-2.amazonaws.com/Facebook+CEO+Mark+Zuckerberg+FULL+testimony+before+U.S.+senate-pXq-5L2ghhg.mp4";
 
-const DEMO_TITLE_ZUCK_2HOURS ="Facebook CEO Mark Zuckerberg | 2 Hours | full testimony before U.S. Senate ";
+const DEMO_TITLE_ZUCK_2HOURS =" 2 Hours |Facebook CEO Mark Zuckerberg | full testimony before U.S. Senate ";
 import DEMO_TRANSCRIPT_ZUCK_2HOURS_DPE from "../sample-data/Facebook-CEO-Mark-Zuckerberg-FULL-testimony-before-U.S.senate-pXq-5L2ghhg.mp4.dpe-2hours.json";
 export const TranscriptEditorDemoZuck2Hours = () =>{
   return  <SlateTranscriptEditor 
@@ -80,7 +80,7 @@ export const TranscriptEditorDemoZuck2Hours = () =>{
     />
 };
 
-const DEMO_TITLE_ZUCK_5HOURS = "Facebook CEO Mark Zuckerberg | 5 Hours | full testimony before U.S. Senate";
+const DEMO_TITLE_ZUCK_5HOURS = " 5 Hours | Facebook CEO Mark Zuckerberg  | full testimony before U.S. Senate";
 import DEMO_TRANSCRIPT_ZUCK_5HOURS_DPE from "../sample-data/Facebook-CEO-Mark-Zuckerberg-FULL-testimony-before-U.S.senate-pXq-5L2ghhg.mp4.dpe.json";
 export const TranscriptEditorDemoZuck5Hours = () => {
   return <SlateTranscriptEditor 
