@@ -291,7 +291,8 @@ export default function SlateTranscriptEditor(props) {
       }
         return path.basename(props.mediaUrl).trim();
     }
-    const handleExport = ({type, ext, speakers,timecodes, atlasFormat })=>{
+    const handleExport = ({ type, ext, speakers, timecodes, atlasFormat })=>{
+      console.log('handleExport',type, ext, speakers,timecodes, atlasFormat)
       let editorContnet = getEditorContent({type, speakers,timecodes,atlasFormat });
       if(ext==='json'){
         editorContnet =  JSON.stringify(editorContnet,null,2)
@@ -408,7 +409,7 @@ export default function SlateTranscriptEditor(props) {
             {props.showTitle?  <OverlayTrigger  delay={TOOTLIP_LONGER_DELAY} placement={'bottom'} overlay={<Tooltip id="tooltip-disabled"> {props.title}</Tooltip>}>
                   <h3 className={'text-truncate text-left'}><small className="text-muted">{props.title}</small></h3> 
               </OverlayTrigger> :  null}
-            <Row>
+              <Row>
                 <Col xs={{span:12, order:1}} sm={3} md={3} lg={3} xl={4}>
                   <Row>
                         <video 
@@ -421,56 +422,54 @@ export default function SlateTranscriptEditor(props) {
                         </video>
                   </Row>
                   <Row>
-                  <Col xs={5} sm={4} md={4} lg={4} xl={4}  className={'p-1 mx-auto'}>
-                    <Badge variant="light" pill>
-                    <code className={'text-muted'}>{shortTimecode(currentTime)}</code><code className={'text-muted'}>{duration?` | ${shortTimecode(duration)}`: ''}</code> 
-                    </Badge>
-                 
-                    </Col>
-                  <Col xs={4} sm={4} md={4} lg={4} xl={4}  className={'p-1 mx-auto'}>
-                      <Form.Control 
-                        as="select" defaultValue={playbackRate}  
-                        onChange={handleSetPlaybackRate}
-                        title={"Change the playback speed of the player"}
-                        >
-                      {PLAYBACK_RATE_VALUES.map((playbackRateValue, index)=>{
-                          return  <option key={index+playbackRateValue} value={playbackRateValue}>x {playbackRateValue}</option> 
-                          })}  
-                      </Form.Control>
-                  </Col>
-                  <Col xs={3} sm={3} md={3} lg={3} xl={3}  className={'p-1 mx-auto'}>
-                  <OverlayTrigger delay={TOOTLIP_DELAY} placement={'bottom'} overlay={<Tooltip id="tooltip-disabled">
-                 { `Seek back by ${SEEK_BACK_SEC} seconds`}
-                    </Tooltip>}>
-                      <span className="d-inline-block">
-                      <Button variant="light" onClick={handleSeekBack}
-                      block
-                       >{SEEK_BACK_SEC} <FontAwesomeIcon icon={faUndo}/></Button>
-                      </span>
-                    </OverlayTrigger>
-                  </Col>
+                    <Col xs={5} sm={4} md={4} lg={4} xl={4}  className={'p-1 mx-auto'}>
+                      <Badge variant="light" pill>
+                      <code className={'text-muted'}>{shortTimecode(currentTime)}</code><code className={'text-muted'}>{duration?` | ${shortTimecode(duration)}`: ''}</code> 
+                      </Badge>
+                      </Col>
+                      <Col xs={4} sm={4} md={4} lg={4} xl={4}  className={'p-1 mx-auto'}>
+                        <Form.Control 
+                          as="select" defaultValue={playbackRate}  
+                          onChange={handleSetPlaybackRate}
+                          title={"Change the playback speed of the player"}
+                          >
+                        {PLAYBACK_RATE_VALUES.map((playbackRateValue, index)=>{
+                            return  <option key={index+playbackRateValue} value={playbackRateValue}>x {playbackRateValue}</option> 
+                            })}  
+                        </Form.Control>
+                      </Col>
+                      <Col xs={3} sm={3} md={3} lg={3} xl={3}  className={'p-1 mx-auto'}>
+                        <OverlayTrigger delay={TOOTLIP_DELAY} placement={'bottom'} overlay={<Tooltip id="tooltip-disabled">
+                          { `Seek back by ${SEEK_BACK_SEC} seconds`}
+                          </Tooltip>}>
+                            <span className="d-inline-block">
+                            <Button variant="light" onClick={handleSeekBack}
+                            block
+                            >{SEEK_BACK_SEC} <FontAwesomeIcon icon={faUndo}/></Button>
+                            </span>
+                          </OverlayTrigger>
+                      </Col>
                   </Row>
                   <Row>
-                  <Col xs={12} sm={12} md={12} lg={12} xl={12}  className={'p-1 mx-auto'}>
-                      <Accordion onClick={ handleSetShowSpeakersCheatShet}>
-                        <Accordion.Toggle as={Button} variant="link" eventKey="0">
-                          <Badge variant="light">Speakers</Badge>
-                        </Accordion.Toggle>
-                        <Accordion.Collapse eventKey="0">
-                          <ListGroup>
-                          {speakerOptions.map((speakerName)=>{
-                            return <ListGroup.Item className={'text-truncate'} title={speakerName.toUpperCase()}>{speakerName.toUpperCase()}</ListGroup.Item>
-                          })}
-                          </ListGroup>
-                        </Accordion.Collapse>
-                      </Accordion>
-                    </Col>
+                    <Col xs={12} sm={12} md={12} lg={12} xl={12}  className={'p-1 mx-auto'}>
+                        <Accordion onClick={ handleSetShowSpeakersCheatShet}>
+                          <Accordion.Toggle as={Button} variant="link" eventKey="0">
+                            <Badge variant="light">Speakers</Badge>
+                          </Accordion.Toggle>
+                          <Accordion.Collapse eventKey="0">
+                            <ListGroup>
+                            {speakerOptions.map((speakerName)=>{
+                              return <ListGroup.Item className={'text-truncate'} title={speakerName.toUpperCase()}>{speakerName.toUpperCase()}</ListGroup.Item>
+                            })}
+                            </ListGroup>
+                          </Accordion.Collapse>
+                        </Accordion>
+                      </Col>
                   </Row>
-                
                 </Col>
+
                 <Col xs={{span:12, order:3}} sm={{span:7, order:2}} md={{span:7, order:2}} lg={{span:8, order:2}} xl={{span:6, order:2}}>
-                
-                {value.length !== 0 ?<> 
+                  {value.length !== 0 ?<> 
                     <section className="editor-wrapper-container"> 
                      <Slate 
                       editor={editor} 
@@ -519,10 +518,9 @@ export default function SlateTranscriptEditor(props) {
                             className="text-center">
                           <i className="text-center">Loading...</i>
                       </section>}
-
                 </Col>
+
                 <Col xs={{span:12, order:2}} sm={{span:2, order:3}} md={{span:2, order:3}} lg={{span:1, order:3}} xl={{span:2, order:3}}>
-                 
                   <Row>
                   <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
                           <OverlayTrigger OverlayTrigger delay={TOOTLIP_LONGER_DELAY} placement={'bottom'} overlay={<Tooltip id="tooltip-disabled">

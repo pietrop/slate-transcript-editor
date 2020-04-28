@@ -48,7 +48,7 @@
     "@fortawesome/fontawesome-svg-core": "^1.2.15",
     "@fortawesome/free-solid-svg-icons": "^5.12.1",
     "@fortawesome/react-fontawesome": "^0.1.5",
-    "align-diarized-text": "^1.0.4",
+    "align-diarized-text": "^1.0.5",
     "docx": "4.7.1",
     "react-bootstrap": "^1.0.1",
     "sbd": "^1.0.18",
