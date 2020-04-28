@@ -36,4 +36,15 @@ export const Hours5 = () => {
     />
 };
 
-
+// TODO: 5 hours with auto save, to troubleshoot performance snag, and optimise auto save logic 
+// export const Hours5WithAutoSave = () => {
+//   return <SlateTranscriptEditor 
+//     mediaUrl={DEMO_MEDIA_URL_ZUCK_5HOURS} 
+//     title={DEMO_TITLE_ZUCK_5HOURS} 
+//     transcriptData={DEMO_TRANSCRIPT_ZUCK_5HOURS_DPE}
+//     handleSaveEditor={action('handleSaveEditor')}
+//     autoSaveContentType={'digitalpaperedit'}
+//     handleAutoSaveChanges={action('handleAutoSaveChanges')}
+//     showTitle={true} 
+//     />
+// };

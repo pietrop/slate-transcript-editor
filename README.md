@@ -17,7 +17,7 @@ Criterias/Principles
 
 [See project board for more details](https://github.com/pietrop/slate-transcript-editor/projects/1) of ongoing work.
 
-See [draftJs vs slateJs](/docs/notes/draftJs-vs-slateJs.md) in doc/notes for some considations that inspired this version.
+See [draftJs vs slateJs](/docs/notes/draftJs-vs-slateJs.md) in doc/notes for some considerations that inspired this version.
 
 ## Setup
 <!-- _stack - optional_
@@ -48,6 +48,8 @@ npm start
 Visit [http://localhost:6006/](http://localhost:6006/)
 
 ### Usage - prod
+
+[slate-transcript-editor](https://www.npmjs.com/package/slate-transcript-editor)
 
 ```
 npm install slate-transcript-editor
