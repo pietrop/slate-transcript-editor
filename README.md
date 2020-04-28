@@ -142,7 +142,7 @@ If you have nvm you can run `nvm use` to change to the node version for this rep
 <!-- _How to run build_ -->
 ### build module
 
-Following storybook [Distribute UI across an organization]](https://www.learnstorybook.com/design-systems-for-developers/react/en/distribute/) guide.
+Following storybook [Distribute UI across an organization](https://www.learnstorybook.com/design-systems-for-developers/react/en/distribute/) guide.
 
 ### build storybook 
 
