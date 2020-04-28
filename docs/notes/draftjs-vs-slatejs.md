@@ -12,3 +12,4 @@ Making a timed text editor is not the same thing as making a rich text editor, t
 * Furthermore SlateJs provides convenient ways to update its Nodes using a Transform, as well as do an update on all the Noted in the editor based on specified conditions \(eg this is useful for updating speakers\)
 * pause while typing might introduce performance issues on longer transcripts if on every keystroke it's creating and destroing a timer. \(see[Wait for User to Stop Typing, in JavaScript](https://schier.co/blog/wait-for-user-to-stop-typing-using-javascript)\)
 * paragraph levle vs word level highlight. Word level highlight generlaly involves wrapping words into spans
+* `handleAutoSaveChanges` function in it's current implementation gets in the way of performance for longer transcripts.
