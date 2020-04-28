@@ -8,10 +8,14 @@ export default {title: 'SlateTranscriptEditor', component: SlateTranscriptEditor
 const DEMO_MEDIA_URL_KATE = "https://download.ted.com/talks/KateDarling_2018S-950k.mp4";
 const DEMO_TITLE_KATE = "TED Talk | Kate Darling - Why we have an emotional connection to robots";
 import DEMO_TRANSCRIPT_KATE from "../sample-data/KateDarling-dpe.json";
+
+const DEMO_MEDIA_URL_SOLEIO = "https://digital-paper-edit-demo.s3.eu-west-2.amazonaws.com/PBS-Frontline/The+Facebook+Dilemma+-+interviews/The+Facebook+Dilemma+-+Soleio+Cuervo-OIAUfZBd_7w.mp4";
+const DEMO_TITLE_SOLEIO = "Soleio Interview, PBS Frontline";
+import DEMO_SOLEIO from "../sample-data/soleio-dpe.json";
 export const demo = () => {
     return <SlateTranscriptEditor 
-  mediaUrl={DEMO_MEDIA_URL_KATE} 
-  transcriptData={DEMO_TRANSCRIPT_KATE}
+  mediaUrl={DEMO_MEDIA_URL_SOLEIO} 
+  transcriptData={DEMO_SOLEIO}
   handleSaveEditor={action('handleSaveEditor')}
   handleAutoSaveChanges={action('handleAutoSaveChanges')}
   autoSaveContentType={'digitalpaperedit'} // digitalpaperedit or slate - digitalpaperedit, runs alignement before exporting, slate, is just the raw data.
@@ -20,8 +24,8 @@ export const demo = () => {
 
 export const MinimamlInitialization = () => {
     return <SlateTranscriptEditor 
-    mediaUrl={DEMO_MEDIA_URL_KATE} 
-    transcriptData={DEMO_TRANSCRIPT_KATE}
+    mediaUrl={DEMO_MEDIA_URL_SOLEIO} 
+    transcriptData={DEMO_SOLEIO}
     handleSaveEditor={action('handleSaveEditor')} // optional
     />
 };
@@ -29,9 +33,9 @@ export const MinimamlInitialization = () => {
 export const OptionalTitle = () => {
     return <SlateTranscriptEditor 
     showTitle={true} // optional - defaults to false
-    mediaUrl={DEMO_MEDIA_URL_KATE} 
-    title={DEMO_TITLE_KATE} 
-    transcriptData={DEMO_TRANSCRIPT_KATE}
+    mediaUrl={DEMO_MEDIA_URL_SOLEIO} 
+    title={DEMO_TITLE_SOLEIO} 
+    transcriptData={DEMO_SOLEIO}
     handleSaveEditor={action('handleSaveEditor')}
     handleAutoSaveChanges={action('handleAutoSaveChanges')}
     autoSaveContentType={'digitalpaperedit'} // digitalpaperedit or slate - digitalpaperedit, runs alignement before exporting, slate, is just the raw data.
@@ -42,9 +46,9 @@ export const OptionalTitle = () => {
 
 export const NoSpeakers = () => {
     return <SlateTranscriptEditor 
-    mediaUrl={DEMO_MEDIA_URL_KATE} 
-    title={DEMO_TITLE_KATE} 
-    transcriptData={DEMO_TRANSCRIPT_KATE}
+    mediaUrl={DEMO_MEDIA_URL_SOLEIO} 
+    title={DEMO_TITLE_SOLEIO} 
+    transcriptData={DEMO_SOLEIO}
     handleSaveEditor={action('handleSaveEditor')}
     handleAutoSaveChanges={action('handleAutoSaveChanges')}
     autoSaveContentType={'digitalpaperedit'} // digitalpaperedit or slate - digitalpaperedit, runs alignement before exporting, slate, is just the raw data.
@@ -55,9 +59,9 @@ export const NoSpeakers = () => {
 
 export const NoTimecodes = () => {
     return <SlateTranscriptEditor 
-      mediaUrl={DEMO_MEDIA_URL_KATE} 
-      title={DEMO_TITLE_KATE} 
-      transcriptData={DEMO_TRANSCRIPT_KATE}
+      mediaUrl={DEMO_MEDIA_URL_SOLEIO} 
+      title={DEMO_TITLE_SOLEIO} 
+      transcriptData={DEMO_SOLEIO}
       handleSaveEditor={action('handleSaveEditor')}
       handleAutoSaveChanges={action('handleAutoSaveChanges')}
       autoSaveContentType={'digitalpaperedit'} // digitalpaperedit or slate - digitalpaperedit, runs alignement before exporting, slate, is just the raw data.
@@ -68,9 +72,9 @@ export const NoTimecodes = () => {
 
 export const NoSpeakersAndTimecodes = () => {
     return <SlateTranscriptEditor 
-        mediaUrl={DEMO_MEDIA_URL_KATE} 
-        title={DEMO_TITLE_KATE} 
-        transcriptData={DEMO_TRANSCRIPT_KATE}
+        mediaUrl={DEMO_MEDIA_URL_SOLEIO} 
+        title={DEMO_TITLE_SOLEIO} 
+        transcriptData={DEMO_SOLEIO}
         handleSaveEditor={action('handleSaveEditor')}
         handleAutoSaveChanges={action('handleAutoSaveChanges')}
         autoSaveContentType={'digitalpaperedit'} // digitalpaperedit or slate - digitalpaperedit, runs alignement before exporting, slate, is just the raw data.
@@ -80,9 +84,9 @@ export const NoSpeakersAndTimecodes = () => {
 };
 export const ReadOnly = () => {
     return <SlateTranscriptEditor 
-          mediaUrl={DEMO_MEDIA_URL_KATE} 
-          title={DEMO_TITLE_KATE} 
-          transcriptData={DEMO_TRANSCRIPT_KATE}
+          mediaUrl={DEMO_MEDIA_URL_SOLEIO} 
+          title={DEMO_TITLE_SOLEIO} 
+          transcriptData={DEMO_SOLEIO}
           handleSaveEditor={action('handleSaveEditor')}
           handleAutoSaveChanges={action('handleAutoSaveChanges')}
           autoSaveContentType={'digitalpaperedit'} // digitalpaperedit or slate - digitalpaperedit, runs alignement before exporting, slate, is just the raw data.
@@ -93,7 +97,7 @@ export const ReadOnly = () => {
 export const Audio = () => {
     return <SlateTranscriptEditor 
             mediaUrl={'https://www.w3schools.com/tags/horse.ogg'} 
-            transcriptData={DEMO_TRANSCRIPT_KATE}
+            transcriptData={DEMO_SOLEIO}
             handleSaveEditor={action('handleSaveEditor')}
             handleAutoSaveChanges={action('handleAutoSaveChanges')}
             autoSaveContentType={'digitalpaperedit'} // digitalpaperedit or slate - digitalpaperedit, runs alignement before exporting, slate, is just the raw data.
