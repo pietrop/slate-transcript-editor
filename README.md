@@ -4,7 +4,7 @@ _Screenshot of UI - optional_ -->
 
 _Work in progress_
 
-Building on the sucess and lessons learned from [`@bbc/react-transcript-editor`](https://github.com/bbc/react-transcript-editor).
+Building on the success and lessons learned from [`@bbc/react-transcript-editor`](https://github.com/bbc/react-transcript-editor).
 Mostly to be used in the context of [autoEdit 3](http://autoedit.io)(digital paper edit), and other proejcts. 
 
 Criterias/Principles
