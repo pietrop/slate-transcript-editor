@@ -19,6 +19,8 @@ Criterias/Principles
 
 See [draftJs vs slateJs](/docs/notes/draftJs-vs-slateJs.md) in doc/notes for some considerations that inspired this version.
 
+[Storybook](https://pietropassarelli.com/slate-transcript-editor)
+
 ## Setup
 <!-- _stack - optional_
 _How to build and run the code/app_ -->
