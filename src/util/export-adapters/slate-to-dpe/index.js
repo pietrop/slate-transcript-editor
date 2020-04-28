@@ -30,6 +30,7 @@ const prepSlateParagraphForAlignement = (slateData)=>{
     slateData.forEach((el, index)=>{
        const newEl = {
             text:  Node.string(el),
+            // start: `${el.start}`,// workaround 
             start: `${el.start}`,// workaround 
             speaker: el.speaker,
            id: `${index}`
@@ -40,23 +41,32 @@ const prepSlateParagraphForAlignement = (slateData)=>{
 }
 const converSlateToDpe = (data,sttJson)=>{
     const linesWithSpeaker = prepSlateParagraphForAlignement(data);
+    console.log('linesWithSpeaker',linesWithSpeaker)
+    console.log('sttJson',sttJson)
     const res = alignDiraizedText(linesWithSpeaker, sttJson);
+    console.log('res',res)
     const words =  res.map((paragraph)=>{
-        return paragraph.words
-    }).flat()
-    const paragraphs =  res.map((paragraph)=>{
-        return {
-            speaker: paragraph.speaker,
-            start: parseFloat(paragraph.start),
-            end: parseFloat(paragraph.end),
-            id: paragraph.id
+        if(paragraph){
+            return paragraph.words;
         }
+    }).flat()
+    const paragraphs = res.map((paragraph)=>{
+        if(paragraph){
+            return {
+                speaker: paragraph.speaker,
+                start: parseFloat(paragraph.start),
+                end: parseFloat(paragraph.end),
+                id: paragraph.id
+            }
+        }
+       
     }).flat()
     // without adjusting the paragraph boundaries, can't go round trip
     // back to slate, coz it's not able to reliably interpolate 
     // words and speaker again 
     const paragraphsWithAdjustedBoundaries = adjustTimecodesBoundaries(paragraphs)
    return {words, paragraphs:paragraphsWithAdjustedBoundaries};
+//    return {words, paragraphs};
 }
 
 export default converSlateToDpe;
