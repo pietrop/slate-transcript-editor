@@ -261,14 +261,14 @@ export default function SlateTranscriptEditor(props) {
       } 
     }
 
-    const getEditorContent = ({type, speakers,timecodes })=>{
+    const getEditorContent = ({type, speakers,timecodes, atlasFormat })=>{
       switch(type) {
         case 'text':
          let tmpValue = value;
           if(timecodes){
             tmpValue =  handleRestoreTimecodes();
           }
-          return slateToText({value:tmpValue, speakers, timecodes});
+          return slateToText({value:tmpValue, speakers, timecodes, atlasFormat});
         case 'json-slate':
           return value;
         case 'json-digitalpaperedit':
@@ -291,8 +291,8 @@ export default function SlateTranscriptEditor(props) {
       }
         return path.basename(props.mediaUrl).trim();
     }
-    const handleExport = ({type, ext, speakers,timecodes })=>{
-      let editorContnet = getEditorContent({type, speakers,timecodes });
+    const handleExport = ({type, ext, speakers,timecodes, atlasFormat })=>{
+      let editorContnet = getEditorContent({type, speakers,timecodes,atlasFormat });
       if(ext==='json'){
         editorContnet =  JSON.stringify(editorContnet,null,2)
       }
@@ -534,6 +534,7 @@ export default function SlateTranscriptEditor(props) {
                           <Dropdown.Item onClick={()=>{handleExport({type:'text', ext:  'txt',speakers:false, timecodes: false })}}>Text (<code>.txt</code>)</Dropdown.Item>
                           <Dropdown.Item onClick={()=>{handleExport({type:'text', ext:  'txt',speakers:true, timecodes: false })}}>Text (Speakers)</Dropdown.Item>
                           <Dropdown.Item onClick={()=>{handleExport({type: 'text',ext: 'txt', speakers:true, timecodes: true })}} disable>Text (Speakers & timecodes)</Dropdown.Item>
+                          <Dropdown.Item onClick={()=>{handleExport({type: 'text',ext: 'txt', speakers:true, timecodes: true, atlasFormat: true })}} disable>Text (Atlas format)</Dropdown.Item>
                           {/* TODO: need to run re-alignement if exportin with timecodes true */}
                           <Dropdown.Divider />
                             <Dropdown.Item onClick={()=>{handleExport({type:'word', ext: 'docx', speakers:false, timecodes: false})}}>Word (<code>.docx</code>)</Dropdown.Item>

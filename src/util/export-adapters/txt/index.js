@@ -21,13 +21,17 @@ I thought.
 
 import {shortTimecode} from '../../timecode-converter/index.js';
 import { Node } from 'slate';
-const slateToText = ({value, speakers, timecodes}) => {
+const slateToText = ({value, speakers, timecodes, atlasFormat}) => {
     return (
       value
         // Return the string content of each paragraph in the value's children.
         .map(n => {
-          // return  `${timecodes? `${ speakers? n.speaker:''}\t[${shortTimecode(n.start)}]\t`:''}\t${Node.string(n)}`
-          return `${timecodes? `${shortTimecode(n.start)}\t`:''}${ speakers? n.speaker.toUpperCase():''}${speakers||timecodes?'\n':''}${Node.string(n)}` //+ Node.get('start', 'start');
+          if(atlasFormat){
+            return  `${timecodes? `${ speakers? n.speaker:''}\t[${shortTimecode(n.start)}]\t`:''}\t${Node.string(n)}`
+          }else{
+            return `${timecodes? `${shortTimecode(n.start)}\t`:''}${ speakers? n.speaker.toUpperCase():''}${speakers||timecodes?'\n':''}${Node.string(n)}`;
+          }
+          
         })
         // Join them all with line breaks denoting paragraphs.
         .join('\n\n')
