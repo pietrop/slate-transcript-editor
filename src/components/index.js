@@ -1,4 +1,5 @@
 import React, {useState, useEffect, useMemo,useCallback} from 'react';
+import PropTypes from 'prop-types';
 import path from 'path';
 import Button from 'react-bootstrap/Button';
 import DropdownButton from 'react-bootstrap/DropdownButton';
@@ -635,3 +636,25 @@ export default function SlateTranscriptEditor(props) {
         </Container>
     );
 }
+
+SlateTranscriptEditor.propTypes = {
+  transcriptData: PropTypes.object.isRequired,
+  mediaUrl: PropTypes.string.isRequired,
+  optionalHandleSaveEditor: PropTypes.func,
+  optionalHandleAutoSaveChanges: PropTypes.func,
+  optionalAutoSaveContentType: PropTypes.string,
+  optionalIsEditable: PropTypes.boolean, 
+  optionalShowTimecodes: PropTypes.boolean, 
+  optionalShowSpeakers: PropTypes.boolean,
+  optionalTitle: PropTypes.string,
+  optionalShowTitle: PropTypes.string,
+  optionalMediaType: PropTypes.string
+};
+
+SlateTranscriptEditor.defaultProps = {
+  showTitle: false,
+  showTimecodes: true,
+  showSpeakers:true,
+  mediaType:'digitalpaperedit',
+  isEditable: true
+};

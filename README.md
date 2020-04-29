@@ -85,7 +85,6 @@ See storybook `*.stories.js` in `src/components`/ for more examples
 | `showSpeakers`        | set to true if you want to show speaker labels in the  transcript at paragraph level                |no|Boolean |
 | `title`               | defaults to empty String, also used in file names for exported files.                               |no|String  |
 | `showTitle`           | Whether to display the provided title                                                               |no|String  |
-| `ref`                 | if you want to have access to internal functions such as retrieving content from the editor. eg to save to a server/db. | no | React ref |
 | `mediaType`            | can be `audio` or `video`, if not provided, it defaults to video, but the component also uses the url file type to determine and adjust the player (`.wav`, `.mp3`,`.m4a`,`.flac`,`.aiff` are recognised as audio ) |    no    | String |
 
  <!-- TODO: link to storybook here --> 

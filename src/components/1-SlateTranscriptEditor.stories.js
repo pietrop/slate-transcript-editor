@@ -8,10 +8,22 @@ import {
     object,
     select
 } from "@storybook/addon-knobs";
+import { withInfo } from '@storybook/addon-info';
+
 import SlateTranscriptEditor from './index.js';
 import 'bootstrap-css-only';
 
-export default {title: 'SlateTranscriptEditor', component: SlateTranscriptEditor, decorators: [withKnobs]};
+export default { 
+    title: 'SlateTranscriptEditor',
+     component: SlateTranscriptEditor, 
+     decorators: [ 
+         withKnobs,
+         withInfo
+        ],
+        parameters: {
+            info: {maxPropArrayLength:3, maxPropsIntoLine:3, maxPropObjectKeys: 1, excludedPropTypes: ['transcriptData'], source: false },
+          },
+    };
 
 const AUDIO_URL = "https://www.w3schools.com/tags/horse.ogg";
 
@@ -29,8 +41,8 @@ export const demo = () => {
         handleAutoSaveChanges={action('handleAutoSaveChanges')}
         // https://www.npmjs.com/package/@storybook/addon-knobs#select
         autoSaveContentType={select("autoSaveContentType", ['digitalpaperedit', 'slate'], 'digitalpaperedit')  } // digitalpaperedit or slate - digitalpaperedit, runs alignement before exporting, slate, is just the raw data.
-        transcriptData={object('transcriptData', DEMO_SOLEIO)}
-        // transcriptData={DEMO_SOLEIO}
+        // transcriptData={object('transcriptData', DEMO_SOLEIO)}
+        transcriptData={DEMO_SOLEIO}
   />
 };
 
@@ -41,6 +53,12 @@ export const MinimamlInitialization = () => {
     handleSaveEditor={action('handleSaveEditor')} // optional
     />
 };
+
+MinimamlInitialization.story = {
+    parameters: {
+      info: { } // mediaUrl: true, transcriptData:true,handleSaveEditor:true
+    },
+  };
 
 export const OptionalTitle = () => {
     return <SlateTranscriptEditor 
