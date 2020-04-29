@@ -1,9 +1,19 @@
 import React from 'react';
 import {action} from '@storybook/addon-actions';
+import {
+    withKnobs,
+    text,
+    boolean,
+    number,
+    object,
+    select
+} from "@storybook/addon-knobs";
 import SlateTranscriptEditor from './index.js';
 import 'bootstrap-css-only';
 
-export default {title: 'SlateTranscriptEditor', component: SlateTranscriptEditor};
+export default {title: 'SlateTranscriptEditor', component: SlateTranscriptEditor, decorators: [withKnobs]};
+
+const AUDIO_URL = "https://www.w3schools.com/tags/horse.ogg";
 
 const DEMO_MEDIA_URL_KATE = "https://download.ted.com/talks/KateDarling_2018S-950k.mp4";
 const DEMO_TITLE_KATE = "TED Talk | Kate Darling - Why we have an emotional connection to robots";
@@ -14,17 +24,19 @@ const DEMO_TITLE_SOLEIO = "Soleio Interview, PBS Frontline";
 import DEMO_SOLEIO from "../sample-data/soleio-dpe.json";
 export const demo = () => {
     return <SlateTranscriptEditor 
-  mediaUrl={DEMO_MEDIA_URL_SOLEIO} 
-  transcriptData={DEMO_SOLEIO}
-  handleSaveEditor={action('handleSaveEditor')}
-  handleAutoSaveChanges={action('handleAutoSaveChanges')}
-  autoSaveContentType={'digitalpaperedit'} // digitalpaperedit or slate - digitalpaperedit, runs alignement before exporting, slate, is just the raw data.
+        mediaUrl={text("mediaUrl", DEMO_MEDIA_URL_SOLEIO)} 
+        handleSaveEditor={action('handleSaveEditor')}
+        handleAutoSaveChanges={action('handleAutoSaveChanges')}
+        // https://www.npmjs.com/package/@storybook/addon-knobs#select
+        autoSaveContentType={select("autoSaveContentType", ['digitalpaperedit', 'slate'], 'digitalpaperedit')  } // digitalpaperedit or slate - digitalpaperedit, runs alignement before exporting, slate, is just the raw data.
+        transcriptData={object('transcriptData', DEMO_SOLEIO)}
+        // transcriptData={DEMO_SOLEIO}
   />
 };
 
 export const MinimamlInitialization = () => {
     return <SlateTranscriptEditor 
-    mediaUrl={DEMO_MEDIA_URL_SOLEIO} 
+    mediaUrl={text("mediaUrl", DEMO_MEDIA_URL_SOLEIO)} 
     transcriptData={DEMO_SOLEIO}
     handleSaveEditor={action('handleSaveEditor')} // optional
     />
@@ -32,76 +44,77 @@ export const MinimamlInitialization = () => {
 
 export const OptionalTitle = () => {
     return <SlateTranscriptEditor 
-    showTitle={true} // optional - defaults to false
-    mediaUrl={DEMO_MEDIA_URL_SOLEIO} 
-    title={DEMO_TITLE_SOLEIO} 
+    showTitle={boolean('showTitle', true)} // optional - defaults to false
+    mediaUrl={text("mediaUrl", DEMO_MEDIA_URL_SOLEIO)} 
+    title={text('title', DEMO_TITLE_SOLEIO)  } 
     transcriptData={DEMO_SOLEIO}
     handleSaveEditor={action('handleSaveEditor')}
     handleAutoSaveChanges={action('handleAutoSaveChanges')}
-    autoSaveContentType={'digitalpaperedit'} // digitalpaperedit or slate - digitalpaperedit, runs alignement before exporting, slate, is just the raw data.
-    showTimecodes={true}
-    showSpeakers={false}
+    autoSaveContentType={select("autoSaveContentType", ['digitalpaperedit', 'slate'], 'digitalpaperedit')  } // digitalpaperedit or slate - digitalpaperedit, runs alignement before exporting, slate, is just the raw data.
+    showTimecodes={boolean('timecodes', true)}
+    showSpeakers={boolean('speakers', true)}
     />
 };
 
 export const NoSpeakers = () => {
     return <SlateTranscriptEditor 
-    mediaUrl={DEMO_MEDIA_URL_SOLEIO} 
-    title={DEMO_TITLE_SOLEIO} 
+    showTitle={boolean('showTitle', false)} 
+    mediaUrl={text("mediaUrl", DEMO_MEDIA_URL_SOLEIO)} 
+    title={text('title', DEMO_TITLE_SOLEIO)  } 
     transcriptData={DEMO_SOLEIO}
     handleSaveEditor={action('handleSaveEditor')}
     handleAutoSaveChanges={action('handleAutoSaveChanges')}
-    autoSaveContentType={'digitalpaperedit'} // digitalpaperedit or slate - digitalpaperedit, runs alignement before exporting, slate, is just the raw data.
-    showTimecodes={true}
-    showSpeakers={false}
+    autoSaveContentType={select("autoSaveContentType", ['digitalpaperedit', 'slate'], 'digitalpaperedit')  } // digitalpaperedit or slate - digitalpaperedit, runs alignement before exporting, slate, is just the raw data
+    showTimecodes={boolean('timecodes', true)}
+    showSpeakers={boolean('speakers', false)}
     />
 };
 
 export const NoTimecodes = () => {
     return <SlateTranscriptEditor 
-      mediaUrl={DEMO_MEDIA_URL_SOLEIO} 
-      title={DEMO_TITLE_SOLEIO} 
+      mediaUrl={text("mediaUrl", DEMO_MEDIA_URL_SOLEIO)} 
+      title={text('title', DEMO_TITLE_SOLEIO)  } 
       transcriptData={DEMO_SOLEIO}
       handleSaveEditor={action('handleSaveEditor')}
       handleAutoSaveChanges={action('handleAutoSaveChanges')}
-      autoSaveContentType={'digitalpaperedit'} // digitalpaperedit or slate - digitalpaperedit, runs alignement before exporting, slate, is just the raw data.
-      showTimecodes={false}
-      showSpeakers={true}
+      autoSaveContentType={select("autoSaveContentType", ['digitalpaperedit', 'slate'], 'digitalpaperedit')  } // digitalpaperedit or slate - digitalpaperedit, runs alignement before exporting, slate, is just the raw data.
+      showTimecodes={boolean('timecodes', false)}
+      showSpeakers={boolean('speakers', true)}
       />
 };
 
 export const NoSpeakersAndTimecodes = () => {
     return <SlateTranscriptEditor 
-        mediaUrl={DEMO_MEDIA_URL_SOLEIO} 
+        mediaUrl={text("mediaUrl", DEMO_MEDIA_URL_SOLEIO)} 
         title={DEMO_TITLE_SOLEIO} 
         transcriptData={DEMO_SOLEIO}
         handleSaveEditor={action('handleSaveEditor')}
         handleAutoSaveChanges={action('handleAutoSaveChanges')}
-        autoSaveContentType={'digitalpaperedit'} // digitalpaperedit or slate - digitalpaperedit, runs alignement before exporting, slate, is just the raw data.
-        showTimecodes={false}
-        showSpeakers={false}
+        autoSaveContentType={select("autoSaveContentType", ['digitalpaperedit', 'slate'], 'digitalpaperedit')  } // digitalpaperedit or slate - digitalpaperedit, runs alignement before exporting, slate, is just the raw data.
+        showTimecodes={boolean('timecodes', false)}
+        showSpeakers={boolean('speakers', false)}
         />
 };
 export const ReadOnly = () => {
     return <SlateTranscriptEditor 
-          mediaUrl={DEMO_MEDIA_URL_SOLEIO} 
+          mediaUrl={text("mediaUrl", DEMO_MEDIA_URL_SOLEIO)} 
           title={DEMO_TITLE_SOLEIO} 
           transcriptData={DEMO_SOLEIO}
           handleSaveEditor={action('handleSaveEditor')}
           handleAutoSaveChanges={action('handleAutoSaveChanges')}
-          autoSaveContentType={'digitalpaperedit'} // digitalpaperedit or slate - digitalpaperedit, runs alignement before exporting, slate, is just the raw data.
+          autoSaveContentType={select("autoSaveContentType", ['digitalpaperedit', 'slate'], 'digitalpaperedit')  } // digitalpaperedit or slate - digitalpaperedit, runs alignement before exporting, slate, is just the raw data.
           isEditable={false}
           />
 };
 
 export const Audio = () => {
     return <SlateTranscriptEditor 
-            mediaUrl={'https://www.w3schools.com/tags/horse.ogg'} 
+            mediaUrl={text("mediaUrl", AUDIO_URL)} 
             transcriptData={DEMO_SOLEIO}
             handleSaveEditor={action('handleSaveEditor')}
             handleAutoSaveChanges={action('handleAutoSaveChanges')}
-            autoSaveContentType={'digitalpaperedit'} // digitalpaperedit or slate - digitalpaperedit, runs alignement before exporting, slate, is just the raw data.
+            autoSaveContentType={select("autoSaveContentType", ['digitalpaperedit', 'slate'], 'digitalpaperedit')  } // digitalpaperedit or slate - digitalpaperedit, runs alignement before exporting, slate, is just the raw data.
             isEditable={true}
-            mediaType={'audio'}
+            mediaType={select("mediaType", ['audio', 'video'], 'audio')  }
             />
 };
