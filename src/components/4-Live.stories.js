@@ -63,12 +63,13 @@ const Example = (props) => {
             handleAutoSaveChanges={action('handleAutoSaveChanges')}
             // https://www.npmjs.com/package/@storybook/addon-knobs#select
             autoSaveContentType={select("autoSaveContentType", ['digitalpaperedit', 'slate'], 'digitalpaperedit')  } // digitalpaperedit or slate - digitalpaperedit, runs alignement before exporting, slate, is just the raw data.
-            // transcriptData={object('transcriptData', DEMO_SOLEIO)}
             transcriptData={jsonData}
             transcriptDataLive={interimResults}
             isEditable={props.isEditable}
             title={props.title}
             showTitle={true}
+            showTimecodes={ true}
+            showSpeakers={ true}
         />
       </>
     );

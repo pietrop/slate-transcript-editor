@@ -82,18 +82,24 @@ export default function SlateTranscriptEditor(props) {
     console.log('value changed!')
     console.log('SlateTranscriptEditor!!!! transcriptDataLive', props.transcriptDataLive);
     if(props.transcriptDataLive){
-      const res = convertDpeToSlate(props.transcriptDataLive);
-      console.log('res',res)
-      // get current selection 
+      const nodes = convertDpeToSlate(props.transcriptDataLive);
+      console.log('res',nodes)
 
-      const currentSelection =  editor.selection//.anchor.path;
-      // add at the end of the editor 
-      Transforms.insertNodes(editor, res)
-
-      // restore the selection where it was 
-      // Transforms.select(editor, currentSelection)
-
-
+    // if the user is selecting the / typing the text
+    //  Transforms.insertNodes would insert the node at seleciton point
+    // instead we check if they are in the editor
+    if(editor.selection){
+      // get the position of the last node 
+      const positionLastNode = [editor.children.length-1]
+      // insert the new nodes at the end of the document
+      Transforms.insertNodes(editor, nodes, {
+        at: positionLastNode
+      })
+    }
+    else{
+      // if there is no selection the default for insertNodes is to add the nodes at the end
+        Transforms.insertNodes(editor, nodes)
+      }
     }
 
   }, [props.transcriptDataLive]);
