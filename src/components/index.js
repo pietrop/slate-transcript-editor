@@ -53,6 +53,10 @@ const TOOTLIP_LONGER_DELAY = 2000;
 
 const mediaRef = React.createRef();
 
+function isEmpty(obj) {
+  return Object.keys(obj).length === 0;
+}
+
 export default function SlateTranscriptEditor(props) {
     const [currentTime, setCurrentTime] = useState(0);
     const [duration, setDuration] = useState(0);
@@ -71,7 +75,30 @@ export default function SlateTranscriptEditor(props) {
     useEffect(()=>{
         const res = convertDpeToSlate(props.transcriptData);
         setValue(res);
+        console.log('SlateTranscriptEditor!!!!', props.transcriptData);
     },[])
+
+  useEffect(() => {
+    console.log('value changed!')
+    console.log('SlateTranscriptEditor!!!! transcriptDataLive', props.transcriptDataLive);
+    if(props.transcriptDataLive){
+      const res = convertDpeToSlate(props.transcriptDataLive);
+      console.log('res',res)
+      // get current selection 
+
+      const currentSelection =  editor.selection//.anchor.path;
+      // add at the end of the editor 
+      Transforms.insertNodes(editor, res)
+
+      // restore the selection where it was 
+      // Transforms.select(editor, currentSelection)
+
+
+    }
+
+  }, [props.transcriptDataLive]);
+
+   
 
     useEffect(()=>{
       console.log('getUniqueSpeakers')
@@ -335,6 +362,10 @@ export default function SlateTranscriptEditor(props) {
      * @param {Number} currentTime - float in seconds
      */
     const generatePreviousTimingsUpToCurrent = (currentTime)=>{
+      // edge case - empty transcription
+      if(isEmpty(props.transcriptData)){
+        return "";
+      }
       const lastWordStartTime = props.transcriptData.words[props.transcriptData.words.length-1].start;
       const lastWordStartTimeInt = parseInt(lastWordStartTime);
       const emptyListOfTimes = Array(lastWordStartTimeInt);
@@ -648,7 +679,8 @@ SlateTranscriptEditor.propTypes = {
   optionalShowSpeakers: PropTypes.boolean,
   optionalTitle: PropTypes.string,
   optionalShowTitle: PropTypes.string,
-  optionalMediaType: PropTypes.string
+  optionalMediaType: PropTypes.string,
+  transcriptDataLive: PropTypes.object
 };
 
 SlateTranscriptEditor.defaultProps = {
