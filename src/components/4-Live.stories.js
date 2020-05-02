@@ -33,14 +33,12 @@ import DEMO_SOLEIO_LIVE from "../sample-data/segmented-transcript-soleio-dpe.jso
 
 // Parent component to simulate results from a live STT stream.
 const Example = (props) => {
-    // console.log('props.transcriptInParts[0]',props.transcriptInParts[0])
     // Declare a new state variable, which we'll call "count"
     const [jsonData, setJsonData] = useState({});
     const [interimResults, setInterimResults] = useState({});
 
     useEffect(()=>{
         props.transcriptInParts&&props.transcriptInParts.forEach(delayLoop((transcriptPart)=>{
-            console.log('transcriptPart',transcriptPart)
             setInterimResults(transcriptPart);
         }, 3000));
     },[])

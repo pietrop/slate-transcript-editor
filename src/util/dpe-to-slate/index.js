@@ -40,7 +40,6 @@ function isEmpty(obj) {
 }
 
 const convertDpeToSlate = (transcript) => {
-  console.log('convertDpeToSlate',transcript )
   if(isEmpty(transcript)){
     return [
       {
@@ -51,7 +50,7 @@ const convertDpeToSlate = (transcript) => {
         "type": "timedText",
         "children": [
           {
-            "text": "Empty"
+            "text": "Text"
           }
         ]
       }
