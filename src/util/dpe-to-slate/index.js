@@ -35,7 +35,29 @@ const generatePreviousTimingsUpToCurrent = (totalTimingsInt, time) => {
     return totalTimingsInt.splice(0, time, 0).join(' ')
 }
 
-const convertDpeToSlate = ({words, paragraphs} ) => {
+function isEmpty(obj) {
+  return Object.keys(obj).length === 0;
+}
+
+const convertDpeToSlate = (transcript) => {
+  if(isEmpty(transcript)){
+    return [
+      {
+        "speaker": "U_UKN",
+        "start": 0,
+        "previousTimings": "0",
+        "startTimecode": "00:00:00",
+        "type": "timedText",
+        "children": [
+          {
+            "text": "Text"
+          }
+        ]
+      }
+    ]
+  }
+
+     const {words, paragraphs} = transcript;
     return paragraphs.map((paragraph) => {
       
         const wordsFiltered = words.filter((word) => {

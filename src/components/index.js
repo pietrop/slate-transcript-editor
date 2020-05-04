@@ -53,6 +53,10 @@ const TOOTLIP_LONGER_DELAY = 2000;
 
 const mediaRef = React.createRef();
 
+function isEmpty(obj) {
+  return Object.keys(obj).length === 0;
+}
+
 export default function SlateTranscriptEditor(props) {
     const [currentTime, setCurrentTime] = useState(0);
     const [duration, setDuration] = useState(0);
@@ -69,12 +73,40 @@ export default function SlateTranscriptEditor(props) {
     const [isPauseWhiletyping, setIsPauseWhiletyping] = useState(false);
 
     useEffect(()=>{
+      if(props.transcriptData){
         const res = convertDpeToSlate(props.transcriptData);
         setValue(res);
+      }
     },[])
 
+  // handles interim results for worrking with a Live STT 
+  useEffect(() => {
+    if(props.transcriptDataLive){
+      const nodes = convertDpeToSlate(props.transcriptDataLive);
+    // if the user is selecting the / typing the text
+    // Transforms.insertNodes would insert the node at seleciton point
+    // instead we check if they are in the editor
+    if(editor.selection){
+      // get the position of the last node 
+      const positionLastNode = [editor.children.length];
+      // insert the new nodes at the end of the document
+      Transforms.insertNodes(editor, nodes, {
+        at: positionLastNode
+      })
+    }
+    // use not having selection in the editor allows us to also handle the initial use case
+    // where the might be no initial results
+    else{
+      // if there is no selection the default for insertNodes is to add the nodes at the end
+        Transforms.insertNodes(editor, nodes)
+      }
+    }
+
+  }, [props.transcriptDataLive]);
+
+   
+
     useEffect(()=>{
-      console.log('getUniqueSpeakers')
       const getUniqueSpeakers = pluck('speaker');
       const uniqueSpeakers = getUniqueSpeakers(value);
       setSpeakerOptions(uniqueSpeakers);
@@ -293,7 +325,6 @@ export default function SlateTranscriptEditor(props) {
         return path.basename(props.mediaUrl).trim();
     }
     const handleExport = ({ type, ext, speakers, timecodes, atlasFormat })=>{
-      console.log('handleExport',type, ext, speakers,timecodes, atlasFormat)
       let editorContnet = getEditorContent({type, speakers,timecodes,atlasFormat });
       if(ext==='json'){
         editorContnet =  JSON.stringify(editorContnet,null,2)
@@ -313,7 +344,6 @@ export default function SlateTranscriptEditor(props) {
 
     const handleRestoreTimecodes = ()=>{
       const alignedSlateData = restoreTimecodes({slateValue: value,transcriptData: props.transcriptData});
-      console.log('alignedSlateData',alignedSlateData);
       setValue(alignedSlateData);
       return alignedSlateData;
     }
@@ -335,6 +365,10 @@ export default function SlateTranscriptEditor(props) {
      * @param {Number} currentTime - float in seconds
      */
     const generatePreviousTimingsUpToCurrent = (currentTime)=>{
+      // edge case - empty transcription
+      if(isEmpty(props.transcriptData)){
+        return "";
+      }
       const lastWordStartTime = props.transcriptData.words[props.transcriptData.words.length-1].start;
       const lastWordStartTimeInt = parseInt(lastWordStartTime);
       const emptyListOfTimes = Array(lastWordStartTimeInt);
@@ -350,9 +384,7 @@ export default function SlateTranscriptEditor(props) {
 
     const handleSubtitlesExport = ({type, ext})=>{
       let editorContnet = getEditorContent({type:'json-digitalpaperedit', speakers:true, timecodes:true });
-      console.log('editorContnet',editorContnet)
       const subtitlesJson = subtitlesGenerator({ words: editorContnet.words, type });
-      console.log('subtitlesJson',subtitlesJson)
       download( subtitlesJson, `${getFileTitle()}.${ext}`);
     }
 
@@ -459,8 +491,8 @@ export default function SlateTranscriptEditor(props) {
                           </Accordion.Toggle>
                           <Accordion.Collapse eventKey="0">
                             <ListGroup>
-                            {speakerOptions.map((speakerName)=>{
-                              return <ListGroup.Item className={'text-truncate'} title={speakerName.toUpperCase()}>{speakerName.toUpperCase()}</ListGroup.Item>
+                            {speakerOptions.map((speakerName, index)=>{
+                              return <ListGroup.Item key={index+speakerName} className={'text-truncate'} title={speakerName.toUpperCase()}>{speakerName.toUpperCase()}</ListGroup.Item>
                             })}
                             </ListGroup>
                           </Accordion.Collapse>
@@ -553,8 +585,8 @@ export default function SlateTranscriptEditor(props) {
                   
                         <DropdownButton  id="dropdown-basic-button" title={<FontAwesomeIcon icon={ faClosedCaptioning } />} variant="light">
 
-                          {subtitlesExportOptionsList.map(({type,label, ext})=>{
-                            return <Dropdown.Item onClick={()=>{handleSubtitlesExport({type, ext})}}>{label} (<code>.{ext}</code>)</Dropdown.Item>
+                          {subtitlesExportOptionsList.map(({type,label, ext}, index)=>{
+                            return <Dropdown.Item key={index+label} onClick={()=>{handleSubtitlesExport({type, ext})}}>{label} (<code>.{ext}</code>)</Dropdown.Item>
                           })}
                         </DropdownButton>
                       </OverlayTrigger>
@@ -640,15 +672,16 @@ export default function SlateTranscriptEditor(props) {
 SlateTranscriptEditor.propTypes = {
   transcriptData: PropTypes.object.isRequired,
   mediaUrl: PropTypes.string.isRequired,
-  optionalHandleSaveEditor: PropTypes.func,
-  optionalHandleAutoSaveChanges: PropTypes.func,
-  optionalAutoSaveContentType: PropTypes.string,
-  optionalIsEditable: PropTypes.boolean, 
-  optionalShowTimecodes: PropTypes.boolean, 
-  optionalShowSpeakers: PropTypes.boolean,
-  optionalTitle: PropTypes.string,
-  optionalShowTitle: PropTypes.string,
-  optionalMediaType: PropTypes.string
+  handleSaveEditor: PropTypes.func,
+  handleAutoSaveChanges: PropTypes.func,
+  autoSaveContentType: PropTypes.string,
+  isEditable: PropTypes.boolean, 
+  showTimecodes: PropTypes.boolean, 
+  showSpeakers: PropTypes.boolean,
+  title: PropTypes.string,
+  showTitle: PropTypes.boolean,
+  mediaType: PropTypes.string,
+  transcriptDataLive: PropTypes.object
 };
 
 SlateTranscriptEditor.defaultProps = {
