@@ -443,7 +443,7 @@ export default function SlateTranscriptEditor(props) {
                   <h3 className={'text-truncate text-left'}><small className="text-muted">{props.title}</small></h3> 
               </OverlayTrigger> :  null}
               <Row>
-                <Col xs={{span:12, order:1}} sm={3} md={3} lg={3} xl={4}>
+                <Col xs={{span:12, order:1}} sm={getMediaType()==='audio'? {span:10, offset: 1}:3} md={getMediaType()==='audio'? {span:10, offset: 1}:3} lg={getMediaType()==='audio'? {span:8, offset: 2}:3} xl={getMediaType()==='audio'? {span:8, offset: 2}:3}>
                   <Row>
                         <video 
                         ref={mediaRef}
@@ -501,7 +501,7 @@ export default function SlateTranscriptEditor(props) {
                   </Row>
                 </Col>
 
-                <Col xs={{span:12, order:3}} sm={{span:7, order:2}} md={{span:7, order:2}} lg={{span:8, order:2}} xl={{span:6, order:2}}>
+                <Col xs={{span:12, order:3}} sm={getMediaType()==='audio'? {span:10, order:2, offset: 1} : {span:7, order:2}} md={getMediaType()==='audio'? {span:10, order:2, offset: 1} :{span:7, order:2}} lg={getMediaType()==='audio'? {span:8, order:2, offset: 2} :{span:8, order:2}} xl={getMediaType()==='audio'? {span: 8, order:2, offset: 2} :{span:7, order:2}}>
                   {value.length !== 0 ?<> 
                     <section className="editor-wrapper-container"> 
                      <Slate 
