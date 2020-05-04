@@ -1,6 +1,6 @@
 {
   "name": "slate-transcript-editor",
-  "version": "0.0.11",
+  "version": "0.0.12",
   "description": "A React component to make correcting automated transcriptions of audio and video easier and faster. Using the Slate Editor",
   "main": "index.js",
   "scripts": {
