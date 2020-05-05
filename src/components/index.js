@@ -564,13 +564,15 @@ export default function SlateTranscriptEditor(props) {
                         {/* TODO: need to run re-alignement if exportin with timecodes true, otherwise they'll be inaccurate */}
                           <Dropdown.Item onClick={()=>{handleExport({type:'text', ext:  'txt',speakers:false, timecodes: false })}}>Text (<code>.txt</code>)</Dropdown.Item>
                           <Dropdown.Item onClick={()=>{handleExport({type:'text', ext:  'txt',speakers:true, timecodes: false })}}>Text (Speakers)</Dropdown.Item>
-                          <Dropdown.Item onClick={()=>{handleExport({type: 'text',ext: 'txt', speakers:true, timecodes: true })}} disable>Text (Speakers & timecodes)</Dropdown.Item>
+                          <Dropdown.Item onClick={()=>{handleExport({type:'text', ext:  'txt',speakers:false, timecodes: true })}}>Text (Timecodes)</Dropdown.Item>
+                          <Dropdown.Item onClick={()=>{handleExport({type: 'text',ext: 'txt', speakers:true, timecodes: true })}} disable>Text (Speakers & Timecodes)</Dropdown.Item>
                           <Dropdown.Item onClick={()=>{handleExport({type: 'text',ext: 'txt', speakers:true, timecodes: true, atlasFormat: true })}} disable>Text (Atlas format)</Dropdown.Item>
                           {/* TODO: need to run re-alignement if exportin with timecodes true */}
                           <Dropdown.Divider />
                             <Dropdown.Item onClick={()=>{handleExport({type:'word', ext: 'docx', speakers:false, timecodes: false})}}>Word (<code>.docx</code>)</Dropdown.Item>
                             <Dropdown.Item onClick={()=>{handleExport({type:'word', ext: 'docx', speakers:true, timecodes: false})}}>Word (Speakers)</Dropdown.Item>
-                            <Dropdown.Item onClick={()=>{handleExport({type:'word', ext: 'docx', speakers:true, timecodes: true})}}>Word (Speakers & timecodes)</Dropdown.Item>
+                            <Dropdown.Item onClick={()=>{handleExport({type:'word', ext: 'docx', speakers:false, timecodes: true})}}>Word (Timecodes)</Dropdown.Item>
+                            <Dropdown.Item onClick={()=>{handleExport({type:'word', ext: 'docx', speakers:true, timecodes: true})}}>Word (Speakers & Timecodes)</Dropdown.Item>
                           <Dropdown.Divider />
                           <Dropdown.Item onClick={()=>{handleExport({type:'json-slate', ext: 'json',speakers:true, timecodes: true})}}>SlateJs (<code>.json</code>)</Dropdown.Item>
                           <Dropdown.Item onClick={()=>{handleExport({type:'json-digitalpaperedit', ext: 'json',speakers:true, timecodes: true})}}>DPE (<code>.json</code>)</Dropdown.Item>
