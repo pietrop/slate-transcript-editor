@@ -28,5 +28,5 @@ original audio.`;
 
 test('fold words at 35 char', () => {
   const result = foldWords(sampleText, 35);
-  	expect(result).toBe(expectedOutput);
+  expect(result).toBe(expectedOutput);
 });

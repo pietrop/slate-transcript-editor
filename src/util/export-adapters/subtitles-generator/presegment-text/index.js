@@ -9,7 +9,11 @@ import divideIntoTwoLines from './divide-into-two-lines/index.js';
  * @param {array} words - Words
  */
 function getTextFromWordsList(words) {
-  return words.map((word) => {return word.text;}).join(' ');
+  return words
+    .map((word) => {
+      return word.text;
+    })
+    .join(' ');
 }
 
 /**
@@ -33,9 +37,6 @@ function preSegmentText(textInput, tmpNumberOfCharPerLine = 35) {
   return textDividedIntoTwoLines;
 }
 
-export {
-  preSegmentText,
-  getTextFromWordsList
-};
+export { preSegmentText, getTextFromWordsList };
 
 export default preSegmentText;
