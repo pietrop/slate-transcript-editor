@@ -27,7 +27,7 @@ function divideIntoTwoLines(text) {
 
   result = removeSpaceAtBeginningOfLine(result);
   // remove empty lines from list to avoid unwanted space a beginning of line
-  result = result.filter(line => line.length !== 0);
+  result = result.filter((line) => line.length !== 0);
 
   result = result.join('').trim();
 

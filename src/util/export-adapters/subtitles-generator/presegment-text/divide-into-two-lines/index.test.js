@@ -46,5 +46,5 @@ audio.`;
 
 test('divide into two lines', () => {
   var result = divideIntoTwoLines(sampleText);
-  	expect(result).toBe(expectedOutput);
+  expect(result).toBe(expectedOutput);
 });

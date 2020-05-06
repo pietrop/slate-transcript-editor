@@ -13,5 +13,5 @@ It does speech to text and then automated consistent translation and then text t
 
 test('add line break between sentences', () => {
   var result = addLineBreakBetweenSentences(sampleText);
-  	expect(result).toBe(expectedOutput);
+  expect(result).toBe(expectedOutput);
 });

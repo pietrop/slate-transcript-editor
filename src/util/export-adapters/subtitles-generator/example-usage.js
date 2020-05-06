@@ -5,7 +5,11 @@ import transcript from './sample/words-list-2.sample.json';
 const sampleWords = transcript.words;
 
 function getTextFromWordsList(words) {
-  return words.map((word) => {return word.text;}).join(' ');
+  return words
+    .map((word) => {
+      return word.text;
+    })
+    .join(' ');
 }
 
 const plainText = getTextFromWordsList(sampleWords);

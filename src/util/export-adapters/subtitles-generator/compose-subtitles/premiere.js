@@ -18,7 +18,9 @@ const ttmlGeneratorPremiere = (vttJSON) => {
     </head>
     <body><div>`;
   vttJSON.forEach((v) => {
-    ttmlOut += `<p begin="${ formatSeconds(parseFloat(v.start)) }" end="${ formatSeconds(parseFloat(v.end)) }">${ escapeText(v.text).replace(/\n/g, '<br />') }</p>\n`;
+    ttmlOut += `<p begin="${formatSeconds(parseFloat(v.start))}" end="${formatSeconds(
+      parseFloat(v.end)
+    )}">${escapeText(v.text).replace(/\n/g, '<br />')}</p>\n`;
   });
   ttmlOut += '</div>\n</body>\n</tt>';
 

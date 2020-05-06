@@ -4,14 +4,13 @@ import { Node } from 'slate';
 export default slateToDocx;
 
 function slateToDocx({
-    value, 
-    speakers, 
-    timecodes, 
-    title="Transcript",
-    creator="Slate Transcript Editor",
-    description="Transcript"
-  }) {
-
+  value,
+  speakers,
+  timecodes,
+  title = 'Transcript',
+  creator = 'Slate Transcript Editor',
+  description = 'Transcript',
+}) {
   const doc = new Document({
     creator: creator,
     description: description,
@@ -30,18 +29,17 @@ function slateToDocx({
   var paragraphEmpty = new Paragraph();
   doc.addParagraph(paragraphEmpty);
 
-  
   value.forEach((slateParagraph) => {
-    console.log('slateParagraph',slateParagraph)
+    console.log('slateParagraph', slateParagraph);
     // TODO: use timecode converter module to convert from seconds to timecode
-  
-    const paragraphSpeakerTimecodes = new Paragraph();  
-    if(timecodes){
+
+    const paragraphSpeakerTimecodes = new Paragraph();
+    if (timecodes) {
       const timecodeStartTime = new TextRun(shortTimecode(slateParagraph.start));
       paragraphSpeakerTimecodes.addRun(timecodeStartTime);
     }
-    if(speakers){
-      if(timecodes){
+    if (speakers) {
+      if (timecodes) {
         const speaker = new TextRun(slateParagraph.speaker).bold().tab();
         paragraphSpeakerTimecodes.addRun(speaker);
       } else {
@@ -49,10 +47,9 @@ function slateToDocx({
         paragraphSpeakerTimecodes.addRun(speaker);
       }
     }
-    if(timecodes||speakers){
+    if (timecodes || speakers) {
       doc.addParagraph(paragraphSpeakerTimecodes);
     }
-    
 
     const paragraphText = new Paragraph(Node.string(slateParagraph));
     const textBreak = new TextRun('').break();
@@ -63,8 +60,8 @@ function slateToDocx({
 
   const packer = new Packer();
 
-  packer.toBlob(doc).then(blob => {
-    const filename = `${ title }.docx`;
+  packer.toBlob(doc).then((blob) => {
+    const filename = `${title}.docx`;
     // // const type =  'application/octet-stream';
     const a = document.createElement('a');
     a.href = window.URL.createObjectURL(blob);
@@ -73,5 +70,4 @@ function slateToDocx({
 
     return blob;
   });
-
 }

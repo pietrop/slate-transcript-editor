@@ -14,7 +14,7 @@ import csvGenerator from './compose-subtitles/csv.js';
 
 function segmentedTextToList(text) {
   let result = text.split('\n\n');
-  result = result.map(line => {
+  result = result.map((line) => {
     return line.trim();
   });
 
@@ -22,11 +22,7 @@ function segmentedTextToList(text) {
 }
 
 function countWords(text) {
-  return text
-    .trim()
-    .replace(/\n /g, '')
-    .replace(/\n/g, ' ')
-    .split(' ').length;
+  return text.trim().replace(/\n /g, '').replace(/\n/g, ' ').split(' ').length;
 }
 
 function addTimecodesToLines(wordsList, lines) {
@@ -59,33 +55,33 @@ function subtitlesComposer({ words, type, numberOfCharPerLine }) {
     return preSegmentText(words, numberOfCharPerLine);
   }
   switch (type) {
-  case 'premiere':
-    return ttmlGeneratorPremiere(subtitlesJson);
-  case 'ttml':
-    return ttmlGenerator(subtitlesJson);
-  case 'itt':
-    return ittGenerator(subtitlesJson);
-  case 'srt':
-    return srtGenerator(subtitlesJson);
-  case 'vtt':
-    return vttGenerator(subtitlesJson);
-  case 'json':
-    return subtitlesJson;
-  case 'csv':
-    return csvGenerator(subtitlesJson);
-  case 'pre-segment-txt':
-    return preSegmentText(words, numberOfCharPerLine);
-  case 'txt':
-    return preSegmentText(words, numberOfCharPerLine);
-  default:
-    return {
-      ttml: ttmlGenerator(subtitlesJson),
-      premiere: ttmlGeneratorPremiere(subtitlesJson),
-      itt: ittGenerator(subtitlesJson),
-      srt: srtGenerator(subtitlesJson),
-      vtt: vttGenerator(subtitlesJson),
-      json: subtitlesJson
-    };
+    case 'premiere':
+      return ttmlGeneratorPremiere(subtitlesJson);
+    case 'ttml':
+      return ttmlGenerator(subtitlesJson);
+    case 'itt':
+      return ittGenerator(subtitlesJson);
+    case 'srt':
+      return srtGenerator(subtitlesJson);
+    case 'vtt':
+      return vttGenerator(subtitlesJson);
+    case 'json':
+      return subtitlesJson;
+    case 'csv':
+      return csvGenerator(subtitlesJson);
+    case 'pre-segment-txt':
+      return preSegmentText(words, numberOfCharPerLine);
+    case 'txt':
+      return preSegmentText(words, numberOfCharPerLine);
+    default:
+      return {
+        ttml: ttmlGenerator(subtitlesJson),
+        premiere: ttmlGeneratorPremiere(subtitlesJson),
+        itt: ittGenerator(subtitlesJson),
+        srt: srtGenerator(subtitlesJson),
+        vtt: vttGenerator(subtitlesJson),
+        json: subtitlesJson,
+      };
   }
 }
 
@@ -100,7 +96,7 @@ export {
   ttmlGenerator,
   ittGenerator,
   srtGenerator,
-  vttGenerator
+  vttGenerator,
 };
 
 export default subtitlesComposer;
