@@ -61,10 +61,8 @@ export default function SlateTranscriptEditor(props) {
   const [playbackRate, setPlaybackRate] = useState(1);
   const editor = useMemo(() => withReact(withHistory(createEditor())), []);
   const [value, setValue] = useState([]);
-  const defaultShowSpeakersPreference =
-    typeof props.showSpeakers === 'boolean' ? props.showSpeakers : true;
-  const defaultShowTimecodesPreference =
-    typeof props.showTimecodes === 'boolean' ? props.showTimecodes : true;
+  const defaultShowSpeakersPreference = typeof props.showSpeakers === 'boolean' ? props.showSpeakers : true;
+  const defaultShowTimecodesPreference = typeof props.showTimecodes === 'boolean' ? props.showTimecodes : true;
   const [showSpeakers, setShowSpeakers] = useState(defaultShowSpeakersPreference);
   const [showTimecodes, setShowTimecodes] = useState(defaultShowTimecodesPreference);
   const [speakerOptions, setSpeakerOptions] = useState([]);
@@ -137,13 +135,13 @@ export default function SlateTranscriptEditor(props) {
     setShowSpeakersCheatShet(!showSpeakersCheatShet);
   };
 
-  const handleTimeUpdated = (e) => {
+  const handleTimeUpdated = e => {
     setCurrentTime(e.target.currentTime);
     // TODO: setting duration here as a workaround
     setDuration(mediaRef.current.duration);
   };
 
-  const handleSetPlaybackRate = (e) => {
+  const handleSetPlaybackRate = e => {
     const tmpNewPlaybackRateValue = parseFloat(e.target.value);
     if (mediaRef && mediaRef.current) {
       mediaRef.current.playbackRate = tmpNewPlaybackRateValue;
@@ -157,7 +155,7 @@ export default function SlateTranscriptEditor(props) {
     }
   };
 
-  const renderElement = useCallback((props) => {
+  const renderElement = useCallback(props => {
     switch (props.element.type) {
       case 'timedText':
         return <TimedTextElement {...props} />;
@@ -189,14 +187,12 @@ export default function SlateTranscriptEditor(props) {
    * especially on long transcripts
    * @param {*} element - props.element, from `renderElement` function
    */
-  const handleSetSpeakerName = (element) => {
+  const handleSetSpeakerName = element => {
     const pathToCurrentNode = ReactEditor.findPath(editor, element);
     const oldSpeakerName = element.speaker.toUpperCase();
     const newSpeakerName = prompt('Change speaker name', oldSpeakerName);
     if (newSpeakerName) {
-      const isUpdateAllSpeakerInstances = confirm(
-        `Would you like to replace all occurrences of ${oldSpeakerName} with ${newSpeakerName}?`
-      );
+      const isUpdateAllSpeakerInstances = confirm(`Would you like to replace all occurrences of ${oldSpeakerName} with ${newSpeakerName}?`);
       if (isUpdateAllSpeakerInstances) {
         const rangeForTheWholeEditor = Editor.range(editor, []);
         // Apply transformation to the whole doc, where speaker matches old spekaer name, and set it to new one
@@ -205,21 +201,17 @@ export default function SlateTranscriptEditor(props) {
           { type: 'timedText', speaker: newSpeakerName },
           {
             at: rangeForTheWholeEditor,
-            match: (node) => node.type === 'timedText' && node.speaker === oldSpeakerName,
+            match: node => node.type === 'timedText' && node.speaker === oldSpeakerName,
           }
         );
       } else {
         // only apply speaker name transformation to current element
-        Transforms.setNodes(
-          editor,
-          { type: 'timedText', speaker: newSpeakerName },
-          { at: pathToCurrentNode }
-        );
+        Transforms.setNodes(editor, { type: 'timedText', speaker: newSpeakerName }, { at: pathToCurrentNode });
       }
     }
   };
 
-  const TimedTextElement = (props) => {
+  const TimedTextElement = props => {
     let textLg = 12;
     let textXl = 12;
     if (!showSpeakers && !showTimecodes) {
@@ -239,15 +231,7 @@ export default function SlateTranscriptEditor(props) {
     return (
       <Row {...props.attributes}>
         {showTimecodes && (
-          <Col
-            contentEditable={false}
-            xs={4}
-            sm={2}
-            md={4}
-            lg={3}
-            xl={2}
-            className={'p-t-2 text-truncate'}
-          >
+          <Col contentEditable={false} xs={4} sm={2} md={4} lg={3} xl={2} className={'p-t-2 text-truncate'}>
             <code
               contentEditable={false}
               style={{ cursor: 'pointer' }}
@@ -261,15 +245,7 @@ export default function SlateTranscriptEditor(props) {
           </Col>
         )}
         {showSpeakers && (
-          <Col
-            contentEditable={false}
-            xs={8}
-            sm={10}
-            md={8}
-            lg={3}
-            xl={3}
-            className={'p-t-2 text-truncate'}
-          >
+          <Col contentEditable={false} xs={8} sm={10} md={8} lg={3} xl={3} className={'p-t-2 text-truncate'}>
             <span
               contentEditable={false}
               className={'text-truncate text-muted unselectable'}
@@ -292,11 +268,11 @@ export default function SlateTranscriptEditor(props) {
     );
   };
 
-  const DefaultElement = (props) => {
+  const DefaultElement = props => {
     return <p {...props.attributes}>{props.children}</p>;
   };
 
-  const handleTimedTextClick = (e) => {
+  const handleTimedTextClick = e => {
     if (e.target.classList.contains('timecode')) {
       const start = e.target.dataset.start;
       if (mediaRef && mediaRef.current) {
@@ -387,13 +363,12 @@ export default function SlateTranscriptEditor(props) {
    * to provide current paragaph's highlight.
    * @param {Number} currentTime - float in seconds
    */
-  const generatePreviousTimingsUpToCurrent = (currentTime) => {
+  const generatePreviousTimingsUpToCurrent = currentTime => {
     // edge case - empty transcription
     if (isEmpty(props.transcriptData)) {
       return '';
     }
-    const lastWordStartTime =
-      props.transcriptData.words[props.transcriptData.words.length - 1].start;
+    const lastWordStartTime = props.transcriptData.words[props.transcriptData.words.length - 1].start;
     const lastWordStartTimeInt = parseInt(lastWordStartTime);
     const emptyListOfTimes = Array(lastWordStartTimeInt);
     const listOfTimesInt = [...emptyListOfTimes.keys()];
@@ -419,13 +394,7 @@ export default function SlateTranscriptEditor(props) {
   const getMediaType = () => {
     const clipExt = path.extname(props.mediaUrl);
     let tmpMediaType = props.mediaType ? props.mediaType : 'video';
-    if (
-      clipExt === '.wav' ||
-      clipExt === '.mp3' ||
-      clipExt === '.m4a' ||
-      clipExt === '.flac' ||
-      clipExt === '.aiff'
-    ) {
+    if (clipExt === '.wav' || clipExt === '.mp3' || clipExt === '.m4a' || clipExt === '.flac' || clipExt === '.aiff') {
       tmpMediaType = 'audio';
     }
     return tmpMediaType;
@@ -435,12 +404,10 @@ export default function SlateTranscriptEditor(props) {
       <style scoped>
         {`
               /* Next words */
-              .timecode[data-previous-timings*="${
-                mediaRef &&
+              .timecode[data-previous-timings*="${mediaRef &&
                 mediaRef.current &&
                 mediaRef.current.duration &&
-                generatePreviousTimingsUpToCurrent(parseInt(currentTime))
-              }"]{
+                generatePreviousTimingsUpToCurrent(parseInt(currentTime))}"]{
                   color:  #9E9E9E;
               }
           `}
@@ -475,11 +442,7 @@ export default function SlateTranscriptEditor(props) {
               `}
       </style>
       {props.showTitle ? (
-        <OverlayTrigger
-          delay={TOOTLIP_LONGER_DELAY}
-          placement={'bottom'}
-          overlay={<Tooltip id="tooltip-disabled"> {props.title}</Tooltip>}
-        >
+        <OverlayTrigger delay={TOOTLIP_LONGER_DELAY} placement={'bottom'} overlay={<Tooltip id="tooltip-disabled"> {props.title}</Tooltip>}>
           <h3 className={'text-truncate text-left'}>
             <small className="text-muted">{props.title}</small>
           </h3>
@@ -507,9 +470,7 @@ export default function SlateTranscriptEditor(props) {
             <Col xs={5} sm={4} md={4} lg={4} xl={4} className={'p-1 mx-auto'}>
               <Badge variant="light" pill>
                 <code className={'text-muted'}>{shortTimecode(currentTime)}</code>
-                <code className={'text-muted'}>
-                  {duration ? ` | ${shortTimecode(duration)}` : ''}
-                </code>
+                <code className={'text-muted'}>{duration ? ` | ${shortTimecode(duration)}` : ''}</code>
               </Badge>
             </Col>
             <Col xs={4} sm={4} md={4} lg={4} xl={4} className={'p-1 mx-auto'}>
@@ -532,9 +493,7 @@ export default function SlateTranscriptEditor(props) {
               <OverlayTrigger
                 delay={TOOTLIP_DELAY}
                 placement={'bottom'}
-                overlay={
-                  <Tooltip id="tooltip-disabled">{`Seek back by ${SEEK_BACK_SEC} seconds`}</Tooltip>
-                }
+                overlay={<Tooltip id="tooltip-disabled">{`Seek back by ${SEEK_BACK_SEC} seconds`}</Tooltip>}
               >
                 <span className="d-inline-block">
                   <Button variant="light" onClick={handleSeekBack} block>
@@ -554,11 +513,7 @@ export default function SlateTranscriptEditor(props) {
                   <ListGroup>
                     {speakerOptions.map((speakerName, index) => {
                       return (
-                        <ListGroup.Item
-                          key={index + speakerName}
-                          className={'text-truncate'}
-                          title={speakerName.toUpperCase()}
-                        >
+                        <ListGroup.Item key={index + speakerName} className={'text-truncate'} title={speakerName.toUpperCase()}>
                           {speakerName.toUpperCase()}
                         </ListGroup.Item>
                       );
@@ -572,12 +527,8 @@ export default function SlateTranscriptEditor(props) {
 
         <Col
           xs={{ span: 12, order: 3 }}
-          sm={
-            getMediaType() === 'audio' ? { span: 10, order: 2, offset: 1 } : { span: 7, order: 2 }
-          }
-          md={
-            getMediaType() === 'audio' ? { span: 10, order: 2, offset: 1 } : { span: 7, order: 2 }
-          }
+          sm={getMediaType() === 'audio' ? { span: 10, order: 2, offset: 1 } : { span: 7, order: 2 }}
+          md={getMediaType() === 'audio' ? { span: 10, order: 2, offset: 1 } : { span: 7, order: 2 }}
           lg={getMediaType() === 'audio' ? { span: 8, order: 2, offset: 2 } : { span: 8, order: 2 }}
           xl={getMediaType() === 'audio' ? { span: 8, order: 2, offset: 2 } : { span: 7, order: 2 }}
         >
@@ -587,7 +538,7 @@ export default function SlateTranscriptEditor(props) {
                 <Slate
                   editor={editor}
                   value={value}
-                  onChange={(value) => {
+                  onChange={value => {
                     if (props.handleAutoSaveChanges) {
                       props.handleAutoSaveChanges(value);
                     }
@@ -598,7 +549,7 @@ export default function SlateTranscriptEditor(props) {
                     readOnly={typeof props.isEditable === 'boolean' ? !props.isEditable : false}
                     renderElement={renderElement}
                     renderLeaf={renderLeaf}
-                    onKeyDown={(event) => {
+                    onKeyDown={event => {
                       if (isPauseWhiletyping) {
                         // logic for pause while typing
                         // https://schier.co/blog/wait-for-user-to-stop-typing-using-javascript
@@ -635,13 +586,7 @@ export default function SlateTranscriptEditor(props) {
           )}
         </Col>
 
-        <Col
-          xs={{ span: 12, order: 2 }}
-          sm={{ span: 2, order: 3 }}
-          md={{ span: 2, order: 3 }}
-          lg={{ span: 1, order: 3 }}
-          xl={{ span: 2, order: 3 }}
-        >
+        <Col xs={{ span: 12, order: 2 }} sm={{ span: 2, order: 3 }} md={{ span: 2, order: 3 }} lg={{ span: 1, order: 3 }} xl={{ span: 2, order: 3 }}>
           <Row>
             <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
               <OverlayTrigger
@@ -651,11 +596,7 @@ export default function SlateTranscriptEditor(props) {
                 overlay={<Tooltip id="tooltip-disabled">Export options</Tooltip>}
               >
                 <span className="d-inline-block">
-                  <DropdownButton
-                    id="dropdown-basic-button"
-                    title={<FontAwesomeIcon icon={faShare} />}
-                    variant="light"
-                  >
+                  <DropdownButton id="dropdown-basic-button" title={<FontAwesomeIcon icon={faShare} />} variant="light">
                     {/* TODO: need to run re-alignement if exportin with timecodes true, otherwise they'll be inaccurate */}
                     <Dropdown.Item
                       onClick={() => {
@@ -801,11 +742,7 @@ export default function SlateTranscriptEditor(props) {
                 placement={'bottom'}
                 overlay={<Tooltip id="tooltip-disabled">Export in caption format</Tooltip>}
               >
-                <DropdownButton
-                  id="dropdown-basic-button"
-                  title={<FontAwesomeIcon icon={faClosedCaptioning} />}
-                  variant="light"
-                >
+                <DropdownButton id="dropdown-basic-button" title={<FontAwesomeIcon icon={faClosedCaptioning} />} variant="light">
                   {subtitlesExportOptionsList.map(({ type, label, ext }, index) => {
                     return (
                       <Dropdown.Item
@@ -839,9 +776,8 @@ export default function SlateTranscriptEditor(props) {
                 placement={'bottom'}
                 overlay={
                   <Tooltip id="tooltip-disabled">
-                    To insert a paragraph break, and split a pargraph in two, put the cursor at a
-                    point where you'd want to add a paragraph break in the text and either click
-                    this button or hit enter key
+                    To insert a paragraph break, and split a pargraph in two, put the cursor at a point where you'd want to add a paragraph break in
+                    the text and either click this button or hit enter key
                   </Tooltip>
                 }
               >
@@ -855,10 +791,7 @@ export default function SlateTranscriptEditor(props) {
                 delay={TOOTLIP_DELAY}
                 placement={'bottom'}
                 overlay={
-                  <Tooltip id="tooltip-disabled">
-                    Put the cursor at a point where you'd want to add [INAUDIBLE] text, and click
-                    this button
-                  </Tooltip>
+                  <Tooltip id="tooltip-disabled">Put the cursor at a point where you'd want to add [INAUDIBLE] text, and click this button</Tooltip>
                 }
               >
                 <Button onClick={insertTextInaudible} variant="light">
@@ -872,16 +805,12 @@ export default function SlateTranscriptEditor(props) {
                 placement={'bottom'}
                 overlay={
                   <Tooltip id="tooltip-disabled">
-                    Turn {isPauseWhiletyping ? 'off' : 'on'} pause while typing functionality. As
-                    you start typing the media while pause playback until you stop. Not reccomended
-                    on longer transcript as it might present performance issues.
+                    Turn {isPauseWhiletyping ? 'off' : 'on'} pause while typing functionality. As you start typing the media while pause playback
+                    until you stop. Not reccomended on longer transcript as it might present performance issues.
                   </Tooltip>
                 }
               >
-                <Button
-                  onClick={handleSetPauseWhileTyping}
-                  variant={isPauseWhiletyping ? 'secondary' : 'light'}
-                >
+                <Button onClick={handleSetPauseWhileTyping} variant={isPauseWhiletyping ? 'secondary' : 'light'}>
                   <FontAwesomeIcon icon={faPause} />
                 </Button>
               </OverlayTrigger>
@@ -892,8 +821,7 @@ export default function SlateTranscriptEditor(props) {
                 placement={'bottom'}
                 overlay={
                   <Tooltip id="tooltip-disabled">
-                    Restore timecodes. At the moment for transcript over 1hour it could temporarily
-                    freeze the UI for a few seconds
+                    Restore timecodes. At the moment for transcript over 1hour it could temporarily freeze the UI for a few seconds
                   </Tooltip>
                 }
               >
@@ -907,8 +835,7 @@ export default function SlateTranscriptEditor(props) {
                 placement={'bottom'}
                 overlay={
                   <Tooltip id="tooltip-disabled">
-                    Double click on a paragraph to jump to the corresponding point at the beginning
-                    of that paragraph in the media
+                    Double click on a paragraph to jump to the corresponding point at the beginning of that paragraph in the media
                   </Tooltip>
                 }
               >

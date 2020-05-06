@@ -26,7 +26,7 @@ const DEMO_MEDIA_URL_SOLEIO =
 import DEMO_SOLEIO_LIVE from '../sample-data/segmented-transcript-soleio-dpe.json';
 
 // Parent component to simulate results from a live STT stream.
-const Example = (props) => {
+const Example = props => {
   // Declare a new state variable, which we'll call "count"
   const [jsonData, setJsonData] = useState({});
   const [interimResults, setInterimResults] = useState({});
@@ -34,7 +34,7 @@ const Example = (props) => {
   useEffect(() => {
     props.transcriptInParts &&
       props.transcriptInParts.forEach(
-        delayLoop((transcriptPart) => {
+        delayLoop(transcriptPart => {
           setInterimResults(transcriptPart);
         }, 3000)
       );
@@ -56,11 +56,7 @@ const Example = (props) => {
         handleSaveEditor={action('handleSaveEditor')}
         handleAutoSaveChanges={action('handleAutoSaveChanges')}
         // https://www.npmjs.com/package/@storybook/addon-knobs#select
-        autoSaveContentType={select(
-          'autoSaveContentType',
-          ['digitalpaperedit', 'slate'],
-          'digitalpaperedit'
-        )} // digitalpaperedit or slate - digitalpaperedit, runs alignement before exporting, slate, is just the raw data.
+        autoSaveContentType={select('autoSaveContentType', ['digitalpaperedit', 'slate'], 'digitalpaperedit')} // digitalpaperedit or slate - digitalpaperedit, runs alignement before exporting, slate, is just the raw data.
         transcriptData={jsonData}
         transcriptDataLive={interimResults}
         isEditable={props.isEditable}
@@ -78,9 +74,7 @@ export const NotEditable = () => {
     <Example
       isEditable={false}
       transcriptInParts={DEMO_SOLEIO_LIVE}
-      title={
-        'Simulated a live STT interim results via a timer and segmented STT json, NOT editable'
-      }
+      title={'Simulated a live STT interim results via a timer and segmented STT json, NOT editable'}
     />
   );
 };

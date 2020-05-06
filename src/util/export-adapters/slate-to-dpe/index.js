@@ -25,7 +25,7 @@ function adjustTimecodesBoundaries(words) {
   });
 }
 
-const prepSlateParagraphForAlignement = (slateData) => {
+const prepSlateParagraphForAlignement = slateData => {
   const result = [];
   slateData.forEach((el, index) => {
     const newEl = {
@@ -46,14 +46,14 @@ const converSlateToDpe = (data, sttJson) => {
   const res = alignDiraizedText(linesWithSpeaker, sttJson);
   console.log('res', res);
   const words = res
-    .map((paragraph) => {
+    .map(paragraph => {
       if (paragraph) {
         return paragraph.words;
       }
     })
     .flat();
   const paragraphs = res
-    .map((paragraph) => {
+    .map(paragraph => {
       if (paragraph) {
         return {
           speaker: paragraph.speaker,

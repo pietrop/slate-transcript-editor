@@ -50,16 +50,16 @@ function foldWords(text, foldNumber) {
   // split on two line break
   var lineArr = text.split('\n\n');
   // fold each line on non fold number char count
-  var foldedWordsInArray = lineArr.map((line) => {
+  var foldedWordsInArray = lineArr.map(line => {
     return foldWordsReturnArray(line.split(' '), foldNumber);
   });
   // flatten result
-  var foldedWordsFlatten = foldedWordsInArray.map((line) => {
+  var foldedWordsFlatten = foldedWordsInArray.map(line => {
     return line.join(' ');
   });
 
   // remove space after carriage return \n in lines
-  const result = foldedWordsFlatten.map((r) => {
+  const result = foldedWordsFlatten.map(r => {
     return removeSpaceAfterCarriageReturn(r);
   });
   // return text

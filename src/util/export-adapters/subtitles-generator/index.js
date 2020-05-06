@@ -14,7 +14,7 @@ import csvGenerator from './compose-subtitles/csv.js';
 
 function segmentedTextToList(text) {
   let result = text.split('\n\n');
-  result = result.map((line) => {
+  result = result.map(line => {
     return line.trim();
   });
 
@@ -22,13 +22,17 @@ function segmentedTextToList(text) {
 }
 
 function countWords(text) {
-  return text.trim().replace(/\n /g, '').replace(/\n/g, ' ').split(' ').length;
+  return text
+    .trim()
+    .replace(/\n /g, '')
+    .replace(/\n/g, ' ')
+    .split(' ').length;
 }
 
 function addTimecodesToLines(wordsList, lines) {
   let startWordCounter = 0;
   let endWordCounter = 0;
-  const results = lines.map((line) => {
+  const results = lines.map(line => {
     endWordCounter += countWords(line);
 
     const jsonLine = { text: line.trim() };

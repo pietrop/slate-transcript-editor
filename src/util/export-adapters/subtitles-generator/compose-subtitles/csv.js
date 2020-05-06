@@ -5,9 +5,7 @@ function csvGenerator(srtJsonContent) {
     lines += `${index + 1},`;
     //need to surround timecodes with "\"" escaped " to escape the , for the milliseconds
     // lines += `\"${ srtLineO.start }\",\"${ srtLineO.end }\",`;
-    lines += `\"${formatSeconds(parseFloat(srtLineO.start)).replace('.', ',')}\",\"${formatSeconds(
-      parseFloat(srtLineO.end)
-    ).replace('.', ',')}\",`;
+    lines += `\"${formatSeconds(parseFloat(srtLineO.start)).replace('.', ',')}\",\"${formatSeconds(parseFloat(srtLineO.end)).replace('.', ',')}\",`;
     // removing line breaks and and removing " as they break the csv.
     // wrapping text in escaped " to  escape any , for the csv.
     // adding carriage return \n to signal end of line in csv

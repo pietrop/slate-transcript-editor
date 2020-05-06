@@ -38,11 +38,11 @@ const ittGenerator = (vttJSON, lang = 'en-GB', FPS = 25) => {
         </head>
         <body style="normal" region="bottom">
           <div begin="-01:00:00:00">`;
-  vttJSON.forEach((v) => {
-    ittOut += `<p begin="${tcFormat(parseFloat(v.start) * FPS, FPS)}" end="${tcFormat(
-      parseFloat(v.end) * FPS,
-      FPS
-    )}">${escapeText(v.text).replace(/\n/g, '<br />')}</p>\n`;
+  vttJSON.forEach(v => {
+    ittOut += `<p begin="${tcFormat(parseFloat(v.start) * FPS, FPS)}" end="${tcFormat(parseFloat(v.end) * FPS, FPS)}">${escapeText(v.text).replace(
+      /\n/g,
+      '<br />'
+    )}</p>\n`;
   });
   ittOut += '</div>\n</body>\n</tt>';
 

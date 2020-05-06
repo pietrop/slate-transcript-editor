@@ -14,7 +14,7 @@
  * @param {*} seconds
  * @param {*} fps
  */
-const normalisePlayerTime = function (seconds, fps) {
+const normalisePlayerTime = function(seconds, fps) {
   return Number(((1.0 / fps) * Math.floor(Number((fps * seconds).toPrecision(12)))).toFixed(2));
 };
 
@@ -22,7 +22,7 @@ const normalisePlayerTime = function (seconds, fps) {
  * @param {*} seconds
  * @param {*} fps
  */
-const secondsToTimecode = function (seconds, framePerSeconds) {
+const secondsToTimecode = function(seconds, framePerSeconds) {
   // handle edge case, trying to convert zero seconds
   if (seconds === 0) {
     return '00:00:00:00';
@@ -45,9 +45,7 @@ const secondsToTimecode = function (seconds, framePerSeconds) {
     return parseInt(n);
   }
 
-  return `${_padZero((wholeSeconds / 60 / 60) % 60)}:${_padZero(
-    (wholeSeconds / 60) % 60
-  )}:${_padZero(wholeSeconds % 60)}:${_padZero(frames)}`;
+  return `${_padZero((wholeSeconds / 60 / 60) % 60)}:${_padZero((wholeSeconds / 60) % 60)}:${_padZero(wholeSeconds % 60)}:${_padZero(frames)}`;
 };
 
 export default secondsToTimecode;

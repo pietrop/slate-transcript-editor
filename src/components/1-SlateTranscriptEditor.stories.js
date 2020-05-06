@@ -38,11 +38,7 @@ export const demo = () => {
       handleSaveEditor={action('handleSaveEditor')}
       handleAutoSaveChanges={action('handleAutoSaveChanges')}
       // https://www.npmjs.com/package/@storybook/addon-knobs#select
-      autoSaveContentType={select(
-        'autoSaveContentType',
-        ['digitalpaperedit', 'slate'],
-        'digitalpaperedit'
-      )} // digitalpaperedit or slate - digitalpaperedit, runs alignement before exporting, slate, is just the raw data.
+      autoSaveContentType={select('autoSaveContentType', ['digitalpaperedit', 'slate'], 'digitalpaperedit')} // digitalpaperedit or slate - digitalpaperedit, runs alignement before exporting, slate, is just the raw data.
       // transcriptData={object('transcriptData', DEMO_SOLEIO)}
       transcriptData={DEMO_SOLEIO}
     />
@@ -74,11 +70,7 @@ export const OptionalTitle = () => {
       transcriptData={DEMO_SOLEIO}
       handleSaveEditor={action('handleSaveEditor')}
       handleAutoSaveChanges={action('handleAutoSaveChanges')}
-      autoSaveContentType={select(
-        'autoSaveContentType',
-        ['digitalpaperedit', 'slate'],
-        'digitalpaperedit'
-      )} // digitalpaperedit or slate - digitalpaperedit, runs alignement before exporting, slate, is just the raw data.
+      autoSaveContentType={select('autoSaveContentType', ['digitalpaperedit', 'slate'], 'digitalpaperedit')} // digitalpaperedit or slate - digitalpaperedit, runs alignement before exporting, slate, is just the raw data.
       showTimecodes={boolean('timecodes', true)}
       showSpeakers={boolean('speakers', true)}
     />
@@ -94,11 +86,7 @@ export const NoSpeakers = () => {
       transcriptData={DEMO_SOLEIO}
       handleSaveEditor={action('handleSaveEditor')}
       handleAutoSaveChanges={action('handleAutoSaveChanges')}
-      autoSaveContentType={select(
-        'autoSaveContentType',
-        ['digitalpaperedit', 'slate'],
-        'digitalpaperedit'
-      )} // digitalpaperedit or slate - digitalpaperedit, runs alignement before exporting, slate, is just the raw data
+      autoSaveContentType={select('autoSaveContentType', ['digitalpaperedit', 'slate'], 'digitalpaperedit')} // digitalpaperedit or slate - digitalpaperedit, runs alignement before exporting, slate, is just the raw data
       showTimecodes={boolean('timecodes', true)}
       showSpeakers={boolean('speakers', false)}
     />
@@ -113,11 +101,7 @@ export const NoTimecodes = () => {
       transcriptData={DEMO_SOLEIO}
       handleSaveEditor={action('handleSaveEditor')}
       handleAutoSaveChanges={action('handleAutoSaveChanges')}
-      autoSaveContentType={select(
-        'autoSaveContentType',
-        ['digitalpaperedit', 'slate'],
-        'digitalpaperedit'
-      )} // digitalpaperedit or slate - digitalpaperedit, runs alignement before exporting, slate, is just the raw data.
+      autoSaveContentType={select('autoSaveContentType', ['digitalpaperedit', 'slate'], 'digitalpaperedit')} // digitalpaperedit or slate - digitalpaperedit, runs alignement before exporting, slate, is just the raw data.
       showTimecodes={boolean('timecodes', false)}
       showSpeakers={boolean('speakers', true)}
     />
@@ -132,11 +116,7 @@ export const NoSpeakersAndTimecodes = () => {
       transcriptData={DEMO_SOLEIO}
       handleSaveEditor={action('handleSaveEditor')}
       handleAutoSaveChanges={action('handleAutoSaveChanges')}
-      autoSaveContentType={select(
-        'autoSaveContentType',
-        ['digitalpaperedit', 'slate'],
-        'digitalpaperedit'
-      )} // digitalpaperedit or slate - digitalpaperedit, runs alignement before exporting, slate, is just the raw data.
+      autoSaveContentType={select('autoSaveContentType', ['digitalpaperedit', 'slate'], 'digitalpaperedit')} // digitalpaperedit or slate - digitalpaperedit, runs alignement before exporting, slate, is just the raw data.
       showTimecodes={boolean('timecodes', false)}
       showSpeakers={boolean('speakers', false)}
     />
@@ -150,11 +130,7 @@ export const ReadOnly = () => {
       transcriptData={DEMO_SOLEIO}
       handleSaveEditor={action('handleSaveEditor')}
       handleAutoSaveChanges={action('handleAutoSaveChanges')}
-      autoSaveContentType={select(
-        'autoSaveContentType',
-        ['digitalpaperedit', 'slate'],
-        'digitalpaperedit'
-      )} // digitalpaperedit or slate - digitalpaperedit, runs alignement before exporting, slate, is just the raw data.
+      autoSaveContentType={select('autoSaveContentType', ['digitalpaperedit', 'slate'], 'digitalpaperedit')} // digitalpaperedit or slate - digitalpaperedit, runs alignement before exporting, slate, is just the raw data.
       isEditable={false}
     />
   );
@@ -167,11 +143,7 @@ export const Audio = () => {
       transcriptData={DEMO_SOLEIO}
       handleSaveEditor={action('handleSaveEditor')}
       handleAutoSaveChanges={action('handleAutoSaveChanges')}
-      autoSaveContentType={select(
-        'autoSaveContentType',
-        ['digitalpaperedit', 'slate'],
-        'digitalpaperedit'
-      )} // digitalpaperedit or slate - digitalpaperedit, runs alignement before exporting, slate, is just the raw data.
+      autoSaveContentType={select('autoSaveContentType', ['digitalpaperedit', 'slate'], 'digitalpaperedit')} // digitalpaperedit or slate - digitalpaperedit, runs alignement before exporting, slate, is just the raw data.
       isEditable={true}
       mediaType={select('mediaType', ['audio', 'video'], 'audio')}
     />

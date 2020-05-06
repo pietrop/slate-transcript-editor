@@ -18,7 +18,7 @@ import { shortTimecode } from '../timecode-converter';
  * eg if `time` is 6, the list would be [0, 1, 2, 3, 4, 5]
  * @param {Number} time - float, time in seconds
  */
-const generatePreviousTimings = (time) => {
+const generatePreviousTimings = time => {
   // https://stackoverflow.com/questions/3746725/how-to-create-an-array-containing-1-n
   return [...Array(parseInt(time)).keys()];
 };
@@ -39,7 +39,7 @@ function isEmpty(obj) {
   return Object.keys(obj).length === 0;
 }
 
-const convertDpeToSlate = (transcript) => {
+const convertDpeToSlate = transcript => {
   if (isEmpty(transcript)) {
     return [
       {
@@ -58,8 +58,8 @@ const convertDpeToSlate = (transcript) => {
   }
 
   const { words, paragraphs } = transcript;
-  return paragraphs.map((paragraph) => {
-    const wordsFiltered = words.filter((word) => {
+  return paragraphs.map(paragraph => {
+    const wordsFiltered = words.filter(word => {
       if (word.start >= paragraph.start && word.end <= paragraph.end) {
         return word;
       }
@@ -69,7 +69,7 @@ const convertDpeToSlate = (transcript) => {
     const lastWordStartTime = words[lastWordIndex].start;
     const totalTimingsInt = generatePreviousTimings(lastWordStartTime);
     const text = wordsFiltered
-      .map((w) => {
+      .map(w => {
         return w.text;
       })
       .join(' ');

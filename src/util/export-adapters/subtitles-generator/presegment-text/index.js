@@ -10,7 +10,7 @@ import divideIntoTwoLines from './divide-into-two-lines/index.js';
  */
 function getTextFromWordsList(words) {
   return words
-    .map((word) => {
+    .map(word => {
       return word.text;
     })
     .join(' ');

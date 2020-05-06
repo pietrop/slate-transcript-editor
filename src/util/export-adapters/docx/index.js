@@ -3,14 +3,7 @@ import { shortTimecode } from '../../timecode-converter/';
 import { Node } from 'slate';
 export default slateToDocx;
 
-function slateToDocx({
-  value,
-  speakers,
-  timecodes,
-  title = 'Transcript',
-  creator = 'Slate Transcript Editor',
-  description = 'Transcript',
-}) {
+function slateToDocx({ value, speakers, timecodes, title = 'Transcript', creator = 'Slate Transcript Editor', description = 'Transcript' }) {
   const doc = new Document({
     creator: creator,
     description: description,
@@ -29,7 +22,7 @@ function slateToDocx({
   var paragraphEmpty = new Paragraph();
   doc.addParagraph(paragraphEmpty);
 
-  value.forEach((slateParagraph) => {
+  value.forEach(slateParagraph => {
     console.log('slateParagraph', slateParagraph);
     // TODO: use timecode converter module to convert from seconds to timecode
 
@@ -60,7 +53,7 @@ function slateToDocx({
 
   const packer = new Packer();
 
-  packer.toBlob(doc).then((blob) => {
+  packer.toBlob(doc).then(blob => {
     const filename = `${title}.docx`;
     // // const type =  'application/octet-stream';
     const a = document.createElement('a');
