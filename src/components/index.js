@@ -464,7 +464,7 @@ export default function SlateTranscriptEditor(props) {
               ref={mediaRef}
               src={props.mediaUrl}
               width={'100%'}
-              height={getMediaType() === 'audio' ? '40em' : 'auto'}
+              height={getMediaType() === 'audio' ? '60em' : 'auto'}
               controls
               playsInline
             ></video>
