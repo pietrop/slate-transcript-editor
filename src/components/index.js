@@ -387,7 +387,10 @@ export default function SlateTranscriptEditor(props) {
       speakers: true,
       timecodes: true,
     });
-    const subtitlesJson = subtitlesGenerator({ words: editorContnet.words, type });
+    let subtitlesJson = subtitlesGenerator({ words: editorContnet.words, type });
+    if (type === 'json') {
+      subtitlesJson = JSON.stringify(subtitlesJson, null, 2);
+    }
     download(subtitlesJson, `${getFileTitle()}.${ext}`);
   };
 

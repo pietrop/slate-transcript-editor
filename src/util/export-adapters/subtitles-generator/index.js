@@ -1,3 +1,4 @@
+import formatSeconds from './compose-subtitles/util/format-seconds.js';
 import textSegmentation from './presegment-text/text-segmentation/index.js';
 import addLineBreakBetweenSentences from './presegment-text/line-break-between-sentences/index.js';
 import foldWords from './presegment-text/fold/index.js';
@@ -70,7 +71,12 @@ function subtitlesComposer({ words, type, numberOfCharPerLine }) {
     case 'vtt':
       return vttGenerator(subtitlesJson);
     case 'json':
-      return subtitlesJson;
+      // converting timecodes to captions time stamps
+      return subtitlesJson.map(line => {
+        line.start = formatSeconds(parseFloat(line.start)).replace('.', ',');
+        line.end = formatSeconds(parseFloat(line.end)).replace('.', ',');
+        return line;
+      });
     case 'csv':
       return csvGenerator(subtitlesJson);
     case 'pre-segment-txt':
