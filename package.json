@@ -61,9 +61,9 @@
     "prop-types": "^15.7.2",
     "react-bootstrap": "^1.0.1",
     "sbd": "^1.0.18",
-    "slate": "^0.57.1",
-    "slate-history": "^0.57.2",
-    "slate-react": "^0.57.1",
+    "slate": "^0.59.0",
+    "slate-history": "^0.59.0",
+    "slate-react": "^0.59.0",
     "smpte-timecode": "^1.2.3",
     "stt-align-node": "^1.1.6"
   },
