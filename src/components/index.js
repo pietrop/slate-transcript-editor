@@ -382,12 +382,12 @@ export default function SlateTranscriptEditor(props) {
   };
 
   const handleSubtitlesExport = ({ type, ext }) => {
-    let editorContnet = getEditorContent({
+    let editorContent = getEditorContent({
       type: 'json-digitalpaperedit',
       speakers: true,
       timecodes: true,
     });
-    let subtitlesJson = subtitlesGenerator({ words: editorContnet.words, type });
+    let subtitlesJson = subtitlesGenerator({ words: editorContent.words, paragraphs: editorContent.paragraphs, type });
     if (type === 'json') {
       subtitlesJson = JSON.stringify(subtitlesJson, null, 2);
     }

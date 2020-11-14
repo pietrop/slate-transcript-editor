@@ -30,7 +30,8 @@ function countWords(text) {
     .split(' ').length;
 }
 
-function addTimecodesToLines(wordsList, lines) {
+function addTimecodesToLines(wordsList, paragraphs, lines) {
+  wordsList = wordsList.filter(w=>w.text.length > 0)
   let startWordCounter = 0;
   let endWordCounter = 0;
   const results = lines.map(line => {
@@ -39,6 +40,10 @@ function addTimecodesToLines(wordsList, lines) {
     const jsonLine = { text: line.trim() };
     jsonLine.start = wordsList[startWordCounter].start;
     jsonLine.end = wordsList[endWordCounter - 1].end;
+    
+    // #-----------------|------|-----------------#
+    const possibleParagraphs = paragraphs.filter(p=>jsonLine.start>=p.start && jsonLine.start < p.end).sort((a,b)=>a.start-b.start)
+    jsonLine.speaker = possibleParagraphs.length > 0 ? possibleParagraphs[0].speaker : "UNKNOWN";
     startWordCounter = endWordCounter;
 
     return jsonLine;
@@ -47,15 +52,15 @@ function addTimecodesToLines(wordsList, lines) {
   return results;
 }
 
-function preSegmentTextJson(wordsList, numberOfCharPerLine) {
+function preSegmentTextJson(wordsList, paragraphs, numberOfCharPerLine) {
   const result = preSegmentText(wordsList, numberOfCharPerLine);
   const segmentedTextArray = segmentedTextToList(result);
 
-  return addTimecodesToLines(wordsList, segmentedTextArray);
+  return addTimecodesToLines(wordsList, paragraphs, segmentedTextArray);
 }
 
-function subtitlesComposer({ words, type, numberOfCharPerLine }) {
-  const subtitlesJson = preSegmentTextJson(words, numberOfCharPerLine);
+function subtitlesComposer({ words, paragraphs, type, numberOfCharPerLine }) {
+  const subtitlesJson = preSegmentTextJson(words, paragraphs, numberOfCharPerLine);
   if (typeof words === 'string') {
     return preSegmentText(words, numberOfCharPerLine);
   }
@@ -70,6 +75,8 @@ function subtitlesComposer({ words, type, numberOfCharPerLine }) {
       return srtGenerator(subtitlesJson);
     case 'vtt':
       return vttGenerator(subtitlesJson);
+    case 'vtt_speakers':
+      return vttGenerator(subtitlesJson, true);
     case 'json':
       // converting timecodes to captions time stamps
       return subtitlesJson.map(line => {
@@ -90,6 +97,7 @@ function subtitlesComposer({ words, type, numberOfCharPerLine }) {
         itt: ittGenerator(subtitlesJson),
         srt: srtGenerator(subtitlesJson),
         vtt: vttGenerator(subtitlesJson),
+        vtt_speakers: vttGenerator(subtitlesJson, true),
         json: subtitlesJson,
       };
   }
