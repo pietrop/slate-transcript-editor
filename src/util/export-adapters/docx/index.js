@@ -27,11 +27,11 @@ function slateToDocx({
     paragraphTitle.addRun(textTitle);
     paragraphTitle.heading1().center();
     doc.addParagraph(paragraphTitle);
-  }
 
-  // add spacing
-  var paragraphEmpty = new Paragraph();
-  doc.addParagraph(paragraphEmpty);
+    // add spacing
+    var paragraphEmpty = new Paragraph();
+    doc.addParagraph(paragraphEmpty);
+  }
 
   value.forEach((slateParagraph) => {
     console.log('slateParagraph', slateParagraph);
@@ -47,7 +47,7 @@ function slateToDocx({
         const speaker = new TextRun(slateParagraph.speaker).bold().tab();
         paragraphSpeakerTimecodes.addRun(speaker);
       } else {
-        const speaker = new TextRun(slateParagraph.speaker).bold();
+        const speaker = new TextRun(inline_speakers ? slateParagraph.speaker.toUpperCase() : slateParagraph.speaker).bold();
         paragraphSpeakerTimecodes.addRun(speaker);
       }
     }
@@ -56,7 +56,7 @@ function slateToDocx({
     const textBreak = new TextRun('').break();
 
     if (inline_speakers) {
-      paragraphSpeakerTimecodes.addRun(new TextRun(paragraphContents).tab()).addRun(textBreak);
+      paragraphSpeakerTimecodes.addRun(new TextRun(`: ${paragraphContents}`)).addRun(textBreak);
     }
 
     if (timecodes || speakers || inline_speakers) {
