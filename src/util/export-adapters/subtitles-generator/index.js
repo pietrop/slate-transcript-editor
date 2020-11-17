@@ -15,7 +15,7 @@ import csvGenerator from './compose-subtitles/csv.js';
 
 function segmentedTextToList(text) {
   let result = text.split('\n\n');
-  result = result.map(line => {
+  result = result.map((line) => {
     return line.trim();
   });
 
@@ -23,27 +23,37 @@ function segmentedTextToList(text) {
 }
 
 function countWords(text) {
-  return text
-    .trim()
-    .replace(/\n /g, '')
-    .replace(/\n/g, ' ')
-    .split(' ').length;
+  return text.trim().replace(/\n /g, '').replace(/\n/g, ' ').split(' ').length;
 }
 
 function addTimecodesToLines(wordsList, paragraphs, lines) {
-  wordsList = wordsList.filter(w=>w.text.length > 0)
+  wordsList = wordsList.filter((w) => w.text.length > 0);
   let startWordCounter = 0;
   let endWordCounter = 0;
-  const results = lines.map(line => {
+  const results = lines.map((line) => {
     endWordCounter += countWords(line);
 
     const jsonLine = { text: line.trim() };
     jsonLine.start = wordsList[startWordCounter].start;
     jsonLine.end = wordsList[endWordCounter - 1].end;
-    
+
     // #-----------------|------|-----------------#
-    const possibleParagraphs = paragraphs.filter(p=>jsonLine.start>=p.start && jsonLine.start < p.end).sort((a,b)=>a.start-b.start)
-    jsonLine.speaker = possibleParagraphs.length > 0 ? possibleParagraphs[0].speaker : "UNKNOWN";
+    const possibleParagraphs = paragraphs
+      .filter((p) => jsonLine.start >= p.start && jsonLine.start < p.end)
+      .map((p) => {
+        const inParagraphEndTime = Math.min(jsonLine.end, p.end);
+        const inParagraphDuration = inParagraphEndTime - jsonLine.start;
+
+        const totalDuration = jsonLine.end - jsonLine.start;
+        const pctInParagraph = inParagraphDuration / totalDuration;
+
+        return {
+          ...p,
+          pctInParagraph,
+        };
+      })
+      .sort((a, b) => b.pctInParagraph - a.pctInParagraph || a.start - b.start); // sort by % in paragraph descending, then start time ascending
+    jsonLine.speaker = possibleParagraphs.length > 0 ? possibleParagraphs[0].speaker : 'UNKNOWN';
     startWordCounter = endWordCounter;
 
     return jsonLine;
@@ -79,7 +89,7 @@ function subtitlesComposer({ words, paragraphs, type, numberOfCharPerLine }) {
       return vttGenerator(subtitlesJson, true);
     case 'json':
       // converting timecodes to captions time stamps
-      return subtitlesJson.map(line => {
+      return subtitlesJson.map((line) => {
         line.start = formatSeconds(parseFloat(line.start)).replace('.', ',');
         line.end = formatSeconds(parseFloat(line.end)).replace('.', ',');
         return line;
