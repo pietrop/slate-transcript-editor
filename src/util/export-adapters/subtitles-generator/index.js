@@ -62,15 +62,37 @@ function addTimecodesToLines(wordsList, paragraphs, lines) {
   return results;
 }
 
-function preSegmentTextJson(wordsList, paragraphs, numberOfCharPerLine) {
-  const result = preSegmentText(wordsList, numberOfCharPerLine);
+function segmentTextByParagraph(wordList, paragraphs) {
+  let str = [];
+  let p_id = '0';
+
+  const sorted_paragraphs = paragraphs.sort((a, b) => a.start - b.start);
+  for (const { text, start } of wordList) {
+    const foundParagraph = sorted_paragraphs.filter((p) => p.start <= start && p.end >= start)[0];
+    if (foundParagraph.id !== p_id) {
+      p_id = foundParagraph.id;
+      str.push('\n\n');
+    }
+    str.push(text);
+  }
+  return str.join(' ');
+}
+
+function preSegmentTextJson(wordsList, paragraphs, numberOfCharPerLine, paragraphMode = false) {
+  let result;
+  if (paragraphMode) {
+    result = segmentTextByParagraph(wordsList, paragraphs);
+  } else {
+    result = preSegmentText(wordsList, numberOfCharPerLine);
+  }
+
   const segmentedTextArray = segmentedTextToList(result);
 
   return addTimecodesToLines(wordsList, paragraphs, segmentedTextArray);
 }
 
 function subtitlesComposer({ words, paragraphs, type, numberOfCharPerLine }) {
-  const subtitlesJson = preSegmentTextJson(words, paragraphs, numberOfCharPerLine);
+  const subtitlesJson = preSegmentTextJson(words, paragraphs, numberOfCharPerLine, type === 'vtt_speakers_paragraphs');
   if (typeof words === 'string') {
     return preSegmentText(words, numberOfCharPerLine);
   }
@@ -86,6 +108,7 @@ function subtitlesComposer({ words, paragraphs, type, numberOfCharPerLine }) {
     case 'vtt':
       return vttGenerator(subtitlesJson);
     case 'vtt_speakers':
+    case 'vtt_speakers_paragraphs':
       return vttGenerator(subtitlesJson, true);
     case 'json':
       // converting timecodes to captions time stamps
