@@ -56,7 +56,7 @@ function slateToDocx({
     const textBreak = new TextRun('').break();
 
     if (inline_speakers) {
-      paragraphSpeakerTimecodes.addRun(new TextRun(`: ${paragraphContents}`)).addRun(textBreak);
+      paragraphSpeakerTimecodes.addRun(new TextRun(`:  ${paragraphContents}`)).addRun(textBreak);
     }
 
     if (timecodes || speakers || inline_speakers) {
