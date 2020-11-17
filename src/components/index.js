@@ -38,6 +38,7 @@ import convertDpeToSlate from '../util/dpe-to-slate';
 import converSlateToDpe from '../util/export-adapters/slate-to-dpe/index.js';
 import slateToDocx from '../util/export-adapters/docx';
 import restoreTimecodes from '../util/restore-timcodes';
+import insertTimecodesInline from '../util/inline-interval-timecodes';
 import pluck from '../util/pluk';
 import subtitlesGenerator from '../util/export-adapters/subtitles-generator/index.js';
 import subtitlesExportOptionsList from '../util/export-adapters/subtitles-generator/list.js';
@@ -135,13 +136,13 @@ export default function SlateTranscriptEditor(props) {
     setShowSpeakersCheatShet(!showSpeakersCheatShet);
   };
 
-  const handleTimeUpdated = e => {
+  const handleTimeUpdated = (e) => {
     setCurrentTime(e.target.currentTime);
     // TODO: setting duration here as a workaround
     setDuration(mediaRef.current.duration);
   };
 
-  const handleSetPlaybackRate = e => {
+  const handleSetPlaybackRate = (e) => {
     const tmpNewPlaybackRateValue = parseFloat(e.target.value);
     if (mediaRef && mediaRef.current) {
       mediaRef.current.playbackRate = tmpNewPlaybackRateValue;
@@ -155,7 +156,7 @@ export default function SlateTranscriptEditor(props) {
     }
   };
 
-  const renderElement = useCallback(props => {
+  const renderElement = useCallback((props) => {
     switch (props.element.type) {
       case 'timedText':
         return <TimedTextElement {...props} />;
@@ -187,7 +188,7 @@ export default function SlateTranscriptEditor(props) {
    * especially on long transcripts
    * @param {*} element - props.element, from `renderElement` function
    */
-  const handleSetSpeakerName = element => {
+  const handleSetSpeakerName = (element) => {
     const pathToCurrentNode = ReactEditor.findPath(editor, element);
     const oldSpeakerName = element.speaker.toUpperCase();
     const newSpeakerName = prompt('Change speaker name', oldSpeakerName);
@@ -201,7 +202,7 @@ export default function SlateTranscriptEditor(props) {
           { type: 'timedText', speaker: newSpeakerName },
           {
             at: rangeForTheWholeEditor,
-            match: node => node.type === 'timedText' && node.speaker === oldSpeakerName,
+            match: (node) => node.type === 'timedText' && node.speaker === oldSpeakerName,
           }
         );
       } else {
@@ -211,7 +212,7 @@ export default function SlateTranscriptEditor(props) {
     }
   };
 
-  const TimedTextElement = props => {
+  const TimedTextElement = (props) => {
     let textLg = 12;
     let textXl = 12;
     if (!showSpeakers && !showTimecodes) {
@@ -268,11 +269,11 @@ export default function SlateTranscriptEditor(props) {
     );
   };
 
-  const DefaultElement = props => {
+  const DefaultElement = (props) => {
     return <p {...props.attributes}>{props.children}</p>;
   };
 
-  const handleTimedTextClick = e => {
+  const handleTimedTextClick = (e) => {
     if (e.target.classList.contains('timecode')) {
       const start = e.target.dataset.start;
       if (mediaRef && mediaRef.current) {
@@ -290,12 +291,12 @@ export default function SlateTranscriptEditor(props) {
     }
   };
 
-  const getEditorContent = ({ type, speakers, timecodes, atlasFormat }) => {
+  const getEditorContent = ({ type, speakers, timecodes, inline_timecodes: inline, hideTitle, atlasFormat }) => {
     switch (type) {
       case 'text':
         let tmpValue = value;
-        if (timecodes) {
-          tmpValue = handleRestoreTimecodes();
+        if (timecodes || inline) {
+          tmpValue = handleRestoreTimecodes(inline);
         }
         return slateToText({ value: tmpValue, speakers, timecodes, atlasFormat });
       case 'json-slate':
@@ -304,10 +305,10 @@ export default function SlateTranscriptEditor(props) {
         return converSlateToDpe(value, props.transcriptData);
       case 'word':
         let docTmpValue = value;
-        if (timecodes) {
-          docTmpValue = handleRestoreTimecodes();
+        if (timecodes || inline) {
+          docTmpValue = handleRestoreTimecodes(inline);
         }
-        return slateToDocx({ value: docTmpValue, speakers, timecodes, title: props.title });
+        return slateToDocx({ value: docTmpValue, speakers, timecodes, inline_speakers: inline, title: props.title, hideTitle });
       default:
         // some default, unlikely to be called
         return {};
@@ -320,8 +321,8 @@ export default function SlateTranscriptEditor(props) {
     }
     return path.basename(props.mediaUrl).trim();
   };
-  const handleExport = ({ type, ext, speakers, timecodes, atlasFormat }) => {
-    let editorContnet = getEditorContent({ type, speakers, timecodes, atlasFormat });
+  const handleExport = ({ type, ext, speakers, timecodes, inline_timecodes, hideTitle, atlasFormat }) => {
+    let editorContnet = getEditorContent({ type, speakers, inline_timecodes, timecodes, hideTitle, atlasFormat });
     if (ext === 'json') {
       editorContnet = JSON.stringify(editorContnet, null, 2);
     }
@@ -338,13 +339,23 @@ export default function SlateTranscriptEditor(props) {
     }
   };
 
-  const handleRestoreTimecodes = () => {
-    const alignedSlateData = restoreTimecodes({
-      slateValue: value,
-      transcriptData: props.transcriptData,
-    });
-    setValue(alignedSlateData);
-    return alignedSlateData;
+  const handleRestoreTimecodes = (inline_timecodes = false) => {
+    if (inline_timecodes) {
+      let transcriptData = insertTimecodesInline({ transcriptData: props.transcriptData });
+      const ret = restoreTimecodes({
+        transcriptData,
+        slateValue: convertDpeToSlate(transcriptData),
+      });
+      handleRestoreTimecodes(false);
+      return ret;
+    } else {
+      const alignedSlateData = restoreTimecodes({
+        slateValue: value,
+        transcriptData: props.transcriptData,
+      });
+      setValue(alignedSlateData);
+      return alignedSlateData;
+    }
   };
 
   const breakParagraph = () => {
@@ -363,7 +374,7 @@ export default function SlateTranscriptEditor(props) {
    * to provide current paragaph's highlight.
    * @param {Number} currentTime - float in seconds
    */
-  const generatePreviousTimingsUpToCurrent = currentTime => {
+  const generatePreviousTimingsUpToCurrent = (currentTime) => {
     // edge case - empty transcription
     if (isEmpty(props.transcriptData)) {
       return '';
@@ -407,10 +418,9 @@ export default function SlateTranscriptEditor(props) {
       <style scoped>
         {`
               /* Next words */
-              .timecode[data-previous-timings*="${mediaRef &&
-                mediaRef.current &&
-                mediaRef.current.duration &&
-                generatePreviousTimingsUpToCurrent(parseInt(currentTime))}"]{
+              .timecode[data-previous-timings*="${
+                mediaRef && mediaRef.current && mediaRef.current.duration && generatePreviousTimingsUpToCurrent(parseInt(currentTime))
+              }"]{
                   color:  #9E9E9E;
               }
           `}
@@ -541,7 +551,7 @@ export default function SlateTranscriptEditor(props) {
                 <Slate
                   editor={editor}
                   value={value}
-                  onChange={value => {
+                  onChange={(value) => {
                     if (props.handleAutoSaveChanges) {
                       props.handleAutoSaveChanges(value);
                     }
@@ -552,7 +562,7 @@ export default function SlateTranscriptEditor(props) {
                     readOnly={typeof props.isEditable === 'boolean' ? !props.isEditable : false}
                     renderElement={renderElement}
                     renderLeaf={renderLeaf}
-                    onKeyDown={event => {
+                    onKeyDown={(event) => {
                       if (isPauseWhiletyping) {
                         // logic for pause while typing
                         // https://schier.co/blog/wait-for-user-to-stop-typing-using-javascript
@@ -708,6 +718,20 @@ export default function SlateTranscriptEditor(props) {
                       }}
                     >
                       Word (Speakers & Timecodes)
+                    </Dropdown.Item>
+                    <Dropdown.Item
+                      onClick={() => {
+                        handleExport({
+                          type: 'word',
+                          ext: 'docx',
+                          speakers: true,
+                          timecodes: false,
+                          inline_timecodes: true,
+                          hideTitle: true,
+                        });
+                      }}
+                    >
+                      Word (OHMS)
                     </Dropdown.Item>
                     <Dropdown.Divider />
                     <Dropdown.Item
