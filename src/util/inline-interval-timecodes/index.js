@@ -1,4 +1,4 @@
-import secondsToTimecode from '../timecode-converter/src/secondsToTimecode';
+import { shortTimecode } from '../timecode-converter';
 
 const insertTimecodesInline = ({ intervalSeconds = 30, transcriptData }) => {
   let lastInsertTime = 0;
@@ -9,7 +9,7 @@ const insertTimecodesInline = ({ intervalSeconds = 30, transcriptData }) => {
   for (const word of sortedWords) {
     if (word.start - lastInsertTime > intervalSeconds) {
       lastInsertTime = Math.floor(word.start / intervalSeconds) * intervalSeconds;
-      const timecode = secondsToTimecode(lastInsertTime);
+      const timecode = shortTimecode(lastInsertTime);
       newWords.push({ start: word.start, end: word.start + (word.end - word.start) / 2, text: `[${timecode}]` });
       word.start = word.start + (word.end - word.start) / 2;
     }
