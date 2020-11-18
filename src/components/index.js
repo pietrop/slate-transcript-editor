@@ -724,7 +724,7 @@ export default function SlateTranscriptEditor(props) {
                         handleExport({
                           type: 'word',
                           ext: 'docx',
-                          speakers: true,
+                          speakers: false,
                           timecodes: false,
                           inline_timecodes: true,
                           hideTitle: true,

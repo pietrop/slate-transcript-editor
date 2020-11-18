@@ -42,12 +42,12 @@ function slateToDocx({
       const timecodeStartTime = new TextRun(shortTimecode(slateParagraph.start));
       paragraphSpeakerTimecodes.addRun(timecodeStartTime);
     }
-    if (speakers || inline_speakers) {
+    if (speakers) {
       if (timecodes) {
         const speaker = new TextRun(slateParagraph.speaker).bold().tab();
         paragraphSpeakerTimecodes.addRun(speaker);
       } else {
-        const speaker = new TextRun(inline_speakers ? slateParagraph.speaker.toUpperCase() : slateParagraph.speaker).bold();
+        const speaker = new TextRun(slateParagraph.speaker).bold();
         paragraphSpeakerTimecodes.addRun(speaker);
       }
     }
@@ -56,11 +56,12 @@ function slateToDocx({
     const textBreak = new TextRun('').break();
 
     if (inline_speakers) {
-      paragraphSpeakerTimecodes.addRun(new TextRun(`:  ${paragraphContents}`)).addRun(textBreak);
+      paragraphSpeakerTimecodes.addRun(new TextRun(`${slateParagraph.speaker.toUpperCase()}:  ${paragraphContents}`));
     }
 
     if (timecodes || speakers || inline_speakers) {
       doc.addParagraph(paragraphSpeakerTimecodes);
+      doc.addParagraph(new Paragraph());
     }
 
     if (!inline_speakers) {
