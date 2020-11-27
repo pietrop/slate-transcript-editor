@@ -23,7 +23,7 @@ function segmentedTextToList(text) {
 }
 
 function countWords(text) {
-  return text.trim().replace(/\n /g, '').replace(/\n/g, ' ').split(' ').length;
+  return text.trim().replace(/\s\s+/g, ' ').split(' ').length;
 }
 
 function addTimecodesToLines(wordsList, paragraphs, lines) {
