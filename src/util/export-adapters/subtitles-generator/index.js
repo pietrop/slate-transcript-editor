@@ -15,7 +15,7 @@ import csvGenerator from './compose-subtitles/csv.js';
 
 function segmentedTextToList(text) {
   let result = text.split('\n\n');
-  result = result.map(line => {
+  result = result.map((line) => {
     return line.trim();
   });
 
@@ -23,17 +23,17 @@ function segmentedTextToList(text) {
 }
 
 function countWords(text) {
-  return text
-    .trim()
-    .replace(/\n /g, '')
-    .replace(/\n/g, ' ')
-    .split(' ').length;
+  // return text.trim().replace(/\n /g, '').replace(/\n/g, ' ').split(' ').length;
+  // Don't count multiple spaces as multiple words
+  // https://www.w3schools.com/jsref/jsref_regexp_whitespace.asp
+  // Do a global search for whitespace characters in a string
+  return text.trim().replace(/\s\s+/g, ' ').split(' ').length;
 }
 
 function addTimecodesToLines(wordsList, lines) {
   let startWordCounter = 0;
   let endWordCounter = 0;
-  const results = lines.map(line => {
+  const results = lines.map((line) => {
     endWordCounter += countWords(line);
 
     const jsonLine = { text: line.trim() };
@@ -72,7 +72,7 @@ function subtitlesComposer({ words, type, numberOfCharPerLine }) {
       return vttGenerator(subtitlesJson);
     case 'json':
       // converting timecodes to captions time stamps
-      return subtitlesJson.map(line => {
+      return subtitlesJson.map((line) => {
         line.start = formatSeconds(parseFloat(line.start)).replace('.', ',');
         line.end = formatSeconds(parseFloat(line.end)).replace('.', ',');
         return line;
