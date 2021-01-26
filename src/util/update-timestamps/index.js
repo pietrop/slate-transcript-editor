@@ -92,10 +92,9 @@ const createParagraphsFromSlateJs = (currentContent, newEntities) => {
  *
  * @return dpe transcript with paragraphs and words
  */
-export const updateTimestampsToDpe = (currentContent, words) => {
+export const converSlateToDpe = (currentContent, words) => {
   const currentText = slateToText({ value: currentContent, speakers: false, timecodes: false, atlasFormat: false });
   const alignedWords = alignSTT(words, currentText);
   const updatedContent = createParagraphsFromSlateJs(currentContent, alignedWords);
-  console.log('updatedContent', updatedContent);
   return { words: alignedWords, paragraphs: updatedContent };
 };

@@ -35,14 +35,13 @@ import { shortTimecode } from '../util/timecode-converter';
 import slateToText from '../util/export-adapters/txt';
 import download from '../util/downlaod/index.js';
 import convertDpeToSlate from '../util/dpe-to-slate';
-import converSlateToDpe, { convertSlateToDpeAsync } from '../util/export-adapters/slate-to-dpe/index.js';
 import slateToDocx from '../util/export-adapters/docx';
-import restoreTimecodes from '../util/restore-timcodes';
+// TODO: This should be moved in export utils
 import insertTimecodesInline from '../util/inline-interval-timecodes';
 import pluck from '../util/pluk';
 import subtitlesGenerator from '../util/export-adapters/subtitles-generator/index.js';
 import subtitlesExportOptionsList from '../util/export-adapters/subtitles-generator/list.js';
-import updateTimestamps from '../util/update-timestamps';
+import updateTimestamps, { converSlateToDpe } from '../util/update-timestamps';
 
 const PLAYBACK_RATE_VALUES = [0.2, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 3, 3.5];
 const SEEK_BACK_SEC = 15;
@@ -317,12 +316,14 @@ export default function SlateTranscriptEditor(props) {
         }
         return slateToText({ value: tmpValue, speakers, timecodes, atlasFormat });
       case 'json-slate':
-        return value;
+        if (isContentModified) {
+          const tmpValue = await handleRestoreTimecodes();
+          return tmpValue;
+        } else {
+          return value;
+        }
       case 'json-digitalpaperedit':
-        console.log('json-digitalpaperedit');
-        const res = convertSlateToDpeAsync(value, props.transcriptData);
-        console.log('res', res);
-        return res;
+        return converSlateToDpe(value, props.transcriptData);
       case 'word':
         let docTmpValue = value;
         if (timecodes || inline) {
@@ -389,10 +390,7 @@ export default function SlateTranscriptEditor(props) {
    */
   const handleRestoreTimecodesWithInlineTimecodes = async (transcriptDataInput) => {
     let transcriptData = insertTimecodesInline({ transcriptData: transcriptDataInput });
-    const restoredTimecodes = await restoreTimecodes({
-      transcriptData,
-      slateValue: convertDpeToSlate(transcriptData),
-    });
+    const restoredTimecodes = await updateTimestamps(convertDpeToSlate(transcriptData), transcriptData);
     handleRestoreTimecodes(false);
     return restoredTimecodes;
   };
@@ -407,10 +405,7 @@ export default function SlateTranscriptEditor(props) {
       const restoredTimecodes = await handleRestoreTimecodesWithInlineTimecodes(props.transcriptData);
       return restoredTimecodes;
     } else {
-      const alignedSlateData = await restoreTimecodes({
-        slateValue: value,
-        transcriptData: props.transcriptData,
-      });
+      const alignedSlateData = await updateTimestamps(value, props.transcriptData);
       setValue(alignedSlateData);
       setIsContentIsModified(false);
       return alignedSlateData;
