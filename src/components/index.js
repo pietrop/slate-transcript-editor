@@ -70,8 +70,10 @@ export default function SlateTranscriptEditor(props) {
   const [showSpeakersCheatShet, setShowSpeakersCheatShet] = useState(false);
   const [saveTimer, setSaveTimer] = useState(null);
   const [isPauseWhiletyping, setIsPauseWhiletyping] = useState(false);
-
   const [isProcessing, setIsProcessing] = useState(false);
+  // used isContentModified to avoid unecessarily run alignment if the slate value contnet has not been modified by the user since
+  // last save or alignment
+  const [isContentModified, setIsContentIsModified] = useState(false);
 
   useEffect(() => {
     if (isProcessing) {
@@ -320,7 +322,14 @@ export default function SlateTranscriptEditor(props) {
         if (timecodes || inline) {
           docTmpValue = await handleRestoreTimecodes(inline);
         }
-        return slateToDocx({ value: docTmpValue, speakers, timecodes, inline_speakers: inline, title: props.title, hideTitle });
+        return slateToDocx({
+          value: docTmpValue,
+          speakers,
+          timecodes,
+          inline_speakers: inline,
+          title: props.title,
+          hideTitle,
+        });
       default:
         // some default, unlikely to be called
         return {};
@@ -336,7 +345,14 @@ export default function SlateTranscriptEditor(props) {
   const handleExport = async ({ type, ext, speakers, timecodes, inlineTimecodes, hideTitle, atlasFormat }) => {
     try {
       setIsProcessing(true);
-      let editorContnet = await getEditorContent({ type, speakers, inlineTimecodes, timecodes, hideTitle, atlasFormat });
+      let editorContnet = await getEditorContent({
+        type,
+        speakers,
+        inlineTimecodes,
+        timecodes,
+        hideTitle,
+        atlasFormat,
+      });
       if (ext === 'json') {
         editorContnet = JSON.stringify(editorContnet, null, 2);
       }
@@ -361,21 +377,36 @@ export default function SlateTranscriptEditor(props) {
     }
   };
 
+  /**
+   * Helper function for handleRestoreTimecodes,
+   * for setitng timecodes for OHMS output
+   */
+  const handleRestoreTimecodesWithInlineTimecodes = async (transcriptDataInput) => {
+    let transcriptData = insertTimecodesInline({ transcriptData: transcriptDataInput });
+    const restoredTimecodes = await restoreTimecodes({
+      transcriptData,
+      slateValue: convertDpeToSlate(transcriptData),
+    });
+    handleRestoreTimecodes(false);
+    return restoredTimecodes;
+  };
+
+  // TODO: refacto this function, perhaps with an helper function
+  // to be cleaner and easier to follow.
   const handleRestoreTimecodes = async (inlineTimecodes = false) => {
+    if (!isContentModified) {
+      return value;
+    }
     if (inlineTimecodes) {
-      let transcriptData = insertTimecodesInline({ transcriptData: props.transcriptData });
-      const ret = await restoreTimecodes({
-        transcriptData,
-        slateValue: convertDpeToSlate(transcriptData),
-      });
-      handleRestoreTimecodes(false);
-      return ret;
+      const restoredTimecodes = await handleRestoreTimecodesWithInlineTimecodes(props.transcriptData);
+      return restoredTimecodes;
     } else {
       const alignedSlateData = await restoreTimecodes({
         slateValue: value,
         transcriptData: props.transcriptData,
       });
       setValue(alignedSlateData);
+      setIsContentIsModified(false);
       return alignedSlateData;
     }
   };
@@ -422,7 +453,11 @@ export default function SlateTranscriptEditor(props) {
         speakers: true,
         timecodes: true,
       });
-      let subtitlesJson = subtitlesGenerator({ words: editorContent.words, paragraphs: editorContent.paragraphs, type });
+      let subtitlesJson = subtitlesGenerator({
+        words: editorContent.words,
+        paragraphs: editorContent.paragraphs,
+        type,
+      });
       if (type === 'json') {
         subtitlesJson = JSON.stringify(subtitlesJson, null, 2);
       }
@@ -442,6 +477,7 @@ export default function SlateTranscriptEditor(props) {
   };
 
   const handleOnKeyDown = (event) => {
+    setIsContentIsModified(true);
     if (isPauseWhiletyping) {
       // logic for pause while typing
       // https://schier.co/blog/wait-for-user-to-stop-typing-using-javascript
@@ -678,7 +714,12 @@ export default function SlateTranscriptEditor(props) {
                     </Dropdown.Item>
                     <Dropdown.Item
                       onClick={() => {
-                        handleExport({ type: 'text', ext: 'txt', speakers: true, timecodes: true });
+                        handleExport({
+                          type: 'text',
+                          ext: 'txt',
+                          speakers: true,
+                          timecodes: true,
+                        });
                       }}
                       disable
                     >
