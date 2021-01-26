@@ -69,7 +69,7 @@ export default function SlateTranscriptEditor(props) {
   const [showSpeakersCheatShet, setShowSpeakersCheatShet] = useState(false);
   const [saveTimer, setSaveTimer] = useState(null);
   const [isPauseWhiletyping, setIsPauseWhiletyping] = useState(false);
-
+  // const [aligning, setAligning] = useState(false);
   useEffect(() => {
     if (props.transcriptData) {
       const res = convertDpeToSlate(props.transcriptData);
@@ -339,11 +339,15 @@ export default function SlateTranscriptEditor(props) {
   };
 
   const handleRestoreTimecodes = () => {
+    console.log('start alginment');
+    // setAligning(true);
     const alignedSlateData = restoreTimecodes({
       slateValue: value,
       transcriptData: props.transcriptData,
     });
     setValue(alignedSlateData);
+    // setAligning(false);
+    console.log('stop alginment');
     return alignedSlateData;
   };
 
@@ -830,7 +834,10 @@ export default function SlateTranscriptEditor(props) {
                 }
               >
                 <Button onClick={handleRestoreTimecodes} variant="light">
-                  <FontAwesomeIcon icon={faSync} />
+                  <FontAwesomeIcon
+                    icon={faSync}
+                    // spin={aligning ? true : false}
+                  />
                 </Button>
               </OverlayTrigger>
             </Col>
