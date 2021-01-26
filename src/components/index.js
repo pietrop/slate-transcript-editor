@@ -70,7 +70,6 @@ export default function SlateTranscriptEditor(props) {
   const [showSpeakersCheatShet, setShowSpeakersCheatShet] = useState(false);
   const [saveTimer, setSaveTimer] = useState(null);
   const [isPauseWhiletyping, setIsPauseWhiletyping] = useState(false);
-  // const [aligning, setAligning] = useState(false);
 
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -304,7 +303,7 @@ export default function SlateTranscriptEditor(props) {
     }
   };
 
-  const getEditorContent = async ({ type, speakers, timecodes, inline_timecodes: inline, hideTitle, atlasFormat }) => {
+  const getEditorContent = async ({ type, speakers, timecodes, inlineTimecodes: inline, hideTitle, atlasFormat }) => {
     switch (type) {
       case 'text':
         let tmpValue = value;
@@ -334,10 +333,10 @@ export default function SlateTranscriptEditor(props) {
     }
     return path.basename(props.mediaUrl).trim();
   };
-  const handleExport = async ({ type, ext, speakers, timecodes, inline_timecodes, hideTitle, atlasFormat }) => {
+  const handleExport = async ({ type, ext, speakers, timecodes, inlineTimecodes, hideTitle, atlasFormat }) => {
     try {
       setIsProcessing(true);
-      let editorContnet = await getEditorContent({ type, speakers, inline_timecodes, timecodes, hideTitle, atlasFormat });
+      let editorContnet = await getEditorContent({ type, speakers, inlineTimecodes, timecodes, hideTitle, atlasFormat });
       if (ext === 'json') {
         editorContnet = JSON.stringify(editorContnet, null, 2);
       }
@@ -362,8 +361,8 @@ export default function SlateTranscriptEditor(props) {
     }
   };
 
-  const handleRestoreTimecodes = async (inline_timecodes = false) => {
-    if (inline_timecodes) {
+  const handleRestoreTimecodes = async (inlineTimecodes = false) => {
+    if (inlineTimecodes) {
       let transcriptData = insertTimecodesInline({ transcriptData: props.transcriptData });
       const ret = await restoreTimecodes({
         transcriptData,
@@ -756,7 +755,7 @@ export default function SlateTranscriptEditor(props) {
                           ext: 'docx',
                           speakers: false,
                           timecodes: false,
-                          inline_timecodes: true,
+                          inlineTimecodes: true,
                           hideTitle: true,
                         });
                       }}

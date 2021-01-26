@@ -4,7 +4,6 @@ import { withKnobs, text, boolean, number, object, select } from '@storybook/add
 import { withInfo } from '@storybook/addon-info';
 
 import SlateTranscriptEditor from './index.js';
-import 'bootstrap-css-only';
 
 export default {
   title: 'Live',
@@ -26,7 +25,7 @@ const DEMO_MEDIA_URL_SOLEIO =
 import DEMO_SOLEIO_LIVE from '../sample-data/segmented-transcript-soleio-dpe.json';
 
 // Parent component to simulate results from a live STT stream.
-const Example = props => {
+const Example = (props) => {
   // Declare a new state variable, which we'll call "count"
   const [jsonData, setJsonData] = useState({});
   const [interimResults, setInterimResults] = useState({});
@@ -34,7 +33,7 @@ const Example = props => {
   useEffect(() => {
     props.transcriptInParts &&
       props.transcriptInParts.forEach(
-        delayLoop(transcriptPart => {
+        delayLoop((transcriptPart) => {
           setInterimResults(transcriptPart);
         }, 3000)
       );
