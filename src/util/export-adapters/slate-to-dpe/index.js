@@ -75,9 +75,6 @@ const converSlateToDpe = (data, sttJson) => {
 };
 
 export const convertSlateToDpeAsync = async (data, sttJson) => {
-  // const linesWithSpeaker = prepSlateParagraphForAlignement(data);
-  // const worker = new Worker('./align_worker.js', { type: 'module' });
-
   return new Promise((response, reject) => {
     const linesWithSpeaker = prepSlateParagraphForAlignement(data);
     const res = alignDiraizedText(linesWithSpeaker, sttJson);

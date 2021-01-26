@@ -388,9 +388,9 @@ export default function SlateTranscriptEditor(props) {
     Transforms.insertText(editor, '[INAUDIBLE]');
   };
 
-  // const handleInsertMusicNote = ()=>{
-  //   Transforms.insertText(editor, '♫'); // or ♪
-  // }
+  const handleInsertMusicNote = () => {
+    Transforms.insertText(editor, '♫'); // or ♪
+  };
 
   /**
    * See explanation in `src/utils/dpe-to-slate/index.js` for how this function works with css injection
@@ -862,6 +862,15 @@ export default function SlateTranscriptEditor(props) {
               </OverlayTrigger>
             </Col>
             <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
+              <OverlayTrigger delay={TOOTLIP_DELAY} placement={'bottom'} overlay={<Tooltip id="tooltip-disabled">Insert a ♫ in the text</Tooltip>}>
+                <span className="d-inline-block">
+                  <Button onClick={handleInsertMusicNote} variant={'light'}>
+                    <FontAwesomeIcon icon={faMusic} />
+                  </Button>
+                </span>
+              </OverlayTrigger>
+            </Col>
+            <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
               <OverlayTrigger
                 delay={TOOTLIP_DELAY}
                 placement={'bottom'}
@@ -919,18 +928,6 @@ export default function SlateTranscriptEditor(props) {
                 {/* </span> */}
               </OverlayTrigger>
             </Col>
-            {/* <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
-                      <OverlayTrigger delay={TOOTLIP_DELAY} placement={'bottom'} overlay={<Tooltip id="tooltip-disabled">
-                         Insert a ♫ in the text
-                      </Tooltip>}>
-                        <span className="d-inline-block">
-                      <Button 
-                        onClick={handleInsertMusicNote} variant={'light'}>
-                          <FontAwesomeIcon icon={ faMusic }  /> 
-                        </Button>
-                        </span>
-                      </OverlayTrigger>
-                    </Col> */}
           </Row>
           <br />
         </Col>
