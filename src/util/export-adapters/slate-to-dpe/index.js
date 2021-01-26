@@ -4,8 +4,10 @@ import { Node } from 'slate';
 // helper module to generate html view, that contains and fs, and it breaks storybook webpack.
 // TODO: refactor in ` align-diarized-text` so that it can work outside node only, but also in browser, without workaround
 // const alignDiraizedText = require('../../../../node_modules/align-diarized-text/src/add-timecodes-to-quotes');
-const alignDiraizedText = require('align-diarized-text');
+// const alignDiraizedText = require('align-diarized-text');
 // import alignDiraizedText from 'align-diarized-text/src/index';
+import alignDiraizedText from 'align-diarized-text';
+import { updateTimestampsToDpe } from '../../update-timestamps';
 
 // TODO: this function needs to be brough into alignDiraizedText
 // and applied to paragraphs - to avoid boundaries overlapp
@@ -69,16 +71,19 @@ const convertSlateToDpePostAlignment = (res) => {
 };
 
 const converSlateToDpe = (data, sttJson) => {
-  const linesWithSpeaker = prepSlateParagraphForAlignement(data);
-  const res = alignDiraizedText(linesWithSpeaker, sttJson);
-  return convertSlateToDpePostAlignment(res);
+  // const linesWithSpeaker = prepSlateParagraphForAlignement(data);
+  // const res = alignDiraizedText(linesWithSpeaker, sttJson);
+  // return convertSlateToDpePostAlignment(res);
+  const responseData = updateTimestampsToDpe(data, sttJson);
+  return responseData;
 };
 
 export const convertSlateToDpeAsync = async (data, sttJson) => {
   return new Promise((response, reject) => {
-    const linesWithSpeaker = prepSlateParagraphForAlignement(data);
-    const res = alignDiraizedText(linesWithSpeaker, sttJson);
-    const responseData = convertSlateToDpePostAlignment(res);
+    // const linesWithSpeaker = prepSlateParagraphForAlignement(data);
+    // const res = alignDiraizedText(linesWithSpeaker, sttJson);
+    // const responseData = convertSlateToDpePostAlignment(res);
+    const responseData = updateTimestampsToDpe(data, sttJson);
     response(responseData);
   });
 };

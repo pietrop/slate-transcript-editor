@@ -25,7 +25,7 @@ const slateToText = ({ value, speakers, timecodes, atlasFormat }) => {
   return (
     value
       // Return the string content of each paragraph in the value's children.
-      .map(n => {
+      .map((n) => {
         if (atlasFormat) {
           return `${timecodes ? `${speakers ? n.speaker : ''}\t[${shortTimecode(n.start)}]\t` : ''}\t${Node.string(n)}`;
         } else {

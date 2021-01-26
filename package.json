@@ -64,7 +64,8 @@
     "slate": "^0.59.0",
     "slate-history": "^0.59.0",
     "slate-react": "^0.59.0",
-    "smpte-timecode": "^1.2.3"
+    "smpte-timecode": "^1.2.3",
+    "stt-align-node": "^1.1.7"
   },
   "husky": {
     "hooks": {

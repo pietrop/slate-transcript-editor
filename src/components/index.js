@@ -42,6 +42,7 @@ import insertTimecodesInline from '../util/inline-interval-timecodes';
 import pluck from '../util/pluk';
 import subtitlesGenerator from '../util/export-adapters/subtitles-generator/index.js';
 import subtitlesExportOptionsList from '../util/export-adapters/subtitles-generator/list.js';
+import updateTimestamps from '../util/update-timestamps';
 
 const PLAYBACK_RATE_VALUES = [0.2, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 3, 3.5];
 const SEEK_BACK_SEC = 15;
@@ -308,6 +309,8 @@ export default function SlateTranscriptEditor(props) {
   const getEditorContent = async ({ type, speakers, timecodes, inlineTimecodes: inline, hideTitle, atlasFormat }) => {
     switch (type) {
       case 'text':
+        // const updated = updateTimestamps(value, props.transcriptData);
+        // console.log('updated updated:', updated);
         let tmpValue = value;
         if (timecodes || inline) {
           tmpValue = await handleRestoreTimecodes(inline);
@@ -316,7 +319,10 @@ export default function SlateTranscriptEditor(props) {
       case 'json-slate':
         return value;
       case 'json-digitalpaperedit':
-        return convertSlateToDpeAsync(value, props.transcriptData);
+        console.log('json-digitalpaperedit');
+        const res = convertSlateToDpeAsync(value, props.transcriptData);
+        console.log('res', res);
+        return res;
       case 'word':
         let docTmpValue = value;
         if (timecodes || inline) {

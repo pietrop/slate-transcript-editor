@@ -12,6 +12,7 @@ import ttmlGenerator from './compose-subtitles/ttml.js';
 import srtGenerator from './compose-subtitles/srt.js';
 import vttGenerator from './compose-subtitles/vtt.js';
 import csvGenerator from './compose-subtitles/csv.js';
+import countWords from '../../count-words';
 
 function segmentedTextToList(text) {
   let result = text.split('\n\n');
@@ -20,14 +21,6 @@ function segmentedTextToList(text) {
   });
 
   return result;
-}
-
-function countWords(text) {
-  // return text.trim().replace(/\n /g, '').replace(/\n/g, ' ').split(' ').length;
-  // Don't count multiple spaces as multiple words
-  // https://www.w3schools.com/jsref/jsref_regexp_whitespace.asp
-  // Do a global search for whitespace characters in a string
-  return text.trim().replace(/\s\s+/g, ' ').split(' ').length;
 }
 
 function addTimecodesToLines(wordsList, paragraphs, lines) {
