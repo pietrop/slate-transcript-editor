@@ -70,9 +70,10 @@ export default function SlateTranscriptEditor(props) {
   const [showSpeakersCheatShet, setShowSpeakersCheatShet] = useState(false);
   const [saveTimer, setSaveTimer] = useState(null);
   const [isPauseWhiletyping, setIsPauseWhiletyping] = useState(false);
-  // const [aligning, setAligning] = useState(false);
-
   const [isProcessing, setIsProcessing] = useState(false);
+  // used isContentModified to avoid unecessarily run alignment if the slate value contnet has not been modified by the user since
+  // last save or alignment
+  const [isContentModified, setIsContentIsModified] = useState(false);
 
   useEffect(() => {
     if (isProcessing) {
@@ -304,7 +305,7 @@ export default function SlateTranscriptEditor(props) {
     }
   };
 
-  const getEditorContent = async ({ type, speakers, timecodes, inline_timecodes: inline, hideTitle, atlasFormat }) => {
+  const getEditorContent = async ({ type, speakers, timecodes, inlineTimecodes: inline, hideTitle, atlasFormat }) => {
     switch (type) {
       case 'text':
         let tmpValue = value;
@@ -321,7 +322,14 @@ export default function SlateTranscriptEditor(props) {
         if (timecodes || inline) {
           docTmpValue = await handleRestoreTimecodes(inline);
         }
-        return slateToDocx({ value: docTmpValue, speakers, timecodes, inline_speakers: inline, title: props.title, hideTitle });
+        return slateToDocx({
+          value: docTmpValue,
+          speakers,
+          timecodes,
+          inline_speakers: inline,
+          title: props.title,
+          hideTitle,
+        });
       default:
         // some default, unlikely to be called
         return {};
@@ -334,10 +342,17 @@ export default function SlateTranscriptEditor(props) {
     }
     return path.basename(props.mediaUrl).trim();
   };
-  const handleExport = async ({ type, ext, speakers, timecodes, inline_timecodes, hideTitle, atlasFormat }) => {
+  const handleExport = async ({ type, ext, speakers, timecodes, inlineTimecodes, hideTitle, atlasFormat }) => {
     try {
       setIsProcessing(true);
-      let editorContnet = await getEditorContent({ type, speakers, inline_timecodes, timecodes, hideTitle, atlasFormat });
+      let editorContnet = await getEditorContent({
+        type,
+        speakers,
+        inlineTimecodes,
+        timecodes,
+        hideTitle,
+        atlasFormat,
+      });
       if (ext === 'json') {
         editorContnet = JSON.stringify(editorContnet, null, 2);
       }
@@ -362,21 +377,36 @@ export default function SlateTranscriptEditor(props) {
     }
   };
 
-  const handleRestoreTimecodes = async (inline_timecodes = false) => {
-    if (inline_timecodes) {
-      let transcriptData = insertTimecodesInline({ transcriptData: props.transcriptData });
-      const ret = await restoreTimecodes({
-        transcriptData,
-        slateValue: convertDpeToSlate(transcriptData),
-      });
-      handleRestoreTimecodes(false);
-      return ret;
+  /**
+   * Helper function for handleRestoreTimecodes,
+   * for setitng timecodes for OHMS output
+   */
+  const handleRestoreTimecodesWithInlineTimecodes = async (transcriptDataInput) => {
+    let transcriptData = insertTimecodesInline({ transcriptData: transcriptDataInput });
+    const restoredTimecodes = await restoreTimecodes({
+      transcriptData,
+      slateValue: convertDpeToSlate(transcriptData),
+    });
+    handleRestoreTimecodes(false);
+    return restoredTimecodes;
+  };
+
+  // TODO: refacto this function, perhaps with an helper function
+  // to be cleaner and easier to follow.
+  const handleRestoreTimecodes = async (inlineTimecodes = false) => {
+    if (!isContentModified) {
+      return value;
+    }
+    if (inlineTimecodes) {
+      const restoredTimecodes = await handleRestoreTimecodesWithInlineTimecodes(props.transcriptData);
+      return restoredTimecodes;
     } else {
       const alignedSlateData = await restoreTimecodes({
         slateValue: value,
         transcriptData: props.transcriptData,
       });
       setValue(alignedSlateData);
+      setIsContentIsModified(false);
       return alignedSlateData;
     }
   };
@@ -388,9 +418,9 @@ export default function SlateTranscriptEditor(props) {
     Transforms.insertText(editor, '[INAUDIBLE]');
   };
 
-  // const handleInsertMusicNote = ()=>{
-  //   Transforms.insertText(editor, '♫'); // or ♪
-  // }
+  const handleInsertMusicNote = () => {
+    Transforms.insertText(editor, '♫'); // or ♪
+  };
 
   /**
    * See explanation in `src/utils/dpe-to-slate/index.js` for how this function works with css injection
@@ -423,7 +453,11 @@ export default function SlateTranscriptEditor(props) {
         speakers: true,
         timecodes: true,
       });
-      let subtitlesJson = subtitlesGenerator({ words: editorContent.words, paragraphs: editorContent.paragraphs, type });
+      let subtitlesJson = subtitlesGenerator({
+        words: editorContent.words,
+        paragraphs: editorContent.paragraphs,
+        type,
+      });
       if (type === 'json') {
         subtitlesJson = JSON.stringify(subtitlesJson, null, 2);
       }
@@ -443,6 +477,7 @@ export default function SlateTranscriptEditor(props) {
   };
 
   const handleOnKeyDown = (event) => {
+    setIsContentIsModified(true);
     if (isPauseWhiletyping) {
       // logic for pause while typing
       // https://schier.co/blog/wait-for-user-to-stop-typing-using-javascript
@@ -679,7 +714,12 @@ export default function SlateTranscriptEditor(props) {
                     </Dropdown.Item>
                     <Dropdown.Item
                       onClick={() => {
-                        handleExport({ type: 'text', ext: 'txt', speakers: true, timecodes: true });
+                        handleExport({
+                          type: 'text',
+                          ext: 'txt',
+                          speakers: true,
+                          timecodes: true,
+                        });
                       }}
                       disable
                     >
@@ -756,7 +796,7 @@ export default function SlateTranscriptEditor(props) {
                           ext: 'docx',
                           speakers: false,
                           timecodes: false,
-                          inline_timecodes: true,
+                          inlineTimecodes: true,
                           hideTitle: true,
                         });
                       }}
@@ -862,6 +902,15 @@ export default function SlateTranscriptEditor(props) {
               </OverlayTrigger>
             </Col>
             <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
+              <OverlayTrigger delay={TOOTLIP_DELAY} placement={'bottom'} overlay={<Tooltip id="tooltip-disabled">Insert a ♫ in the text</Tooltip>}>
+                <span className="d-inline-block">
+                  <Button onClick={handleInsertMusicNote} variant={'light'}>
+                    <FontAwesomeIcon icon={faMusic} />
+                  </Button>
+                </span>
+              </OverlayTrigger>
+            </Col>
+            <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
               <OverlayTrigger
                 delay={TOOTLIP_DELAY}
                 placement={'bottom'}
@@ -919,18 +968,6 @@ export default function SlateTranscriptEditor(props) {
                 {/* </span> */}
               </OverlayTrigger>
             </Col>
-            {/* <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
-                      <OverlayTrigger delay={TOOTLIP_DELAY} placement={'bottom'} overlay={<Tooltip id="tooltip-disabled">
-                         Insert a ♫ in the text
-                      </Tooltip>}>
-                        <span className="d-inline-block">
-                      <Button 
-                        onClick={handleInsertMusicNote} variant={'light'}>
-                          <FontAwesomeIcon icon={ faMusic }  /> 
-                        </Button>
-                        </span>
-                      </OverlayTrigger>
-                    </Col> */}
           </Row>
           <br />
         </Col>
