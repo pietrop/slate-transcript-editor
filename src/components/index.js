@@ -69,7 +69,7 @@ export default function SlateTranscriptEditor(props) {
   const [showSpeakersCheatShet, setShowSpeakersCheatShet] = useState(false);
   const [saveTimer, setSaveTimer] = useState(null);
   const [isPauseWhiletyping, setIsPauseWhiletyping] = useState(false);
-
+  // const [aligning, setAligning] = useState(false);
   useEffect(() => {
     if (props.transcriptData) {
       const res = convertDpeToSlate(props.transcriptData);
@@ -135,13 +135,13 @@ export default function SlateTranscriptEditor(props) {
     setShowSpeakersCheatShet(!showSpeakersCheatShet);
   };
 
-  const handleTimeUpdated = e => {
+  const handleTimeUpdated = (e) => {
     setCurrentTime(e.target.currentTime);
     // TODO: setting duration here as a workaround
     setDuration(mediaRef.current.duration);
   };
 
-  const handleSetPlaybackRate = e => {
+  const handleSetPlaybackRate = (e) => {
     const tmpNewPlaybackRateValue = parseFloat(e.target.value);
     if (mediaRef && mediaRef.current) {
       mediaRef.current.playbackRate = tmpNewPlaybackRateValue;
@@ -155,7 +155,7 @@ export default function SlateTranscriptEditor(props) {
     }
   };
 
-  const renderElement = useCallback(props => {
+  const renderElement = useCallback((props) => {
     switch (props.element.type) {
       case 'timedText':
         return <TimedTextElement {...props} />;
@@ -187,9 +187,9 @@ export default function SlateTranscriptEditor(props) {
    * especially on long transcripts
    * @param {*} element - props.element, from `renderElement` function
    */
-  const handleSetSpeakerName = element => {
+  const handleSetSpeakerName = (element) => {
     const pathToCurrentNode = ReactEditor.findPath(editor, element);
-    const oldSpeakerName = element.speaker.toUpperCase();
+    const oldSpeakerName = element.speaker;
     const newSpeakerName = prompt('Change speaker name', oldSpeakerName);
     if (newSpeakerName) {
       const isUpdateAllSpeakerInstances = confirm(`Would you like to replace all occurrences of ${oldSpeakerName} with ${newSpeakerName}?`);
@@ -201,7 +201,7 @@ export default function SlateTranscriptEditor(props) {
           { type: 'timedText', speaker: newSpeakerName },
           {
             at: rangeForTheWholeEditor,
-            match: node => node.type === 'timedText' && node.speaker === oldSpeakerName,
+            match: (node) => node.type === 'timedText' && node.speaker.toLowerCase() === oldSpeakerName.toLowerCase(),
           }
         );
       } else {
@@ -211,7 +211,7 @@ export default function SlateTranscriptEditor(props) {
     }
   };
 
-  const TimedTextElement = props => {
+  const TimedTextElement = (props) => {
     let textLg = 12;
     let textXl = 12;
     if (!showSpeakers && !showTimecodes) {
@@ -252,12 +252,14 @@ export default function SlateTranscriptEditor(props) {
               style={{
                 cursor: 'pointer',
                 width: '100%',
+                textTransform: 'uppercase',
               }}
-              title={props.element.speaker.toUpperCase()}
+              // title={props.element.speaker.toUpperCase()}
+              title={props.element.speaker}
               onClick={handleSetSpeakerName.bind(this, props.element)}
             >
               {' '}
-              {props.element.speaker.toUpperCase()}
+              {props.element.speaker}
             </span>
           </Col>
         )}
@@ -268,11 +270,11 @@ export default function SlateTranscriptEditor(props) {
     );
   };
 
-  const DefaultElement = props => {
+  const DefaultElement = (props) => {
     return <p {...props.attributes}>{props.children}</p>;
   };
 
-  const handleTimedTextClick = e => {
+  const handleTimedTextClick = (e) => {
     if (e.target.classList.contains('timecode')) {
       const start = e.target.dataset.start;
       if (mediaRef && mediaRef.current) {
@@ -339,11 +341,15 @@ export default function SlateTranscriptEditor(props) {
   };
 
   const handleRestoreTimecodes = () => {
+    console.log('start alginment');
+    // setAligning(true);
     const alignedSlateData = restoreTimecodes({
       slateValue: value,
       transcriptData: props.transcriptData,
     });
     setValue(alignedSlateData);
+    // setAligning(false);
+    console.log('stop alginment');
     return alignedSlateData;
   };
 
@@ -363,7 +369,7 @@ export default function SlateTranscriptEditor(props) {
    * to provide current paragaph's highlight.
    * @param {Number} currentTime - float in seconds
    */
-  const generatePreviousTimingsUpToCurrent = currentTime => {
+  const generatePreviousTimingsUpToCurrent = (currentTime) => {
     // edge case - empty transcription
     if (isEmpty(props.transcriptData)) {
       return '';
@@ -402,15 +408,41 @@ export default function SlateTranscriptEditor(props) {
     }
     return tmpMediaType;
   };
+
+  const handleOnKeyDown = (event) => {
+    if (isPauseWhiletyping) {
+      // logic for pause while typing
+      // https://schier.co/blog/wait-for-user-to-stop-typing-using-javascript
+      // TODO: currently eve the video was paused, and pause while typing is on,
+      // it will play it when stopped typing. so added btn to turn feature on off.
+      // and disabled as default.
+      // also pause while typing might introduce performance issues on longer transcripts
+      // if on every keystroke it's creating and destroing a timer.
+      // should find a more efficient way to "debounce" or "throttle" this functionality
+      if (mediaRef && mediaRef.current) {
+        mediaRef.current.pause();
+      }
+
+      if (saveTimer !== null) {
+        clearTimeout(saveTimer);
+      }
+
+      const tmpSaveTimer = setTimeout(() => {
+        if (mediaRef && mediaRef.current) {
+          mediaRef.current.play();
+        }
+      }, PAUSE_WHILTE_TYPING_TIMEOUT_MILLISECONDS);
+      setSaveTimer(tmpSaveTimer);
+    }
+  };
   return (
     <Container fluid style={{ backgroundColor: '#eee', height: '100vh', paddingTop: '1em' }}>
       <style scoped>
         {`
               /* Next words */
-              .timecode[data-previous-timings*="${mediaRef &&
-                mediaRef.current &&
-                mediaRef.current.duration &&
-                generatePreviousTimingsUpToCurrent(parseInt(currentTime))}"]{
+              .timecode[data-previous-timings*="${
+                mediaRef && mediaRef.current && mediaRef.current.duration && generatePreviousTimingsUpToCurrent(parseInt(currentTime))
+              }"]{
                   color:  #9E9E9E;
               }
           `}
@@ -541,7 +573,7 @@ export default function SlateTranscriptEditor(props) {
                 <Slate
                   editor={editor}
                   value={value}
-                  onChange={value => {
+                  onChange={(value) => {
                     if (props.handleAutoSaveChanges) {
                       props.handleAutoSaveChanges(value);
                     }
@@ -552,32 +584,7 @@ export default function SlateTranscriptEditor(props) {
                     readOnly={typeof props.isEditable === 'boolean' ? !props.isEditable : false}
                     renderElement={renderElement}
                     renderLeaf={renderLeaf}
-                    onKeyDown={event => {
-                      if (isPauseWhiletyping) {
-                        // logic for pause while typing
-                        // https://schier.co/blog/wait-for-user-to-stop-typing-using-javascript
-                        // TODO: currently eve the video was paused, and pause while typing is on,
-                        // it will play it when stopped typing. so added btn to turn feature on off.
-                        // and disabled as default.
-                        // also pause while typing might introduce performance issues on longer transcripts
-                        // if on every keystroke it's creating and destroing a timer.
-                        // should find a more efficient way to "debounce" or "throttle" this functionality
-                        if (mediaRef && mediaRef.current) {
-                          mediaRef.current.pause();
-                        }
-
-                        if (saveTimer !== null) {
-                          clearTimeout(saveTimer);
-                        }
-
-                        const tmpSaveTimer = setTimeout(() => {
-                          if (mediaRef && mediaRef.current) {
-                            mediaRef.current.play();
-                          }
-                        }, PAUSE_WHILTE_TYPING_TIMEOUT_MILLISECONDS);
-                        setSaveTimer(tmpSaveTimer);
-                      }
-                    }}
+                    onKeyDown={handleOnKeyDown}
                   />
                 </Slate>
               </section>
@@ -829,7 +836,10 @@ export default function SlateTranscriptEditor(props) {
                 }
               >
                 <Button onClick={handleRestoreTimecodes} variant="light">
-                  <FontAwesomeIcon icon={faSync} />
+                  <FontAwesomeIcon
+                    icon={faSync}
+                    // spin={aligning ? true : false}
+                  />
                 </Button>
               </OverlayTrigger>
             </Col>
