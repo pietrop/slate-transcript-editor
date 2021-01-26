@@ -10,7 +10,7 @@ import divideIntoTwoLines from './divide-into-two-lines/index.js';
  */
 function getTextFromWordsList(words) {
   return words
-    .map(word => {
+    .map((word) => {
       return word.text;
     })
     .join(' ');
@@ -31,7 +31,6 @@ function preSegmentText(textInput, tmpNumberOfCharPerLine = 35) {
   // - 3.Fold char limit per line
   const foldedText = foldWords(textWithLineBreakBetweenSentences, tmpNumberOfCharPerLine);
   // - 4.Divide into two lines
-  // console.log(foldedText)
   const textDividedIntoTwoLines = divideIntoTwoLines(foldedText);
 
   return textDividedIntoTwoLines;

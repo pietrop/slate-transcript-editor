@@ -5,6 +5,7 @@ import { Node } from 'slate';
 // TODO: refactor in ` align-diarized-text` so that it can work outside node only, but also in browser, without workaround
 // const alignDiraizedText = require('../../../../node_modules/align-diarized-text/src/add-timecodes-to-quotes');
 const alignDiraizedText = require('align-diarized-text');
+// import alignDiraizedText from 'align-diarized-text/src/index';
 
 // TODO: this function needs to be brough into alignDiraizedText
 // and applied to paragraphs - to avoid boundaries overlapp
@@ -39,9 +40,8 @@ const prepSlateParagraphForAlignement = (slateData) => {
   });
   return result;
 };
-const converSlateToDpe = (data, sttJson) => {
-  const linesWithSpeaker = prepSlateParagraphForAlignement(data);
-  const res = alignDiraizedText(linesWithSpeaker, sttJson);
+
+const convertSlateToDpePostAlignment = (res) => {
   const words = res
     .map((paragraph) => {
       if (paragraph) {
@@ -66,6 +66,24 @@ const converSlateToDpe = (data, sttJson) => {
   // words and speaker again
   const paragraphsWithAdjustedBoundaries = adjustTimecodesBoundaries(paragraphs);
   return { words, paragraphs: paragraphsWithAdjustedBoundaries };
+};
+
+const converSlateToDpe = (data, sttJson) => {
+  const linesWithSpeaker = prepSlateParagraphForAlignement(data);
+  const res = alignDiraizedText(linesWithSpeaker, sttJson);
+  return convertSlateToDpePostAlignment(res);
+};
+
+export const convertSlateToDpeAsync = async (data, sttJson) => {
+  // const linesWithSpeaker = prepSlateParagraphForAlignement(data);
+  // const worker = new Worker('./align_worker.js', { type: 'module' });
+
+  return new Promise((response, reject) => {
+    const linesWithSpeaker = prepSlateParagraphForAlignement(data);
+    const res = alignDiraizedText(linesWithSpeaker, sttJson);
+    const responseData = convertSlateToDpePostAlignment(res);
+    response(responseData);
+  });
 };
 
 export default converSlateToDpe;
