@@ -189,7 +189,7 @@ export default function SlateTranscriptEditor(props) {
    */
   const handleSetSpeakerName = (element) => {
     const pathToCurrentNode = ReactEditor.findPath(editor, element);
-    const oldSpeakerName = element.speaker.toUpperCase();
+    const oldSpeakerName = element.speaker;
     const newSpeakerName = prompt('Change speaker name', oldSpeakerName);
     if (newSpeakerName) {
       const isUpdateAllSpeakerInstances = confirm(`Would you like to replace all occurrences of ${oldSpeakerName} with ${newSpeakerName}?`);
@@ -201,7 +201,7 @@ export default function SlateTranscriptEditor(props) {
           { type: 'timedText', speaker: newSpeakerName },
           {
             at: rangeForTheWholeEditor,
-            match: (node) => node.type === 'timedText' && node.speaker === oldSpeakerName,
+            match: (node) => node.type === 'timedText' && node.speaker.toLowerCase() === oldSpeakerName.toLowerCase(),
           }
         );
       } else {
@@ -252,12 +252,14 @@ export default function SlateTranscriptEditor(props) {
               style={{
                 cursor: 'pointer',
                 width: '100%',
+                textTransform: 'uppercase',
               }}
-              title={props.element.speaker.toUpperCase()}
+              // title={props.element.speaker.toUpperCase()}
+              title={props.element.speaker}
               onClick={handleSetSpeakerName.bind(this, props.element)}
             >
               {' '}
-              {props.element.speaker.toUpperCase()}
+              {props.element.speaker}
             </span>
           </Col>
         )}
