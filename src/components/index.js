@@ -128,6 +128,37 @@ export default function SlateTranscriptEditor(props) {
     }
   }, [mediaRef]);
 
+  const getSlateContent = () => {
+    return value;
+  };
+
+  const getFileTitle = () => {
+    if (props.title) {
+      return props.title;
+    }
+    return path.basename(props.mediaUrl).trim();
+  };
+
+  const getMediaType = () => {
+    const clipExt = path.extname(props.mediaUrl);
+    let tmpMediaType = props.mediaType ? props.mediaType : 'video';
+    if (clipExt === '.wav' || clipExt === '.mp3' || clipExt === '.m4a' || clipExt === '.flac' || clipExt === '.aiff') {
+      tmpMediaType = 'audio';
+    }
+    return tmpMediaType;
+  };
+
+  const breakParagraph = () => {
+    Editor.insertBreak(editor);
+  };
+  const insertTextInaudible = () => {
+    Transforms.insertText(editor, '[INAUDIBLE]');
+  };
+
+  const handleInsertMusicNote = () => {
+    Transforms.insertText(editor, '♫'); // or ♪
+  };
+
   const handleSetShowSpeakersCheatShet = () => {
     setShowSpeakersCheatShet(!showSpeakersCheatShet);
   };
@@ -289,15 +320,23 @@ export default function SlateTranscriptEditor(props) {
     }
   };
 
-  const getFileTitle = () => {
-    if (props.title) {
-      return props.title;
+  // TODO: refacto this function, to be cleaner and easier to follow.
+  const handleRestoreTimecodes = async (inlineTimecodes = false) => {
+    if (!isContentModified && !inlineTimecodes) {
+      return value;
     }
-    return path.basename(props.mediaUrl).trim();
-  };
-
-  const getSlateContent = () => {
-    return value;
+    if (inlineTimecodes) {
+      const transcriptData = insertTimecodesInline({ transcriptData: props.transcriptData });
+      const alignedSlateData = await updateTimestamps(convertDpeToSlate(transcriptData), transcriptData);
+      setValue(alignedSlateData);
+      setIsContentIsModified(false);
+      return alignedSlateData;
+    } else {
+      const alignedSlateData = await updateTimestamps(value, props.transcriptData);
+      setValue(alignedSlateData);
+      setIsContentIsModified(false);
+      return alignedSlateData;
+    }
   };
 
   const handleExport = async ({ type, ext, speakers, timecodes, inlineTimecodes, hideTitle, atlasFormat, isDownload }) => {
@@ -354,45 +393,6 @@ export default function SlateTranscriptEditor(props) {
   };
 
   /**
-   * Helper function for handleRestoreTimecodes,
-   * for setitng timecodes for OHMS output
-   */
-  const handleRestoreTimecodesWithInlineTimecodes = async (transcriptDataInput) => {
-    let transcriptData = insertTimecodesInline({ transcriptData: transcriptDataInput });
-    const restoredTimecodes = await updateTimestamps(convertDpeToSlate(transcriptData), transcriptData);
-    handleRestoreTimecodes(false);
-    return restoredTimecodes;
-  };
-
-  // TODO: refacto this function, perhaps with an helper function
-  // to be cleaner and easier to follow.
-  const handleRestoreTimecodes = async (inlineTimecodes = false) => {
-    if (!isContentModified && !inlineTimecodes) {
-      return value;
-    }
-    if (inlineTimecodes) {
-      const restoredTimecodes = await handleRestoreTimecodesWithInlineTimecodes(props.transcriptData);
-      return restoredTimecodes;
-    } else {
-      const alignedSlateData = await updateTimestamps(value, props.transcriptData);
-      setValue(alignedSlateData);
-      setIsContentIsModified(false);
-      return alignedSlateData;
-    }
-  };
-
-  const breakParagraph = () => {
-    Editor.insertBreak(editor);
-  };
-  const insertTextInaudible = () => {
-    Transforms.insertText(editor, '[INAUDIBLE]');
-  };
-
-  const handleInsertMusicNote = () => {
-    Transforms.insertText(editor, '♫'); // or ♪
-  };
-
-  /**
    * See explanation in `src/utils/dpe-to-slate/index.js` for how this function works with css injection
    * to provide current paragaph's highlight.
    * @param {Number} currentTime - float in seconds
@@ -413,15 +413,6 @@ export default function SlateTranscriptEditor(props) {
 
   const handleSetPauseWhileTyping = () => {
     setIsPauseWhiletyping(!isPauseWhiletyping);
-  };
-
-  const getMediaType = () => {
-    const clipExt = path.extname(props.mediaUrl);
-    let tmpMediaType = props.mediaType ? props.mediaType : 'video';
-    if (clipExt === '.wav' || clipExt === '.mp3' || clipExt === '.m4a' || clipExt === '.flac' || clipExt === '.aiff') {
-      tmpMediaType = 'audio';
-    }
-    return tmpMediaType;
   };
 
   const handleOnKeyDown = (event) => {
