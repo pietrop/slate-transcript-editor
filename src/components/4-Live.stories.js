@@ -2,7 +2,6 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { action } from '@storybook/addon-actions';
 import { withKnobs, text, boolean, number, object, select } from '@storybook/addon-knobs';
 import { withInfo } from '@storybook/addon-info';
-
 import SlateTranscriptEditor from './index.js';
 
 export default {

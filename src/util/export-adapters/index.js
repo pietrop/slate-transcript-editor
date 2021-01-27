@@ -1,72 +1,66 @@
-// import draftToTxt from './txt/index';
-// import draftToDocx from './docx/index';
-// import draftToTxtSpeakersTimecodes from './txt-speakers-timecodes/index';
-// import draftToDigitalPaperEdit from './draftjs-to-digital-paper-edit/index.js';
-// import subtitlesGenerator from './subtitles-generator/index.js';
-// /**
-//  * Adapters for Draft.js conversion
-//  * @param {json} blockData - Draft.js blocks
-//  * @param {string} exportFormat - the type of file supported by the available adapters
-//  */
+/**
+ * Adapters for Draft.js conversion
+ * @param {json} slateValue - Draft.js blocks
+ * @param {string} type - the type of file supported by the available adapters
+ */
 
-// const exportAdapter = (blockData, exportFormat, transcriptTitle) => {
-//   switch (exportFormat) {
-//   case 'draftjs':
-//     return { data: blockData, ext: 'json' };
-//   case 'txt':
-//     return { data: draftToTxt(blockData), ext: 'txt' };
-//   case 'docx':
-//     return { data: draftToDocx(blockData, transcriptTitle), ext: 'docx' };
-//   case 'txtspeakertimecodes':
-//     return { data: draftToTxtSpeakersTimecodes(blockData), ext: 'txt' };
-//   case 'digitalpaperedit':
-//     return { data: draftToDigitalPaperEdit(blockData), ext: 'json' };
-//   case 'srt':
-//     var { words } = draftToDigitalPaperEdit(blockData);
-//     const srtContent = subtitlesGenerator({ words, type: 'srt', numberOfCharPerLine: 35 });
+import slateToText from './txt';
+import { converSlateToDpe } from '../update-timestamps';
+import slateToDocx from '../export-adapters/docx';
+import subtitlesExportOptionsList from './subtitles-generator/list';
+import subtitlesGenerator from './subtitles-generator/index';
 
-//     return { data: srtContent, ext: 'srt' };
+const captionTypeList = subtitlesExportOptionsList.map((list) => {
+  return list.type;
+});
 
-//   case 'premiereTTML':
-//     var { words } = draftToDigitalPaperEdit(blockData);
-//     var content = subtitlesGenerator({ words, type: 'premiere' });
+const isCaptionType = (type) => {
+  const res = captionTypeList.includes(type);
+  return res;
+};
+const exportAdapter = ({
+  slateValue,
+  type,
+  ext,
+  transcriptTitle,
+  speakers,
+  timecodes,
+  inlineTimecodes: inline,
+  hideTitle,
+  atlasFormat,
+  dpeTranscriptData,
+}) => {
+  switch (type) {
+    case 'text':
+      return slateToText({ value: slateValue, speakers, timecodes, atlasFormat });
+    case 'json-slate':
+      return slateValue;
+    case 'json-digitalpaperedit':
+      return converSlateToDpe(slateValue, dpeTranscriptData);
+    case 'word':
+      //   return { data: draftToDocx(slateValue, transcriptTitle), ext: 'docx' };
+      return slateToDocx({
+        value: slateValue,
+        speakers,
+        timecodes,
+        inline_speakers: inline,
+        title: transcriptTitle,
+        hideTitle,
+      });
+    default:
+      if (isCaptionType(type)) {
+        const editorContent = converSlateToDpe(slateValue, dpeTranscriptData);
+        let subtitlesJson = subtitlesGenerator({
+          words: editorContent.words,
+          paragraphs: editorContent.paragraphs,
+          type,
+        });
+        return subtitlesJson;
+      }
+      // some default, unlikely to be called
+      console.error('Did not recognise the export format ', type);
+      return 'Did not recognise the export format';
+  }
+};
 
-//     return { data: content, ext: 'ttml' };
-//   case 'ttml':
-//     var { words } = draftToDigitalPaperEdit(blockData);
-//     var content = subtitlesGenerator({ words, type: 'ttml' });
-
-//     return { data: content, ext: 'ttml' };
-//   case 'itt':
-//     var { words } = draftToDigitalPaperEdit(blockData);
-//     var content = subtitlesGenerator({ words, type: 'itt' });
-
-//     return { data: content, ext: 'itt' };
-
-//   case 'csv':
-//     var { words } = draftToDigitalPaperEdit(blockData);
-//     var content = subtitlesGenerator({ words, type: 'csv' });
-
-//     return { data: content, ext: 'csv' };
-//   case 'vtt':
-//     var { words } = draftToDigitalPaperEdit(blockData);
-//     var content = subtitlesGenerator({ words, type: 'vtt' });
-
-//     return { data: content, ext: 'vtt' };
-//   case 'json-captions':
-//     var { words } = draftToDigitalPaperEdit(blockData);
-//     var content = subtitlesGenerator({ words, type: 'json' });
-
-//     return { data: content, ext: 'json' };
-//   case 'pre-segment-txt':
-//     var { words } = draftToDigitalPaperEdit(blockData);
-//     var content = subtitlesGenerator({ words, type: 'pre-segment-txt' });
-
-//     return { data: content, ext: 'txt' };
-//   default:
-//     // code block
-//     console.error('Did not recognise the export format');
-//   }
-// };
-
-// export default exportAdapter;
+export default exportAdapter;

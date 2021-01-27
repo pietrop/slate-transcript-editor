@@ -32,17 +32,14 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { shortTimecode } from '../util/timecode-converter';
-import slateToText from '../util/export-adapters/txt';
 import download from '../util/downlaod/index.js';
 import convertDpeToSlate from '../util/dpe-to-slate';
-import slateToDocx from '../util/export-adapters/docx';
 // TODO: This should be moved in export utils
 import insertTimecodesInline from '../util/inline-interval-timecodes';
 import pluck from '../util/pluk';
-import subtitlesGenerator from '../util/export-adapters/subtitles-generator/index.js';
 import subtitlesExportOptionsList from '../util/export-adapters/subtitles-generator/list.js';
-import updateTimestamps, { converSlateToDpe } from '../util/update-timestamps';
-
+import updateTimestamps from '../util/update-timestamps';
+import exportAdapter from '../util/export-adapters';
 const PLAYBACK_RATE_VALUES = [0.2, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 3, 3.5];
 const SEEK_BACK_SEC = 15;
 const PAUSE_WHILTE_TYPING_TIMEOUT_MILLISECONDS = 1500;
@@ -305,67 +302,48 @@ export default function SlateTranscriptEditor(props) {
     }
   };
 
-  const getEditorContent = async ({ type, speakers, timecodes, inlineTimecodes: inline, hideTitle, atlasFormat }) => {
-    switch (type) {
-      case 'text':
-        // const updated = updateTimestamps(value, props.transcriptData);
-        // console.log('updated updated:', updated);
-        let tmpValue = value;
-        if (timecodes || inline) {
-          tmpValue = await handleRestoreTimecodes(inline);
-        }
-        return slateToText({ value: tmpValue, speakers, timecodes, atlasFormat });
-      case 'json-slate':
-        if (isContentModified) {
-          const tmpValue = await handleRestoreTimecodes();
-          return tmpValue;
-        } else {
-          return value;
-        }
-      case 'json-digitalpaperedit':
-        return converSlateToDpe(value, props.transcriptData);
-      case 'word':
-        let docTmpValue = value;
-        if (timecodes || inline) {
-          docTmpValue = await handleRestoreTimecodes(inline);
-        }
-        return slateToDocx({
-          value: docTmpValue,
-          speakers,
-          timecodes,
-          inline_speakers: inline,
-          title: props.title,
-          hideTitle,
-        });
-      default:
-        // some default, unlikely to be called
-        return {};
-    }
-  };
-
   const getFileTitle = () => {
     if (props.title) {
       return props.title;
     }
     return path.basename(props.mediaUrl).trim();
   };
-  const handleExport = async ({ type, ext, speakers, timecodes, inlineTimecodes, hideTitle, atlasFormat }) => {
+
+  const getSlateContent = () => {
+    return value;
+  };
+
+  const handleExport = async ({ type, ext, speakers, timecodes, inlineTimecodes: inline, hideTitle, atlasFormat, isDownload }) => {
     try {
       setIsProcessing(true);
-      let editorContnet = await getEditorContent({
+      let tmpValue = getSlateContent();
+      if (timecodes || inline) {
+        tmpValue = await handleRestoreTimecodes(inline);
+      }
+
+      if (isContentModified && type === 'json-slate') {
+        tmpValue = await handleRestoreTimecodes();
+      }
+
+      let editorContnet = exportAdapter({
+        slateValue: tmpValue,
         type,
+        transcriptTitle: getFileTitle(),
         speakers,
-        inlineTimecodes,
         timecodes,
+        inlineTimecodes: inline,
         hideTitle,
         atlasFormat,
+        dpeTranscriptData: props.transcriptData,
       });
+
       if (ext === 'json') {
         editorContnet = JSON.stringify(editorContnet, null, 2);
       }
-      if (ext !== 'docx') {
+      if (ext !== 'docx' && isDownload) {
         download(editorContnet, `${getFileTitle()}.${ext}`);
       }
+      return editorContnet;
     } finally {
       setIsProcessing(false);
     }
@@ -375,7 +353,7 @@ export default function SlateTranscriptEditor(props) {
     try {
       setIsProcessing(true);
       const format = props.autoSaveContentType ? props.autoSaveContentType : 'digitalpaperedit';
-      const editorContnet = await getEditorContent({ type: `json-${format}` });
+      const editorContnet = await handleExport({ type: `json-${format}`, isDownload: false });
       if (props.handleSaveEditor) {
         props.handleSaveEditor(editorContnet);
       }
@@ -444,28 +422,6 @@ export default function SlateTranscriptEditor(props) {
 
   const handleSetPauseWhileTyping = () => {
     setIsPauseWhiletyping(!isPauseWhiletyping);
-  };
-
-  const handleSubtitlesExport = async ({ type, ext }) => {
-    try {
-      setIsProcessing(true);
-      let editorContent = await getEditorContent({
-        type: 'json-digitalpaperedit',
-        speakers: true,
-        timecodes: true,
-      });
-      let subtitlesJson = subtitlesGenerator({
-        words: editorContent.words,
-        paragraphs: editorContent.paragraphs,
-        type,
-      });
-      if (type === 'json') {
-        subtitlesJson = JSON.stringify(subtitlesJson, null, 2);
-      }
-      download(subtitlesJson, `${getFileTitle()}.${ext}`);
-    } finally {
-      setIsProcessing(false);
-    }
   };
 
   const getMediaType = () => {
@@ -684,6 +640,7 @@ export default function SlateTranscriptEditor(props) {
                           ext: 'txt',
                           speakers: false,
                           timecodes: false,
+                          isDownload: true,
                         });
                       }}
                     >
@@ -696,6 +653,7 @@ export default function SlateTranscriptEditor(props) {
                           ext: 'txt',
                           speakers: true,
                           timecodes: false,
+                          isDownload: true,
                         });
                       }}
                     >
@@ -708,6 +666,7 @@ export default function SlateTranscriptEditor(props) {
                           ext: 'txt',
                           speakers: false,
                           timecodes: true,
+                          isDownload: true,
                         });
                       }}
                     >
@@ -720,6 +679,7 @@ export default function SlateTranscriptEditor(props) {
                           ext: 'txt',
                           speakers: true,
                           timecodes: true,
+                          isDownload: true,
                         });
                       }}
                       disable
@@ -734,6 +694,7 @@ export default function SlateTranscriptEditor(props) {
                           speakers: true,
                           timecodes: true,
                           atlasFormat: true,
+                          isDownload: true,
                         });
                       }}
                       disable
@@ -749,6 +710,7 @@ export default function SlateTranscriptEditor(props) {
                           ext: 'docx',
                           speakers: false,
                           timecodes: false,
+                          isDownload: true,
                         });
                       }}
                     >
@@ -761,6 +723,7 @@ export default function SlateTranscriptEditor(props) {
                           ext: 'docx',
                           speakers: true,
                           timecodes: false,
+                          isDownload: true,
                         });
                       }}
                     >
@@ -773,6 +736,7 @@ export default function SlateTranscriptEditor(props) {
                           ext: 'docx',
                           speakers: false,
                           timecodes: true,
+                          isDownload: true,
                         });
                       }}
                     >
@@ -785,6 +749,7 @@ export default function SlateTranscriptEditor(props) {
                           ext: 'docx',
                           speakers: true,
                           timecodes: true,
+                          isDownload: true,
                         });
                       }}
                     >
@@ -812,6 +777,7 @@ export default function SlateTranscriptEditor(props) {
                           ext: 'json',
                           speakers: true,
                           timecodes: true,
+                          isDownload: true,
                         });
                       }}
                     >
@@ -824,6 +790,7 @@ export default function SlateTranscriptEditor(props) {
                           ext: 'json',
                           speakers: true,
                           timecodes: true,
+                          isDownload: true,
                         });
                       }}
                     >
@@ -851,7 +818,7 @@ export default function SlateTranscriptEditor(props) {
                       <Dropdown.Item
                         key={index + label}
                         onClick={() => {
-                          handleSubtitlesExport({ type, ext });
+                          handleExport({ type, ext, isDownload: true });
                         }}
                       >
                         {label} (<code>.{ext}</code>)
