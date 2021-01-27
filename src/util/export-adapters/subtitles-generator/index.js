@@ -32,6 +32,7 @@ function addTimecodesToLines(wordsList, paragraphs, lines) {
 
     const jsonLine = { text: line.trim() };
     jsonLine.start = wordsList[startWordCounter].start;
+    // TODO: there's an issue here and `vtt_speakers_paragraphs` export is broken
     jsonLine.end = wordsList[endWordCounter - 1].end;
 
     // #-----------------|------|-----------------#
@@ -94,7 +95,7 @@ function subtitlesComposer({ words, paragraphs, type, numberOfCharPerLine }) {
     return preSegmentText(words, numberOfCharPerLine);
   }
   switch (type) {
-    case 'premiere':
+    case 'premiereTTML':
       return ttmlGeneratorPremiere(subtitlesJson);
     case 'ttml':
       return ttmlGenerator(subtitlesJson);
@@ -121,15 +122,7 @@ function subtitlesComposer({ words, paragraphs, type, numberOfCharPerLine }) {
     case 'txt':
       return preSegmentText(words, numberOfCharPerLine);
     default:
-      return {
-        ttml: ttmlGenerator(subtitlesJson),
-        premiere: ttmlGeneratorPremiere(subtitlesJson),
-        itt: ittGenerator(subtitlesJson),
-        srt: srtGenerator(subtitlesJson),
-        vtt: vttGenerator(subtitlesJson),
-        vtt_speakers: vttGenerator(subtitlesJson, true),
-        json: subtitlesJson,
-      };
+      return 'Could not find the subtitle format';
   }
 }
 
