@@ -104,9 +104,9 @@ _see storybook for example code_
 
 - Uses [slate](https://slatejs.org) as editor, see their [docs](https://docs.slatejs.org/).
   <!-- - takes dpe as input -->
-- Uses [`align-diarized-text`](https://github.com/pietrop/align-diarized-text) for restoring timecodes. This lib combined [`stt-align-node`](https://github.com/bbc/stt-align-node) with [`alignment-from-stt`](https://github.com/pietrop/alignment-from-stt) to restore timecodes **and** preserve speaker labels.
+- Uses [`stt-align-node`](https://github.com/bbc/stt-align-node) for restoring timecodes.
 
-- It `align-diarized-text` when export of formats that require timecodes, eg `dpe` json, or `docx` and `txt` with timecodes. Also for the 'realignement'/sync UI btn.
+- It re-syncs the timecodes when export of formats that require timecodes, eg `dpe` json, or `docx` and `txt` with timecodes. Also for the 'realignement'/sync UI btn.
 - If you export or save as slate json, at the moment it doesn't run alignement. The function to perform the alignement is also exported by the module, so that you can performe this computational intensive alignement elsewhere if needed, eg server side.
 
 ### CSS
