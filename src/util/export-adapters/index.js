@@ -5,7 +5,7 @@
  */
 
 import slateToText from './txt';
-import { converSlateToDpe } from '../update-timestamps';
+import converSlateToDpe from './slate-to-dpe';
 import slateToDocx from '../export-adapters/docx';
 import subtitlesExportOptionsList from './subtitles-generator/list';
 import subtitlesGenerator from './subtitles-generator/index';
@@ -25,7 +25,7 @@ const exportAdapter = ({
   transcriptTitle,
   speakers,
   timecodes,
-  inlineTimecodes: inline,
+  inlineTimecodes,
   hideTitle,
   atlasFormat,
   dpeTranscriptData,
@@ -40,11 +40,11 @@ const exportAdapter = ({
     case 'word':
       //   return { data: draftToDocx(slateValue, transcriptTitle), ext: 'docx' };
       return slateToDocx({
+        title: transcriptTitle,
         value: slateValue,
         speakers,
         timecodes,
-        inline_speakers: inline,
-        title: transcriptTitle,
+        inlineTimecodes,
         hideTitle,
       });
     default:

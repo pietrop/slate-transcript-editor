@@ -13,23 +13,12 @@ import Tooltip from 'react-bootstrap/Tooltip';
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import ListGroup from 'react-bootstrap/ListGroup';
 import Accordion from 'react-bootstrap/Accordion';
-import { createEditor, Editor, Node, Transforms } from 'slate';
+import { createEditor, Editor, Transforms } from 'slate';
 // https://docs.slatejs.org/walkthroughs/01-installing-slate
 // Import the Slate components and React plugin.
 import { Slate, Editable, withReact, ReactEditor } from 'slate-react';
 import { withHistory } from 'slate-history';
-import {
-  faSave,
-  faShare,
-  faUndo,
-  faSync,
-  faInfoCircle,
-  faICursor,
-  faMehBlank,
-  faPause,
-  faMusic,
-  faClosedCaptioning,
-} from '@fortawesome/free-solid-svg-icons';
+import { faSave, faShare, faUndo, faSync, faInfoCircle, faMehBlank, faPause, faMusic, faClosedCaptioning } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { shortTimecode } from '../util/timecode-converter';
 import download from '../util/downlaod/index.js';
@@ -40,6 +29,8 @@ import pluck from '../util/pluk';
 import subtitlesExportOptionsList from '../util/export-adapters/subtitles-generator/list.js';
 import updateTimestamps from '../util/update-timestamps';
 import exportAdapter from '../util/export-adapters';
+import isEmpty from '../util/is-empty';
+
 const PLAYBACK_RATE_VALUES = [0.2, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 3, 3.5];
 const SEEK_BACK_SEC = 15;
 const PAUSE_WHILTE_TYPING_TIMEOUT_MILLISECONDS = 1500;
@@ -48,10 +39,6 @@ const TOOTLIP_DELAY = 1000;
 const TOOTLIP_LONGER_DELAY = 2000;
 
 const mediaRef = React.createRef();
-
-function isEmpty(obj) {
-  return Object.keys(obj).length === 0;
-}
 
 export default function SlateTranscriptEditor(props) {
   const [currentTime, setCurrentTime] = useState(0);
@@ -313,12 +300,16 @@ export default function SlateTranscriptEditor(props) {
     return value;
   };
 
-  const handleExport = async ({ type, ext, speakers, timecodes, inlineTimecodes: inline, hideTitle, atlasFormat, isDownload }) => {
+  const handleExport = async ({ type, ext, speakers, timecodes, inlineTimecodes, hideTitle, atlasFormat, isDownload }) => {
     try {
       setIsProcessing(true);
       let tmpValue = getSlateContent();
-      if (timecodes || inline) {
-        tmpValue = await handleRestoreTimecodes(inline);
+      if (timecodes) {
+        tmpValue = await handleRestoreTimecodes();
+      }
+
+      if (inlineTimecodes) {
+        tmpValue = await handleRestoreTimecodes(inlineTimecodes);
       }
 
       if (isContentModified && type === 'json-slate') {
@@ -331,7 +322,7 @@ export default function SlateTranscriptEditor(props) {
         transcriptTitle: getFileTitle(),
         speakers,
         timecodes,
-        inlineTimecodes: inline,
+        inlineTimecodes,
         hideTitle,
         atlasFormat,
         dpeTranscriptData: props.transcriptData,
@@ -376,7 +367,7 @@ export default function SlateTranscriptEditor(props) {
   // TODO: refacto this function, perhaps with an helper function
   // to be cleaner and easier to follow.
   const handleRestoreTimecodes = async (inlineTimecodes = false) => {
-    if (!isContentModified) {
+    if (!isContentModified && !inlineTimecodes) {
       return value;
     }
     if (inlineTimecodes) {
