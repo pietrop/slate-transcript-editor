@@ -1,6 +1,13 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { createEditor, Editor, Transforms } from 'slate';
+// https://docs.slatejs.org/walkthroughs/01-installing-slate
+// Import the Slate components and React plugin.
+import { Slate, Editable, withReact, ReactEditor } from 'slate-react';
+import { withHistory } from 'slate-history';
 import PropTypes from 'prop-types';
 import path from 'path';
+import { faSave, faShare, faUndo, faSync, faInfoCircle, faMehBlank, faPause, faMusic, faClosedCaptioning } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Button from 'react-bootstrap/Button';
 import DropdownButton from 'react-bootstrap/DropdownButton';
 import Dropdown from 'react-bootstrap/Dropdown';
@@ -13,24 +20,16 @@ import Tooltip from 'react-bootstrap/Tooltip';
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import ListGroup from 'react-bootstrap/ListGroup';
 import Accordion from 'react-bootstrap/Accordion';
-import { createEditor, Editor, Transforms } from 'slate';
-// https://docs.slatejs.org/walkthroughs/01-installing-slate
-// Import the Slate components and React plugin.
-import { Slate, Editable, withReact, ReactEditor } from 'slate-react';
-import { withHistory } from 'slate-history';
-import { faSave, faShare, faUndo, faSync, faInfoCircle, faMehBlank, faPause, faMusic, faClosedCaptioning } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { shortTimecode } from '../util/timecode-converter';
-import download from '../util/downlaod/index.js';
-import convertDpeToSlate from '../util/dpe-to-slate';
+import { shortTimecode } from '../../util/timecode-converter';
+import download from '../../util/downlaod/index.js';
+import convertDpeToSlate from '../../util/dpe-to-slate';
 // TODO: This should be moved in export utils
-import insertTimecodesInline from '../util/inline-interval-timecodes';
-import pluck from '../util/pluk';
-import subtitlesExportOptionsList from '../util/export-adapters/subtitles-generator/list.js';
-import updateTimestamps from '../util/update-timestamps';
-import exportAdapter from '../util/export-adapters';
-import isEmpty from '../util/is-empty';
-
+import insertTimecodesInline from '../../util/inline-interval-timecodes';
+import pluck from '../../util/pluk';
+import subtitlesExportOptionsList from '../../util/export-adapters/subtitles-generator/list.js';
+import updateTimestamps from '../../util/update-timestamps';
+import exportAdapter from '../../util/export-adapters';
+import TimedTextEditor from '../TimedTextEditor';
 const PLAYBACK_RATE_VALUES = [0.2, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 3, 3.5];
 const SEEK_BACK_SEC = 15;
 const PAUSE_WHILTE_TYPING_TIMEOUT_MILLISECONDS = 1500;
@@ -44,7 +43,7 @@ export default function SlateTranscriptEditor(props) {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [playbackRate, setPlaybackRate] = useState(1);
-  const editor = useMemo(() => withReact(withHistory(createEditor())), []);
+  // const editor = useMemo(() => withReact(withHistory(createEditor())), []);
   const [value, setValue] = useState([]);
   const defaultShowSpeakersPreference = typeof props.showSpeakers === 'boolean' ? props.showSpeakers : true;
   const defaultShowTimecodesPreference = typeof props.showTimecodes === 'boolean' ? props.showTimecodes : true;
@@ -52,13 +51,15 @@ export default function SlateTranscriptEditor(props) {
   const [showTimecodes, setShowTimecodes] = useState(defaultShowTimecodesPreference);
   const [speakerOptions, setSpeakerOptions] = useState([]);
   const [showSpeakersCheatShet, setShowSpeakersCheatShet] = useState(false);
-  const [saveTimer, setSaveTimer] = useState(null);
+  // const [saveTimer, setSaveTimer] = useState(null);
   const [isPauseWhiletyping, setIsPauseWhiletyping] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   // used isContentModified to avoid unecessarily run alignment if the slate value contnet has not been modified by the user since
   // last save or alignment
   const [isContentModified, setIsContentIsModified] = useState(false);
 
+  // this.timedTextEditorRef = React.createRef();
+  const timedTextEditorRef = useRef();
   useEffect(() => {
     if (isProcessing) {
       document.body.style.cursor = 'wait';
@@ -74,34 +75,11 @@ export default function SlateTranscriptEditor(props) {
     }
   }, []);
 
-  // handles interim results for worrking with a Live STT
-  useEffect(() => {
-    if (props.transcriptDataLive) {
-      const nodes = convertDpeToSlate(props.transcriptDataLive);
-      // if the user is selecting the / typing the text
-      // Transforms.insertNodes would insert the node at seleciton point
-      // instead we check if they are in the editor
-      if (editor.selection) {
-        // get the position of the last node
-        const positionLastNode = [editor.children.length];
-        // insert the new nodes at the end of the document
-        Transforms.insertNodes(editor, nodes, {
-          at: positionLastNode,
-        });
-      }
-      // use not having selection in the editor allows us to also handle the initial use case
-      // where the might be no initial results
-      else {
-        // if there is no selection the default for insertNodes is to add the nodes at the end
-        Transforms.insertNodes(editor, nodes);
-      }
-    }
-  }, [props.transcriptDataLive]);
-
   useEffect(() => {
     const getUniqueSpeakers = pluck('speaker');
     const uniqueSpeakers = getUniqueSpeakers(value);
     setSpeakerOptions(uniqueSpeakers);
+    return () => ({});
   }, [showSpeakersCheatShet]);
 
   useEffect(() => {
@@ -117,19 +95,24 @@ export default function SlateTranscriptEditor(props) {
   }, []);
 
   useEffect(() => {
+    console.log('here');
+  }, [timedTextEditorRef.timedTextEditorRef]);
+
+  useEffect(() => {
     // Update the document title using the browser API
     if (mediaRef && mediaRef.current) {
       // Not working
       setDuration(mediaRef.current.duration);
-      if (mediaRef.current.duration >= MAX_DURATION_FOR_PERFORMANCE_OPTIMIZATION_IN_SECONDS) {
-        setShowSpeakers(false);
-        showTimecodes(false);
-      }
+      // if (mediaRef.current.duration >= MAX_DURATION_FOR_PERFORMANCE_OPTIMIZATION_IN_SECONDS) {
+      //   setShowSpeakers(false);
+      //   showTimecodes(false);
+      // }
     }
   }, [mediaRef]);
 
   const getSlateContent = () => {
-    return value;
+    return timedTextEditorRef && timedTextEditorRef.current && timedTextEditorRef.current.getSlateContent();
+    // return value;
   };
 
   const getFileTitle = () => {
@@ -183,144 +166,10 @@ export default function SlateTranscriptEditor(props) {
     }
   };
 
-  const renderElement = useCallback((props) => {
-    switch (props.element.type) {
-      case 'timedText':
-        return <TimedTextElement {...props} />;
-      default:
-        return <DefaultElement {...props} />;
-    }
-  }, []);
-
-  const renderLeaf = useCallback(({ attributes, children, leaf }) => {
-    return (
-      <span
-        onDoubleClick={handleTimedTextClick}
-        className={'timecode text'}
-        data-start={children.props.parent.start}
-        data-previous-timings={children.props.parent.previousTimings}
-        title={children.props.parent.start}
-        {...attributes}
-      >
-        {children}
-      </span>
-    );
-  }, []);
-
-  //
-
-  /**
-   * `handleSetSpeakerName` is outside of TimedTextElement
-   * to improve the overall performance of the editor,
-   * especially on long transcripts
-   * @param {*} element - props.element, from `renderElement` function
-   */
-  const handleSetSpeakerName = (element) => {
-    const pathToCurrentNode = ReactEditor.findPath(editor, element);
-    const oldSpeakerName = element.speaker;
-    const newSpeakerName = prompt('Change speaker name', oldSpeakerName);
-    if (newSpeakerName) {
-      const isUpdateAllSpeakerInstances = confirm(`Would you like to replace all occurrences of ${oldSpeakerName} with ${newSpeakerName}?`);
-      if (isUpdateAllSpeakerInstances) {
-        const rangeForTheWholeEditor = Editor.range(editor, []);
-        // Apply transformation to the whole doc, where speaker matches old spekaer name, and set it to new one
-        Transforms.setNodes(
-          editor,
-          { type: 'timedText', speaker: newSpeakerName },
-          {
-            at: rangeForTheWholeEditor,
-            match: (node) => node.type === 'timedText' && node.speaker.toLowerCase() === oldSpeakerName.toLowerCase(),
-          }
-        );
-      } else {
-        // only apply speaker name transformation to current element
-        Transforms.setNodes(editor, { type: 'timedText', speaker: newSpeakerName }, { at: pathToCurrentNode });
-      }
-    }
-  };
-
-  const TimedTextElement = (props) => {
-    let textLg = 12;
-    let textXl = 12;
-    if (!showSpeakers && !showTimecodes) {
-      textLg = 12;
-      textXl = 12;
-    } else if (showSpeakers && !showTimecodes) {
-      textLg = 9;
-      textXl = 9;
-    } else if (!showSpeakers && showTimecodes) {
-      textLg = 9;
-      textXl = 10;
-    } else if (showSpeakers && showTimecodes) {
-      textLg = 6;
-      textXl = 7;
-    }
-
-    return (
-      <Row {...props.attributes}>
-        {showTimecodes && (
-          <Col contentEditable={false} xs={4} sm={2} md={4} lg={3} xl={2} className={'p-t-2 text-truncate'}>
-            <code
-              contentEditable={false}
-              style={{ cursor: 'pointer' }}
-              className={'timecode text-muted unselectable'}
-              onClick={handleTimedTextClick}
-              title={props.element.startTimecode}
-              data-start={props.element.start}
-            >
-              {props.element.startTimecode}
-            </code>
-          </Col>
-        )}
-        {showSpeakers && (
-          <Col contentEditable={false} xs={8} sm={10} md={8} lg={3} xl={3} className={'p-t-2 text-truncate'}>
-            <span
-              contentEditable={false}
-              className={'text-truncate text-muted unselectable'}
-              style={{
-                cursor: 'pointer',
-                width: '100%',
-                textTransform: 'uppercase',
-              }}
-              // title={props.element.speaker.toUpperCase()}
-              title={props.element.speaker}
-              onClick={handleSetSpeakerName.bind(this, props.element)}
-            >
-              {' '}
-              {props.element.speaker}
-            </span>
-          </Col>
-        )}
-        <Col xs={12} sm={12} md={12} lg={textLg} xl={textXl} className={'p-b-1 mx-auto'}>
-          {props.children}
-        </Col>
-      </Row>
-    );
-  };
-
-  const DefaultElement = (props) => {
-    return (
-      <p contentEditable={false} {...props.attributes}>
-        {props.children}
-      </p>
-    );
-  };
-
-  const handleTimedTextClick = (e) => {
-    if (e.target.classList.contains('timecode')) {
-      const start = e.target.dataset.start;
-      if (mediaRef && mediaRef.current) {
-        mediaRef.current.currentTime = parseFloat(start);
-        mediaRef.current.play();
-      }
-    } else if (e.target.dataset.slateString) {
-      if (e.target.parentNode.dataset.start) {
-        const start = e.target.parentNode.dataset.start;
-        if (mediaRef && mediaRef.current && start) {
-          mediaRef.current.currentTime = parseFloat(start);
-          mediaRef.current.play();
-        }
-      }
+  const onWordClick = (start) => {
+    if (mediaRef && mediaRef.current) {
+      mediaRef.current.currentTime = parseFloat(start);
+      mediaRef.current.play();
     }
   };
 
@@ -396,95 +245,12 @@ export default function SlateTranscriptEditor(props) {
     }
   };
 
-  /**
-   * See explanation in `src/utils/dpe-to-slate/index.js` for how this function works with css injection
-   * to provide current paragaph's highlight.
-   * @param {Number} currentTime - float in seconds
-   */
-  const generatePreviousTimingsUpToCurrent = (currentTime) => {
-    // edge case - empty transcription
-    if (isEmpty(props.transcriptData)) {
-      return '';
-    }
-    const lastWordStartTime = props.transcriptData.words[props.transcriptData.words.length - 1].start;
-    const lastWordStartTimeInt = parseInt(lastWordStartTime);
-    const emptyListOfTimes = Array(lastWordStartTimeInt);
-    const listOfTimesInt = [...emptyListOfTimes.keys()];
-    const listOfTimesUpToCurrentTimeInt = listOfTimesInt.splice(0, currentTime, 0);
-    const stringlistOfTimesUpToCurrentTimeInt = listOfTimesUpToCurrentTimeInt.join(' ');
-    return stringlistOfTimesUpToCurrentTimeInt;
-  };
-
   const handleSetPauseWhileTyping = () => {
     setIsPauseWhiletyping(!isPauseWhiletyping);
   };
 
-  const handleOnKeyDown = (event) => {
-    setIsContentIsModified(true);
-    if (isPauseWhiletyping) {
-      // logic for pause while typing
-      // https://schier.co/blog/wait-for-user-to-stop-typing-using-javascript
-      // TODO: currently eve the video was paused, and pause while typing is on,
-      // it will play it when stopped typing. so added btn to turn feature on off.
-      // and disabled as default.
-      // also pause while typing might introduce performance issues on longer transcripts
-      // if on every keystroke it's creating and destroing a timer.
-      // should find a more efficient way to "debounce" or "throttle" this functionality
-      if (mediaRef && mediaRef.current) {
-        mediaRef.current.pause();
-      }
-
-      if (saveTimer !== null) {
-        clearTimeout(saveTimer);
-      }
-
-      const tmpSaveTimer = setTimeout(() => {
-        if (mediaRef && mediaRef.current) {
-          mediaRef.current.play();
-        }
-      }, PAUSE_WHILTE_TYPING_TIMEOUT_MILLISECONDS);
-      setSaveTimer(tmpSaveTimer);
-    }
-  };
   return (
     <Container fluid style={{ backgroundColor: '#eee', height: '100vh', paddingTop: '1em' }}>
-      <style scoped>
-        {`
-              /* Next words */
-              .timecode[data-previous-timings*="${generatePreviousTimingsUpToCurrent(parseInt(currentTime))}"]{
-                  color:  #9E9E9E;
-              }
-          `}
-      </style>
-      <style scope>
-        {`.editor-wrapper-container{
-                padding: 8px 16px;
-                background: #f9f9f9;
-                box-shadow: 0 0 10px #ccc;
-                height: 90vh;
-                overflow: auto;
-              }
-              /* https://developer.mozilla.org/en-US/docs/Web/CSS/user-select
-              TODO: only working in Chrome, not working in Firefox, and Safari - OSX
-              if selecting text, not showing selection
-              Commented out because it means cannot select speakers and timecode anymore
-              which is the intended default behavior but needs to come with export
-              functionality to export as plain text, word etc.. otherwise user won't be able
-              to get text out of component with timecodes and speaker names in the interim */
-              .unselectable {
-                -moz-user-select: none;
-                -webkit-user-select: none;
-                -ms-user-select: none;
-                user-select: none;
-              }
-              .timecode:hover{
-                text-decoration: underline;
-              }
-              .timecode.text:hover{
-                text-decoration:none;
-              }
-              `}
-      </style>
       {props.showTitle ? (
         <OverlayTrigger delay={TOOTLIP_LONGER_DELAY} placement={'bottom'} overlay={<Tooltip id="tooltip-disabled"> {props.title}</Tooltip>}>
           <h3 className={'text-truncate text-left'}>
@@ -576,33 +342,26 @@ export default function SlateTranscriptEditor(props) {
           lg={getMediaType() === 'audio' ? { span: 8, order: 2, offset: 2 } : { span: 8, order: 2 }}
           xl={getMediaType() === 'audio' ? { span: 8, order: 2, offset: 2 } : { span: 7, order: 2 }}
         >
-          {value.length !== 0 ? (
-            <>
-              <section className="editor-wrapper-container">
-                <Slate
-                  editor={editor}
-                  value={value}
-                  onChange={(value) => {
-                    if (props.handleAutoSaveChanges) {
-                      props.handleAutoSaveChanges(value);
-                    }
-                    return setValue(value);
-                  }}
-                >
-                  <Editable
-                    readOnly={typeof props.isEditable === 'boolean' ? !props.isEditable : false}
-                    renderElement={renderElement}
-                    renderLeaf={renderLeaf}
-                    onKeyDown={handleOnKeyDown}
-                  />
-                </Slate>
-              </section>
-            </>
-          ) : (
-            <section className="text-center">
-              <i className="text-center">Loading...</i>
-            </section>
-          )}
+          <TimedTextEditor
+            mediaUrl={props.mediaUrl}
+            isEditable={props.isEditable}
+            autoSaveContentType={props.autoSaveContentType}
+            showTimecodes={showTimecodes}
+            showSpeakers={showSpeakers}
+            title={props.title}
+            transcriptData={props.transcriptData}
+            handleSaveEditor={props.handleSaveEditor}
+            showTitle={props.showTitle}
+            currentTime={currentTime}
+            //
+            isPauseWhiletyping={isPauseWhiletyping}
+            onWordClick={onWordClick}
+            handleAnalyticsEvents={props.handleAnalyticsEvents}
+            getSlateContent={getSlateContent}
+            ref={timedTextEditorRef}
+            mediaRef={mediaRef}
+            transcriptDataLive={props.transcriptDataLive}
+          />
         </Col>
 
         <Col xs={{ span: 12, order: 2 }} sm={{ span: 2, order: 3 }} md={{ span: 2, order: 3 }} lg={{ span: 1, order: 3 }} xl={{ span: 2, order: 3 }}>

@@ -34,6 +34,7 @@ function chunkParagraphs(wordsChunk, paragaph) {
     const wordsEndTime = words[words.length - 1].end;
     const paragraphs = paragaph.filter((p) => {
       return p.start >= wordsStartTime && p.end <= wordsEndTime;
+      // return p.end <= wordsEndTime;
     });
     const transcript = { words, paragraphs };
     return transcript;
@@ -61,8 +62,9 @@ const PageWrapper = (props) => {
       <Tabs id="controlled-tab-example" activeKey={key} onSelect={handleOnSelect}>
         {transcriptsChunks.map((chunk, index) => {
           const startTime = chunk.words[0].start;
+          // const endTime = chunk.words[chunk.words.length - 1].end;
           return (
-            <Tab eventKey={index} title={shortTimecode(startTime)}>
+            <Tab eventKey={index} title={`${shortTimecode(startTime)}`}>
               {/* This is so that we don't load the editor's for tabs that are not in view */}
               {currentTranscriptIndex === index && (
                 <>
