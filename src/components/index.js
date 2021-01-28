@@ -299,7 +299,11 @@ export default function SlateTranscriptEditor(props) {
   };
 
   const DefaultElement = (props) => {
-    return <p {...props.attributes}>{props.children}</p>;
+    return (
+      <p contentEditable={false} {...props.attributes}>
+        {props.children}
+      </p>
+    );
   };
 
   const handleTimedTextClick = (e) => {
