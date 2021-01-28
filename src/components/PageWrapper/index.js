@@ -5,12 +5,6 @@ import SlateTranscriptEditor from '../index';
 import chunk from 'lodash.chunk';
 import { shortTimecode } from '../../util/timecode-converter';
 
-// TODO: import from util
-export const generatePreviousTimings = (time) => {
-  // https://stackoverflow.com/questions/3746725/how-to-create-an-array-containing-1-n
-  return [...Array(parseInt(time)).keys()];
-};
-
 const calculateNumberOfHours = (words) => {
   const wordsLength = words.length;
   const wordCountIndex = wordsLength - 1;
