@@ -58,6 +58,7 @@
     "@fortawesome/react-fontawesome": "^0.1.5",
     "@storybook/addon-storysource": "^5.3.18",
     "docx": "4.7.1",
+    "lodash.chunk": "^4.2.0",
     "prop-types": "^15.7.2",
     "react-bootstrap": "^1.0.1",
     "sbd": "^1.0.18",
