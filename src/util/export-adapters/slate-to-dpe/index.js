@@ -3,14 +3,15 @@
  * https://github.com/pietrop/react-transcript-editor/blob/master/packages/components/timed-text-editor/UpdateTimestamps/index.js
  * similar to updateTimestamps
  */
-import { alignSTT } from 'stt-align-node';
-import slateToText from '../txt';
+// import { alignSTT } from 'stt-align-node';
+// import slateToText from '../txt';
 import countWords from '../../count-words';
+import updateTimestampsHelper from './update-timestamps/update-timestamps-helper';
 /**
  * Transposes the timecodes from stt json list of words onto
  * dpe transcript with paragraphs and words
  */
-const createParagraphsFromSlateJs = (currentContent, newEntities) => {
+export const createDpeParagraphsFromSlateJs = (currentContent, newEntities) => {
   // Update entites to block structure.
   const updatedBlockArray = [];
   let totalWords = 0;
@@ -45,9 +46,8 @@ const createParagraphsFromSlateJs = (currentContent, newEntities) => {
  * @return dpe transcript with paragraphs and words
  */
 const converSlateToDpe = (currentContent, words) => {
-  const currentText = slateToText({ value: currentContent, speakers: false, timecodes: false, atlasFormat: false });
-  const alignedWords = alignSTT(words, currentText);
-  const updatedContent = createParagraphsFromSlateJs(currentContent, alignedWords);
+  const alignedWords = updateTimestampsHelper(currentContent, words);
+  const updatedContent = createDpeParagraphsFromSlateJs(currentContent, alignedWords);
   return { words: alignedWords, paragraphs: updatedContent };
 };
 

@@ -27,7 +27,7 @@ import convertDpeToSlate from '../../util/dpe-to-slate';
 import insertTimecodesInline from '../../util/inline-interval-timecodes';
 import pluck from '../../util/pluk';
 import subtitlesExportOptionsList from '../../util/export-adapters/subtitles-generator/list.js';
-import updateTimestamps from '../../util/update-timestamps';
+import updateTimestamps from '../../util/export-adapters/slate-to-dpe/update-timestamps';
 import exportAdapter from '../../util/export-adapters';
 import generatePreviousTimingsUpToCurrent from './generate-previous-timings-up-to-current';
 
@@ -43,7 +43,9 @@ const TimedTextEditor = (props) => {
   const defaultShowSpeakersPreference = typeof props.showSpeakers === 'boolean' ? props.showSpeakers : true;
   const defaultShowTimecodesPreference = typeof props.showTimecodes === 'boolean' ? props.showTimecodes : true;
   const [showSpeakers, setShowSpeakers] = useState(defaultShowSpeakersPreference);
+  // const showSpeakers = props.showSpeakers;
   const [showTimecodes, setShowTimecodes] = useState(defaultShowTimecodesPreference);
+  // const showTimecodes = props.showTimecodes;
   // const [speakerOptions, setSpeakerOptions] = useState([]);
   // const [showSpeakersCheatShet, setShowSpeakersCheatShet] = useState(false);
   const [saveTimer, setSaveTimer] = useState(null);
@@ -51,22 +53,26 @@ const TimedTextEditor = (props) => {
   //   const [isProcessing, setIsProcessing] = useState(false);
   // used isContentModified to avoid unecessarily run alignment if the slate value contnet has not been modified by the user since
   // last save or alignment
-  const [isContentModified, setIsContentIsModified] = useState(false);
+  // const [isContentModified, setIsContentIsModified] = useState(false);
 
-  const getSlateContent = () => {
-    // props.getSlateContent(value);
-    return value;
-  };
-  useEffect(() => {
-    if (props.transcriptData) {
-      const res = convertDpeToSlate(props.transcriptData);
-      setValue(res);
-    }
-  }, []);
+  // const getSlateContent = () => {
+  //   // props.getSlateContent(value);
+  //   return value;
+  // };
+  // useEffect(() => {
+  //   if (props.transcriptData) {
+  //     const res = convertDpeToSlate(props.transcriptData);
+  //     setValue(res);
+  //   }
+  // }, []);
 
   // useEffect(() => {
   //   return getSlateContent(value);
   // }, [getSlateContent]);
+
+  useEffect(() => {
+    return; //setValue(props.value);
+  }, [props.value]);
 
   const TimedTextElement = (props) => {
     let textLg = 12;
@@ -151,7 +157,7 @@ const TimedTextEditor = (props) => {
         className={'timecode text'}
         data-start={children.props.parent.start}
         data-previous-timings={children.props.parent.previousTimings}
-        title={children.props.parent.start}
+        title={children.props.parent.startTimecode}
         {...attributes}
       >
         {children}
@@ -164,6 +170,7 @@ const TimedTextEditor = (props) => {
    * to improve the overall performance of the editor,
    * especially on long transcripts
    * @param {*} element - props.element, from `renderElement` function
+   * TODO: handleSetSpeakerName should trigger a prop on auto save
    */
   const handleSetSpeakerName = (element) => {
     const pathToCurrentNode = ReactEditor.findPath(editor, element);
@@ -210,7 +217,8 @@ const TimedTextEditor = (props) => {
   };
 
   const handleOnKeyDown = (event) => {
-    setIsContentIsModified(true);
+    console.log('handleOnKeyDown');
+    // setIsContentIsModified(true);
     if (props.isPauseWhiletyping) {
       // logic for pause while typing
       // https://schier.co/blog/wait-for-user-to-stop-typing-using-javascript
@@ -237,28 +245,28 @@ const TimedTextEditor = (props) => {
     }
   };
 
-  useEffect(() => {
-    if (props.transcriptDataLive) {
-      const nodes = convertDpeToSlate(props.transcriptDataLive);
-      // if the user is selecting the / typing the text
-      // Transforms.insertNodes would insert the node at seleciton point
-      // instead we check if they are in the editor
-      if (editor.selection) {
-        // get the position of the last node
-        const positionLastNode = [editor.children.length];
-        // insert the new nodes at the end of the document
-        Transforms.insertNodes(editor, nodes, {
-          at: positionLastNode,
-        });
-      }
-      // use not having selection in the editor allows us to also handle the initial use case
-      // where the might be no initial results
-      else {
-        // if there is no selection the default for insertNodes is to add the nodes at the end
-        Transforms.insertNodes(editor, nodes);
-      }
-    }
-  }, [props.transcriptDataLive]);
+  // useEffect(() => {
+  //   if (props.transcriptDataLive) {
+  //     const nodes = convertDpeToSlate(props.transcriptDataLive);
+  //     // if the user is selecting the / typing the text
+  //     // Transforms.insertNodes would insert the node at seleciton point
+  //     // instead we check if they are in the editor
+  //     if (editor.selection) {
+  //       // get the position of the last node
+  //       const positionLastNode = [editor.children.length];
+  //       // insert the new nodes at the end of the document
+  //       Transforms.insertNodes(editor, nodes, {
+  //         at: positionLastNode,
+  //       });
+  //     }
+  //     // use not having selection in the editor allows us to also handle the initial use case
+  //     // where the might be no initial results
+  //     else {
+  //       // if there is no selection the default for insertNodes is to add the nodes at the end
+  //       Transforms.insertNodes(editor, nodes);
+  //     }
+  //   }
+  // }, [props.transcriptDataLive]);
 
   return (
     <>
@@ -299,17 +307,20 @@ const TimedTextEditor = (props) => {
               }
               `}
       </style>
-      {value.length !== 0 ? (
+      {props.value.length !== 0 ? (
         <>
           <section className="editor-wrapper-container">
             <Slate
               editor={editor}
-              value={value}
+              value={props.value}
               onChange={(value) => {
                 if (props.handleAutoSaveChanges) {
                   props.handleAutoSaveChanges(value);
+                  console.log('onChange');
+                  // setIsContentIsModified(false);
                 }
-                return setValue(value);
+                // return setValue(value);
+                // return value;
               }}
             >
               <Editable

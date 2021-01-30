@@ -27,7 +27,7 @@ import convertDpeToSlate from '../util/dpe-to-slate';
 import insertTimecodesInline from '../util/inline-interval-timecodes';
 import pluck from '../util/pluk';
 import subtitlesExportOptionsList from '../util/export-adapters/subtitles-generator/list.js';
-import updateTimestamps from '../util/update-timestamps';
+import updateTimestamps from '../util/export-adapters/slate-to-dpe/update-timestamps';
 import exportAdapter from '../util/export-adapters';
 import isEmpty from '../util/is-empty';
 

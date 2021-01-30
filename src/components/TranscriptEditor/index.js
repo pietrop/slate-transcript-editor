@@ -6,7 +6,17 @@ import { Slate, Editable, withReact, ReactEditor } from 'slate-react';
 import { withHistory } from 'slate-history';
 import PropTypes from 'prop-types';
 import path from 'path';
-import { faSave, faShare, faUndo, faSync, faInfoCircle, faMehBlank, faPause, faMusic, faClosedCaptioning } from '@fortawesome/free-solid-svg-icons';
+import {
+  faSave,
+  faFileDownload,
+  faUndo,
+  faSync,
+  faInfoCircle,
+  faMehBlank,
+  faPause,
+  faMusic,
+  faClosedCaptioning,
+} from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Button from 'react-bootstrap/Button';
 import DropdownButton from 'react-bootstrap/DropdownButton';
@@ -27,7 +37,10 @@ import convertDpeToSlate from '../../util/dpe-to-slate';
 import insertTimecodesInline from '../../util/inline-interval-timecodes';
 import pluck from '../../util/pluk';
 import subtitlesExportOptionsList from '../../util/export-adapters/subtitles-generator/list.js';
-import updateTimestamps from '../../util/update-timestamps';
+import updateTimestamps from '../../util/export-adapters/slate-to-dpe/update-timestamps';
+import updateTimestampsHelper from '../../util/export-adapters/slate-to-dpe/update-timestamps/update-timestamps-helper';
+import { createSlateContentFromSlateJsParagraphs } from '../../util/export-adapters/slate-to-dpe/update-timestamps';
+import { createDpeParagraphsFromSlateJs } from '../../util/export-adapters/slate-to-dpe';
 import exportAdapter from '../../util/export-adapters';
 import TimedTextEditor from '../TimedTextEditor';
 const PLAYBACK_RATE_VALUES = [0.2, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 3, 3.5];
@@ -111,8 +124,9 @@ export default function SlateTranscriptEditor(props) {
   }, [mediaRef]);
 
   const getSlateContent = () => {
-    return timedTextEditorRef && timedTextEditorRef.current && timedTextEditorRef.current.getSlateContent();
-    // return value;
+    // return timedTextEditorRef && timedTextEditorRef.current && timedTextEditorRef.current.getSlateContent();
+    console.log('TranscriptEditor getSlateContent', value);
+    return value;
   };
 
   const getFileTitle = () => {
@@ -175,7 +189,9 @@ export default function SlateTranscriptEditor(props) {
 
   // TODO: refacto this function, to be cleaner and easier to follow.
   const handleRestoreTimecodes = async (inlineTimecodes = false) => {
+    console.log('handleRestoreTimecodes');
     if (!isContentModified && !inlineTimecodes) {
+      console.log('value', value);
       return value;
     }
     if (inlineTimecodes) {
@@ -183,10 +199,12 @@ export default function SlateTranscriptEditor(props) {
       const alignedSlateData = await updateTimestamps(convertDpeToSlate(transcriptData), transcriptData);
       setValue(alignedSlateData);
       setIsContentIsModified(false);
+      console.log('inlineTimecodes alignedSlateData', alignedSlateData);
       return alignedSlateData;
     } else {
       const alignedSlateData = await updateTimestamps(value, props.transcriptData);
       setValue(alignedSlateData);
+      console.log('!inlineTimecodes alignedSlateData', alignedSlateData);
       setIsContentIsModified(false);
       return alignedSlateData;
     }
@@ -208,7 +226,7 @@ export default function SlateTranscriptEditor(props) {
         tmpValue = await handleRestoreTimecodes();
       }
 
-      let editorContnet = exportAdapter({
+      let editorContent = exportAdapter({
         slateValue: tmpValue,
         type,
         transcriptTitle: getFileTitle(),
@@ -221,27 +239,35 @@ export default function SlateTranscriptEditor(props) {
       });
 
       if (ext === 'json') {
-        editorContnet = JSON.stringify(editorContnet, null, 2);
+        editorContent = JSON.stringify(editorContent, null, 2);
       }
       if (ext !== 'docx' && isDownload) {
-        download(editorContnet, `${getFileTitle()}.${ext}`);
+        download(editorContent, `${getFileTitle()}.${ext}`);
       }
-      return editorContnet;
+      return editorContent;
     } finally {
       setIsProcessing(false);
     }
   };
 
   const handleSave = async () => {
-    try {
-      setIsProcessing(true);
-      const format = props.autoSaveContentType ? props.autoSaveContentType : 'digitalpaperedit';
-      const editorContnet = await handleExport({ type: `json-${format}`, isDownload: false });
+    console.log('TranscriptEditor handleSave');
+    const alignedWords = updateTimestampsHelper(value, props.transcriptData);
+    const editorContent = createSlateContentFromSlateJsParagraphs(value, alignedWords);
+    setValue(editorContent);
+    setIsContentIsModified(false);
+
+    const format = props.autoSaveContentType ? props.autoSaveContentType : 'digitalpaperedit';
+    if (format === 'digitalpaperedit') {
+      const editorContentInDpe = createDpeParagraphsFromSlateJs(value, alignedWords);
       if (props.handleSaveEditor) {
-        props.handleSaveEditor(editorContnet);
+        const dpeTranscript = { paragraphs: editorContentInDpe, words: alignedWords };
+        props.handleSaveEditor(dpeTranscript);
       }
-    } finally {
-      setIsProcessing(false);
+    } else {
+      if (props.handleSaveEditor) {
+        props.handleSaveEditor(editorContent);
+      }
     }
   };
 
@@ -249,6 +275,19 @@ export default function SlateTranscriptEditor(props) {
     setIsPauseWhiletyping(!isPauseWhiletyping);
   };
 
+  const handleAutoSaveChanges = (value) => {
+    if (props.handleAutoSaveChanges) {
+      props.handleAutoSaveChanges(value);
+    }
+    setIsContentIsModified(true);
+    // console.log('isContentIsModified', isContentIsModified);
+    setValue(value);
+  };
+
+  // const handleSaveEditor = (value) => {
+  //   props.handleSaveEditor(value);
+  //   setValue(save);
+  // };
   return (
     <Container fluid style={{ backgroundColor: '#eee', height: '100vh', paddingTop: '1em' }}>
       {props.showTitle ? (
@@ -348,19 +387,21 @@ export default function SlateTranscriptEditor(props) {
             autoSaveContentType={props.autoSaveContentType}
             showTimecodes={showTimecodes}
             showSpeakers={showSpeakers}
-            title={props.title}
             transcriptData={props.transcriptData}
-            handleSaveEditor={props.handleSaveEditor}
+            // handleSaveEditor={handleSaveEditor}
+            handleAutoSaveChanges={handleAutoSaveChanges}
             showTitle={props.showTitle}
             currentTime={currentTime}
             //
             isPauseWhiletyping={isPauseWhiletyping}
             onWordClick={onWordClick}
             handleAnalyticsEvents={props.handleAnalyticsEvents}
-            getSlateContent={getSlateContent}
+            // getSlateContent={getSlateContent}
+            // https://reactjs.org/docs/forwarding-refs.html
             ref={timedTextEditorRef}
             mediaRef={mediaRef}
             transcriptDataLive={props.transcriptDataLive}
+            value={value}
           />
         </Col>
 
@@ -374,7 +415,15 @@ export default function SlateTranscriptEditor(props) {
                 overlay={<Tooltip id="tooltip-disabled">Export options</Tooltip>}
               >
                 <span className="d-inline-block">
-                  <DropdownButton disabled={isProcessing} id="dropdown-basic-button" title={<FontAwesomeIcon icon={faShare} />} variant="light">
+                  <DropdownButton
+                    disabled={isProcessing}
+                    id="dropdown-basic-button"
+                    title={<FontAwesomeIcon icon={faFileDownload} />}
+                    variant="light"
+                  >
+                    <Dropdown.Item style={{ color: 'black' }} disabled>
+                      <b>Text Export</b>
+                    </Dropdown.Item>
                     {/* TODO: need to run re-alignement if exportin with timecodes true, otherwise they'll be inaccurate */}
                     <Dropdown.Item
                       onClick={() => {
@@ -513,6 +562,25 @@ export default function SlateTranscriptEditor(props) {
                       Word (OHMS)
                     </Dropdown.Item>
                     <Dropdown.Divider />
+                    <Dropdown.Item style={{ color: 'black' }} disabled>
+                      <b>Closed Captions Export</b>
+                    </Dropdown.Item>
+                    {subtitlesExportOptionsList.map(({ type, label, ext }, index) => {
+                      return (
+                        <Dropdown.Item
+                          key={index + label}
+                          onClick={() => {
+                            handleExport({ type, ext, isDownload: true });
+                          }}
+                        >
+                          {label} (<code>.{ext}</code>)
+                        </Dropdown.Item>
+                      );
+                    })}
+                    <Dropdown.Divider />
+                    <Dropdown.Item style={{ color: 'black' }} disabled>
+                      <b>Developer options</b>
+                    </Dropdown.Item>
                     <Dropdown.Item
                       onClick={() => {
                         handleExport({
@@ -543,7 +611,7 @@ export default function SlateTranscriptEditor(props) {
                 </span>
               </OverlayTrigger>
             </Col>
-            <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
+            {/* <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
               <OverlayTrigger
                 OverlayTrigger
                 delay={TOOTLIP_LONGER_DELAY}
@@ -570,7 +638,7 @@ export default function SlateTranscriptEditor(props) {
                   })}
                 </DropdownButton>
               </OverlayTrigger>
-            </Col>
+            </Col> */}
             <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
               <OverlayTrigger
                 OverlayTrigger
@@ -583,7 +651,7 @@ export default function SlateTranscriptEditor(props) {
                 </Button>
               </OverlayTrigger>
             </Col>
-            <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
+            {/* <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
               <OverlayTrigger
                 delay={TOOTLIP_DELAY}
                 placement={'bottom'}
@@ -595,11 +663,11 @@ export default function SlateTranscriptEditor(props) {
                 }
               >
                 <Button disabled={isProcessing} onClick={breakParagraph} variant="light">
-                  {/* <FontAwesomeIcon icon={ faICursor } /> */}↵
+                 ↵
                 </Button>
               </OverlayTrigger>
-            </Col>
-            <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
+            </Col> */}
+            {/* <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
               <OverlayTrigger
                 delay={TOOTLIP_DELAY}
                 placement={'bottom'}
@@ -611,8 +679,8 @@ export default function SlateTranscriptEditor(props) {
                   <FontAwesomeIcon icon={faMehBlank} />
                 </Button>
               </OverlayTrigger>
-            </Col>
-            <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
+            </Col> */}
+            {/* <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
               <OverlayTrigger delay={TOOTLIP_DELAY} placement={'bottom'} overlay={<Tooltip id="tooltip-disabled">Insert a ♫ in the text</Tooltip>}>
                 <span className="d-inline-block">
                   <Button onClick={handleInsertMusicNote} variant={'light'}>
@@ -620,7 +688,7 @@ export default function SlateTranscriptEditor(props) {
                   </Button>
                 </span>
               </OverlayTrigger>
-            </Col>
+            </Col> */}
             <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
               <OverlayTrigger
                 delay={TOOTLIP_DELAY}
@@ -690,7 +758,7 @@ export default function SlateTranscriptEditor(props) {
 SlateTranscriptEditor.propTypes = {
   transcriptData: PropTypes.object.isRequired,
   mediaUrl: PropTypes.string.isRequired,
-  handleSaveEditor: PropTypes.func,
+  // handleSaveEditor: PropTypes.func,
   handleAutoSaveChanges: PropTypes.func,
   autoSaveContentType: PropTypes.string,
   isEditable: PropTypes.boolean,
