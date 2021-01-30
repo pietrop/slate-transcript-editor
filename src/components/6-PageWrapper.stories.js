@@ -29,21 +29,20 @@ export const PageWrapperExample = (props) => {
   return (
     <>
       <PageWrapper
-        // mediaUrl={text('mediaUrl', DEMO_MEDIA_URL_SOLEIO)}
-        // handleSaveEditor={action('handleSaveEditor')}
-        // handleAutoSaveChanges={action('handleAutoSaveChanges')}
+        handleAutoSaveChanges={action('handleAutoSaveChanges')}
         // // https://www.npmjs.com/package/@storybook/addon-knobs#select
-        autoSaveContentType={select('autoSaveContentType', ['digitalpaperedit', 'slate'], 'digitalpaperedit')} // digitalpaperedit or slate - digitalpaperedit, runs alignement before exporting, slate, is just the raw data.
-        // transcriptDataLive={interimResults}
-        isEditable={true}
-        showTimecodes={true}
-        showSpeakers={true}
-        mediaUrl={DEMO_MEDIA_URL_ZUCK_5HOURS}
-        title={DEMO_TITLE_ZUCK_5HOURS}
-        transcriptData={DEMO_TRANSCRIPT_ZUCK_5HOURS_DPE}
+        autoSaveContentType={select('autoSaveContentType', ['digitalpaperedit'], 'digitalpaperedit')} // digitalpaperedit or slate - digitalpaperedit, runs alignement before exporting, slate, is just the raw data.
+        //
+        mediaUrl={text('mediaUrl', DEMO_MEDIA_URL_ZUCK_5HOURS)}
         handleSaveEditor={action('handleSaveEditor')}
-        // autoSaveContentType={'digitalpaperedit'}
-        showTitle={true}
+        // handleAutoSaveChanges={action('handleAutoSaveChanges')}
+        // https://www.npmjs.com/package/@storybook/addon-knobs#select
+        transcriptData={DEMO_TRANSCRIPT_ZUCK_5HOURS_DPE}
+        showTitle={boolean('showTitle', true)} // optional - defaults to false
+        title={text('title', DEMO_TITLE_ZUCK_5HOURS)}
+        showTimecodes={boolean('timecodes', true)}
+        showSpeakers={boolean('speakers', true)}
+        isEditable={boolean('isEditable', true)}
       />
     </>
   );

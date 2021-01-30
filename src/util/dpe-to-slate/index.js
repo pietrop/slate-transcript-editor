@@ -21,7 +21,12 @@ import { shortTimecode } from '../timecode-converter';
 
 export const generatePreviousTimings = (time) => {
   // https://stackoverflow.com/questions/3746725/how-to-create-an-array-containing-1-n
-  return [...Array(parseInt(time)).keys()];
+  // TODO: not sure why need this if statment, needs looking into and remove, keeping only first return
+  if (time) {
+    return [...Array(parseInt(time)).keys()];
+  } else {
+    return [0];
+  }
 };
 
 /**

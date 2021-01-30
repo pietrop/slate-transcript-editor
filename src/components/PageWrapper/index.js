@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import Tabs from 'react-bootstrap/Tabs';
 import Tab from 'react-bootstrap/Tab';
-import SlateTranscriptEditor from '../index';
+// import SlateTranscriptEditor from '../index';
+import TranscriptEditor from '../TranscriptEditor/index';
 import chunk from 'lodash.chunk';
 import { shortTimecode } from '../../util/timecode-converter';
 
@@ -68,7 +69,7 @@ const PageWrapper = (props) => {
               {/* This is so that we don't load the editor's for tabs that are not in view */}
               {currentTranscriptIndex === index && (
                 <>
-                  <SlateTranscriptEditor
+                  <TranscriptEditor
                     mediaUrl={props.mediaUrl}
                     transcriptData={chunk}
                     title={props.title}
