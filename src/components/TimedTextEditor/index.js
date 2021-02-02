@@ -301,7 +301,7 @@ const TimedTextEditor = (props) => {
                   // setIsContentIsModified(false);
                 }
                 // return setValue(value);
-                // return value;
+                return value;
               }}
             >
               <Editable

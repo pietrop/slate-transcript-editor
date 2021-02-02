@@ -17,6 +17,7 @@ import ListGroup from 'react-bootstrap/ListGroup';
 import Accordion from 'react-bootstrap/Accordion';
 import Tabs from 'react-bootstrap/Tabs';
 import Tab from 'react-bootstrap/Tab';
+import Pagination from 'react-bootstrap/Pagination';
 import { shortTimecode } from '../../util/timecode-converter';
 import download from '../../util/downlaod/index.js';
 import convertDpeToSlate from '../../util/dpe-to-slate';
@@ -60,6 +61,7 @@ export default function TranscriptEditor(props) {
   const [isContentModified, setIsContentIsModified] = useState(false);
   //
   const [key, setKey] = useState(0);
+  const [active, setActive] = useState(0);
   const { transcriptData } = props;
   const wordsChunk = divideDpeTranscriptIntoChunks(transcriptData);
   const transcriptsChunksTmp = chunkParagraphs(wordsChunk, transcriptData.paragraphs);
@@ -113,8 +115,17 @@ export default function TranscriptEditor(props) {
   // for tabs logic
   const handleOnSelect = (k) => {
     setKey(k);
+
     setCurrentTranscriptIndex(parseInt(k));
     const tmp = transcriptsChunks[parseInt(k)];
+    setCurrentTranscriptChunk(tmp);
+  };
+
+  const handlePageChange = (index) => {
+    console.log(index);
+    setActive(index);
+    setCurrentTranscriptIndex(index);
+    const tmp = transcriptsChunks[index];
     setCurrentTranscriptChunk(tmp);
   };
 
@@ -259,9 +270,14 @@ export default function TranscriptEditor(props) {
   };
 
   const handleAutoSaveChanges = (value) => {
-    // if (props.handleAutoSaveChanges) {
-    //   props.handleAutoSaveChanges(value);
-    // }
+    if (props.handleAutoSaveChanges) {
+      // transcriptsChunks[currentTranscriptIndex] = value;
+      // setTranscriptsChunks(transcriptsChunks);
+
+      setCurrentTranscriptChunk(value);
+      // props.handleSaveEditor(data);
+      props.handleAutoSaveChanges(value);
+    }
     // setIsContentIsModified(true);
     // setValue(value);
   };
@@ -349,69 +365,46 @@ export default function TranscriptEditor(props) {
 
         <Col xs={{ span: 12, order: 3 }} sm={{ span: 7, order: 2 }} md={{ span: 7, order: 2 }} lg={{ span: 8, order: 2 }} xl={{ span: 7, order: 2 }}>
           {transcriptsChunks.length > 1 && (
-            <Tabs id="controlled-tab-example" activeKey={key} onSelect={handleOnSelect}>
+            <Pagination>
               {transcriptsChunks.map((chunk, index) => {
-                // const startTime = chunk.words[0].start;
-                const startTime = chunk[0].startTimecode;
-                // const endTime = chunk.words[chunk.words.length - 1].end;
-                // const endTime = chunk[chunk.length - 1].startTimecode;
                 return (
-                  <Tab eventKey={index} index={index} title={`${startTime}`}>
-                    {/* This is so that we don't load the editor's for tabs that are not in view */}
-                    {/* {currentTranscriptIndex === index && ( */}
-                    <>
-                      <TimedTextEditor
-                        mediaUrl={props.mediaUrl}
-                        isEditable={props.isEditable}
-                        autoSaveCsontentType={props.autoSaveContentType}
-                        showTimecodes={showTimecodes}
-                        showSpeakers={showSpeakers}
-                        // transcriptData={props.transcriptData}
-                        // transcriptData={chunk}
-                        value={chunk}
-                        // handleSaveEditor={handleSaveEditor}
-                        handleSaveEditor={handleSaveEditor}
-                        handleAutoSaveChanges={handleAutoSaveChanges}
-                        showTitle={props.showTitle}
-                        currentTime={currentTime}
-                        //
-                        isPauseWhiletyping={isPauseWhiletyping}
-                        onWordClick={onWordClick}
-                        handleAnalyticsEvents={props.handleAnalyticsEvents}
-                        mediaRef={mediaRef}
-                        transcriptDataLive={props.transcriptDataLive}
-                      />
-                    </>
-                    {/* )} */}
-                  </Tab>
+                  <Pagination.Item
+                    onClick={() => {
+                      handlePageChange(index);
+                    }}
+                    key={index}
+                    active={index === active}
+                  >
+                    {chunk[0].startTimecode}
+                  </Pagination.Item>
                 );
               })}
-            </Tabs>
+            </Pagination>
           )}
 
-          {transcriptsChunks.length === 1 && (
-            <TimedTextEditor
-              mediaUrl={props.mediaUrl}
-              isEditable={props.isEditable}
-              autoSaveCsontentType={props.autoSaveContentType}
-              showTimecodes={showTimecodes}
-              showSpeakers={showSpeakers}
-              // transcriptData={props.transcriptData}
-              // transcriptData={currentTranscriptChunk}
-              value={currentTranscriptChunk}
-              // handleSaveEditor={handleSaveEditor}
-              handleSaveEditor={handleSaveEditor}
-              handleAutoSaveChanges={handleAutoSaveChanges}
-              showTitle={props.showTitle}
-              currentTime={currentTime}
-              //
-              isPauseWhiletyping={isPauseWhiletyping}
-              onWordClick={onWordClick}
-              handleAnalyticsEvents={props.handleAnalyticsEvents}
-              mediaRef={mediaRef}
-              transcriptDataLive={props.transcriptDataLive}
-            />
-          )}
+          {/* {transcriptsChunks.length === 1 && ( */}
+          <TimedTextEditor
+            mediaUrl={props.mediaUrl}
+            isEditable={props.isEditable}
+            autoSaveCsontentType={props.autoSaveContentType}
+            showTimecodes={showTimecodes}
+            showSpeakers={showSpeakers}
+            // transcriptData={props.transcriptData}
+            // transcriptData={currentTranscriptChunk}
+            value={currentTranscriptChunk}
+            // handleSaveEditor={handleSaveEditor}
+            handleSaveEditor={handleSaveEditor}
+            handleAutoSaveChanges={handleAutoSaveChanges}
+            showTitle={props.showTitle}
+            currentTime={currentTime}
+            //
+            isPauseWhiletyping={isPauseWhiletyping}
+            onWordClick={onWordClick}
+            handleAnalyticsEvents={props.handleAnalyticsEvents}
+            mediaRef={mediaRef}
+            transcriptDataLive={props.transcriptDataLive}
+          />
+          {/* )} */}
         </Col>
         <Col xs={{ span: 12, order: 2 }} sm={{ span: 2, order: 3 }} md={{ span: 2, order: 3 }} lg={{ span: 1, order: 3 }} xl={{ span: 2, order: 3 }}>
           <Row>
