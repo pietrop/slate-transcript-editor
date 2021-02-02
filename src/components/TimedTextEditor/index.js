@@ -217,8 +217,6 @@ const TimedTextEditor = (props) => {
   };
 
   const handleOnKeyDown = (event) => {
-    console.log('handleOnKeyDown');
-    // setIsContentIsModified(true);
     if (props.isPauseWhiletyping) {
       // logic for pause while typing
       // https://schier.co/blog/wait-for-user-to-stop-typing-using-javascript
@@ -307,7 +305,7 @@ const TimedTextEditor = (props) => {
               }
               `}
       </style>
-      {props.value.length !== 0 ? (
+      {props.value && props.value.length !== 0 ? (
         <>
           <section className="editor-wrapper-container">
             <Slate
@@ -316,7 +314,6 @@ const TimedTextEditor = (props) => {
               onChange={(value) => {
                 if (props.handleAutoSaveChanges) {
                   props.handleAutoSaveChanges(value);
-                  console.log('onChange');
                   // setIsContentIsModified(false);
                 }
                 // return setValue(value);

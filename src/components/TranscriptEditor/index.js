@@ -1,22 +1,7 @@
-import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { createEditor, Editor, Transforms } from 'slate';
-// https://docs.slatejs.org/walkthroughs/01-installing-slate
-// Import the Slate components and React plugin.
-import { Slate, Editable, withReact, ReactEditor } from 'slate-react';
-import { withHistory } from 'slate-history';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import path from 'path';
-import {
-  faSave,
-  faFileDownload,
-  faUndo,
-  faSync,
-  faInfoCircle,
-  faMehBlank,
-  faPause,
-  faMusic,
-  faClosedCaptioning,
-} from '@fortawesome/free-solid-svg-icons';
+import { faSave, faFileDownload, faUndo, faSync, faInfoCircle, faPause } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Button from 'react-bootstrap/Button';
 import DropdownButton from 'react-bootstrap/DropdownButton';
@@ -39,14 +24,11 @@ import pluck from '../../util/pluk';
 import subtitlesExportOptionsList from '../../util/export-adapters/subtitles-generator/list.js';
 import updateTimestamps from '../../util/export-adapters/slate-to-dpe/update-timestamps';
 import updateTimestampsHelper from '../../util/export-adapters/slate-to-dpe/update-timestamps/update-timestamps-helper';
-import { createSlateContentFromSlateJsParagraphs } from '../../util/export-adapters/slate-to-dpe/update-timestamps';
 import { createDpeParagraphsFromSlateJs } from '../../util/export-adapters/slate-to-dpe';
 import exportAdapter from '../../util/export-adapters';
 import TimedTextEditor from '../TimedTextEditor';
 const PLAYBACK_RATE_VALUES = [0.2, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 3, 3.5];
 const SEEK_BACK_SEC = 15;
-const PAUSE_WHILTE_TYPING_TIMEOUT_MILLISECONDS = 1500;
-const MAX_DURATION_FOR_PERFORMANCE_OPTIMIZATION_IN_SECONDS = 3600;
 const TOOTLIP_DELAY = 1000;
 const TOOTLIP_LONGER_DELAY = 2000;
 
@@ -56,7 +38,6 @@ export default function SlateTranscriptEditor(props) {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [playbackRate, setPlaybackRate] = useState(1);
-  // const editor = useMemo(() => withReact(withHistory(createEditor())), []);
   const [value, setValue] = useState([]);
   const defaultShowSpeakersPreference = typeof props.showSpeakers === 'boolean' ? props.showSpeakers : true;
   const defaultShowTimecodesPreference = typeof props.showTimecodes === 'boolean' ? props.showTimecodes : true;
@@ -64,15 +45,12 @@ export default function SlateTranscriptEditor(props) {
   const [showTimecodes, setShowTimecodes] = useState(defaultShowTimecodesPreference);
   const [speakerOptions, setSpeakerOptions] = useState([]);
   const [showSpeakersCheatShet, setShowSpeakersCheatShet] = useState(false);
-  // const [saveTimer, setSaveTimer] = useState(null);
   const [isPauseWhiletyping, setIsPauseWhiletyping] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   // used isContentModified to avoid unecessarily run alignment if the slate value contnet has not been modified by the user since
   // last save or alignment
   const [isContentModified, setIsContentIsModified] = useState(false);
 
-  // this.timedTextEditorRef = React.createRef();
-  const timedTextEditorRef = useRef();
   useEffect(() => {
     if (isProcessing) {
       document.body.style.cursor = 'wait';
@@ -98,7 +76,6 @@ export default function SlateTranscriptEditor(props) {
   useEffect(() => {
     // Update the document title using the browser API
     if (mediaRef && mediaRef.current) {
-      // setDuration(mediaRef.current.duration);
       mediaRef.current.addEventListener('timeupdate', handleTimeUpdated);
     }
     return function cleanup() {
@@ -108,24 +85,14 @@ export default function SlateTranscriptEditor(props) {
   }, []);
 
   useEffect(() => {
-    console.log('here');
-  }, [timedTextEditorRef.timedTextEditorRef]);
-
-  useEffect(() => {
     // Update the document title using the browser API
     if (mediaRef && mediaRef.current) {
       // Not working
       setDuration(mediaRef.current.duration);
-      // if (mediaRef.current.duration >= MAX_DURATION_FOR_PERFORMANCE_OPTIMIZATION_IN_SECONDS) {
-      //   setShowSpeakers(false);
-      //   showTimecodes(false);
-      // }
     }
   }, [mediaRef]);
 
   const getSlateContent = () => {
-    // return timedTextEditorRef && timedTextEditorRef.current && timedTextEditorRef.current.getSlateContent();
-    console.log('TranscriptEditor getSlateContent', value);
     return value;
   };
 
@@ -134,26 +101,6 @@ export default function SlateTranscriptEditor(props) {
       return props.title;
     }
     return path.basename(props.mediaUrl).trim();
-  };
-
-  const getMediaType = () => {
-    const clipExt = path.extname(props.mediaUrl);
-    let tmpMediaType = props.mediaType ? props.mediaType : 'video';
-    if (clipExt === '.wav' || clipExt === '.mp3' || clipExt === '.m4a' || clipExt === '.flac' || clipExt === '.aiff') {
-      tmpMediaType = 'audio';
-    }
-    return tmpMediaType;
-  };
-
-  const breakParagraph = () => {
-    Editor.insertBreak(editor);
-  };
-  const insertTextInaudible = () => {
-    Transforms.insertText(editor, '[INAUDIBLE]');
-  };
-
-  const handleInsertMusicNote = () => {
-    Transforms.insertText(editor, '♫'); // or ♪
   };
 
   const handleSetShowSpeakersCheatShet = () => {
@@ -189,9 +136,7 @@ export default function SlateTranscriptEditor(props) {
 
   // TODO: refacto this function, to be cleaner and easier to follow.
   const handleRestoreTimecodes = async (inlineTimecodes = false) => {
-    console.log('handleRestoreTimecodes');
     if (!isContentModified && !inlineTimecodes) {
-      console.log('value', value);
       return value;
     }
     if (inlineTimecodes) {
@@ -199,12 +144,10 @@ export default function SlateTranscriptEditor(props) {
       const alignedSlateData = await updateTimestamps(convertDpeToSlate(transcriptData), transcriptData);
       setValue(alignedSlateData);
       setIsContentIsModified(false);
-      console.log('inlineTimecodes alignedSlateData', alignedSlateData);
       return alignedSlateData;
     } else {
       const alignedSlateData = await updateTimestamps(value, props.transcriptData);
       setValue(alignedSlateData);
-      console.log('!inlineTimecodes alignedSlateData', alignedSlateData);
       setIsContentIsModified(false);
       return alignedSlateData;
     }
@@ -250,10 +193,10 @@ export default function SlateTranscriptEditor(props) {
     }
   };
 
-  const handleSave = async () => {
-    console.log('TranscriptEditor handleSave');
+  const handleSaveEditor = async () => {
+    console.log('handleSaveEditor');
     const alignedWords = updateTimestampsHelper(value, props.transcriptData);
-    const editorContent = createSlateContentFromSlateJsParagraphs(value, alignedWords);
+    const editorContent = (value, alignedWords);
     setValue(editorContent);
     setIsContentIsModified(false);
 
@@ -280,14 +223,9 @@ export default function SlateTranscriptEditor(props) {
       props.handleAutoSaveChanges(value);
     }
     setIsContentIsModified(true);
-    // console.log('isContentIsModified', isContentIsModified);
     setValue(value);
   };
 
-  // const handleSaveEditor = (value) => {
-  //   props.handleSaveEditor(value);
-  //   setValue(save);
-  // };
   return (
     <Container fluid style={{ backgroundColor: '#eee', height: '100vh', paddingTop: '1em' }}>
       {props.showTitle ? (
@@ -298,21 +236,16 @@ export default function SlateTranscriptEditor(props) {
         </OverlayTrigger>
       ) : null}
       <Row>
-        <Col
-          xs={{ span: 12, order: 1 }}
-          sm={getMediaType() === 'audio' ? { span: 10, offset: 1 } : 3}
-          md={getMediaType() === 'audio' ? { span: 10, offset: 1 } : 3}
-          lg={getMediaType() === 'audio' ? { span: 8, offset: 2 } : 3}
-          xl={getMediaType() === 'audio' ? { span: 8, offset: 2 } : 3}
-        >
-          <Row>
+        <Col xs={{ span: 12, order: 1 }} sm={3} md={3} lg={3} xl={3}>
+          <Row style={{ backgroundColor: 'black' }}>
             <video
               ref={mediaRef}
               src={props.mediaUrl}
               width={'100%'}
-              height={getMediaType() === 'audio' ? '60em' : 'auto'}
+              height={'auto'}
               controls
               playsInline
+              // poster={'https://video-react.js.org/assets/poster.png'}
             ></video>
           </Row>
           <Row>
@@ -374,13 +307,7 @@ export default function SlateTranscriptEditor(props) {
           </Row>
         </Col>
 
-        <Col
-          xs={{ span: 12, order: 3 }}
-          sm={getMediaType() === 'audio' ? { span: 10, order: 2, offset: 1 } : { span: 7, order: 2 }}
-          md={getMediaType() === 'audio' ? { span: 10, order: 2, offset: 1 } : { span: 7, order: 2 }}
-          lg={getMediaType() === 'audio' ? { span: 8, order: 2, offset: 2 } : { span: 8, order: 2 }}
-          xl={getMediaType() === 'audio' ? { span: 8, order: 2, offset: 2 } : { span: 7, order: 2 }}
-        >
+        <Col xs={{ span: 12, order: 3 }} sm={{ span: 7, order: 2 }} md={{ span: 7, order: 2 }} lg={{ span: 8, order: 2 }} xl={{ span: 7, order: 2 }}>
           <TimedTextEditor
             mediaUrl={props.mediaUrl}
             isEditable={props.isEditable}
@@ -397,14 +324,11 @@ export default function SlateTranscriptEditor(props) {
             onWordClick={onWordClick}
             handleAnalyticsEvents={props.handleAnalyticsEvents}
             // getSlateContent={getSlateContent}
-            // https://reactjs.org/docs/forwarding-refs.html
-            ref={timedTextEditorRef}
             mediaRef={mediaRef}
             transcriptDataLive={props.transcriptDataLive}
             value={value}
           />
         </Col>
-
         <Col xs={{ span: 12, order: 2 }} sm={{ span: 2, order: 3 }} md={{ span: 2, order: 3 }} lg={{ span: 1, order: 3 }} xl={{ span: 2, order: 3 }}>
           <Row>
             <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
@@ -611,34 +535,6 @@ export default function SlateTranscriptEditor(props) {
                 </span>
               </OverlayTrigger>
             </Col>
-            {/* <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
-              <OverlayTrigger
-                OverlayTrigger
-                delay={TOOTLIP_LONGER_DELAY}
-                placement={'bottom'}
-                overlay={<Tooltip id="tooltip-disabled">Export in caption format</Tooltip>}
-              >
-                <DropdownButton
-                  disabled={isProcessing}
-                  id="dropdown-basic-button"
-                  title={<FontAwesomeIcon icon={faClosedCaptioning} />}
-                  variant="light"
-                >
-                  {subtitlesExportOptionsList.map(({ type, label, ext }, index) => {
-                    return (
-                      <Dropdown.Item
-                        key={index + label}
-                        onClick={() => {
-                          handleExport({ type, ext, isDownload: true });
-                        }}
-                      >
-                        {label} (<code>.{ext}</code>)
-                      </Dropdown.Item>
-                    );
-                  })}
-                </DropdownButton>
-              </OverlayTrigger>
-            </Col> */}
             <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
               <OverlayTrigger
                 OverlayTrigger
@@ -646,49 +542,15 @@ export default function SlateTranscriptEditor(props) {
                 placement={'bottom'}
                 overlay={<Tooltip id="tooltip-disabled">Save</Tooltip>}
               >
-                <Button disabled={isProcessing} onClick={handleSave} variant="light">
+                <Button
+                  // disabled={isProcessing}
+                  onClick={handleSaveEditor}
+                  variant="light"
+                >
                   <FontAwesomeIcon icon={faSave} />
                 </Button>
               </OverlayTrigger>
             </Col>
-            {/* <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
-              <OverlayTrigger
-                delay={TOOTLIP_DELAY}
-                placement={'bottom'}
-                overlay={
-                  <Tooltip id="tooltip-disabled">
-                    To insert a paragraph break, and split a pargraph in two, put the cursor at a point where you'd want to add a paragraph break in
-                    the text and either click this button or hit enter key
-                  </Tooltip>
-                }
-              >
-                <Button disabled={isProcessing} onClick={breakParagraph} variant="light">
-                 ↵
-                </Button>
-              </OverlayTrigger>
-            </Col> */}
-            {/* <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
-              <OverlayTrigger
-                delay={TOOTLIP_DELAY}
-                placement={'bottom'}
-                overlay={
-                  <Tooltip id="tooltip-disabled">Put the cursor at a point where you'd want to add [INAUDIBLE] text, and click this button</Tooltip>
-                }
-              >
-                <Button disabled={isProcessing} onClick={insertTextInaudible} variant="light">
-                  <FontAwesomeIcon icon={faMehBlank} />
-                </Button>
-              </OverlayTrigger>
-            </Col> */}
-            {/* <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
-              <OverlayTrigger delay={TOOTLIP_DELAY} placement={'bottom'} overlay={<Tooltip id="tooltip-disabled">Insert a ♫ in the text</Tooltip>}>
-                <span className="d-inline-block">
-                  <Button onClick={handleInsertMusicNote} variant={'light'}>
-                    <FontAwesomeIcon icon={faMusic} />
-                  </Button>
-                </span>
-              </OverlayTrigger>
-            </Col> */}
             <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
               <OverlayTrigger
                 delay={TOOTLIP_DELAY}

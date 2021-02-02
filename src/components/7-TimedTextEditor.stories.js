@@ -3,7 +3,7 @@ import { action } from '@storybook/addon-actions';
 import { withKnobs, text, boolean, number, object, select } from '@storybook/addon-knobs';
 import { withInfo } from '@storybook/addon-info';
 import TimedTextEditor from './TimedTextEditor/index.js';
-
+import convertDpeToSlate from '../util/dpe-to-slate/index.js';
 export default {
   title: 'TimedTextEditor',
   component: TimedTextEditor,
@@ -23,7 +23,8 @@ const DEMO_MEDIA_URL_SOLEIO =
   'https://digital-paper-edit-demo.s3.eu-west-2.amazonaws.com/PBS-Frontline/The+Facebook+Dilemma+-+interviews/The+Facebook+Dilemma+-+Soleio+Cuervo-OIAUfZBd_7w.mp4';
 const DEMO_TITLE_SOLEIO = 'Soleio Interview, PBS Frontline';
 import DEMO_SOLEIO from '../sample-data/soleio-dpe.json';
-
+// This would normally happen in transcript editor
+const DEMO_SOLEIO_DPE_JSON = convertDpeToSlate(DEMO_SOLEIO);
 // Parent component to simulate results from a live STT stream.
 export const TimedTextEditorExample = (props) => {
   return (
@@ -36,6 +37,7 @@ export const TimedTextEditorExample = (props) => {
         showSpeakers={true}
         title={DEMO_TITLE_SOLEIO}
         transcriptData={DEMO_SOLEIO}
+        value={DEMO_SOLEIO_DPE_JSON}
         handleSaveEditor={action('handleSaveEditor')}
         showTitle={true}
         currentTime={number('currentTime', 30)}
