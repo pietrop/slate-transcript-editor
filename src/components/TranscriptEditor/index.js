@@ -271,9 +271,8 @@ export default function TranscriptEditor(props) {
 
   const handleAutoSaveChanges = (value) => {
     if (props.handleAutoSaveChanges) {
-      // transcriptsChunks[currentTranscriptIndex] = value;
-      // setTranscriptsChunks(transcriptsChunks);
-
+      transcriptsChunks[currentTranscriptIndex] = value;
+      setTranscriptsChunks(transcriptsChunks);
       setCurrentTranscriptChunk(value);
       // props.handleSaveEditor(data);
       props.handleAutoSaveChanges(value);
@@ -382,7 +381,6 @@ export default function TranscriptEditor(props) {
             </Pagination>
           )}
 
-          {/* {transcriptsChunks.length === 1 && ( */}
           <TimedTextEditor
             mediaUrl={props.mediaUrl}
             isEditable={props.isEditable}
@@ -404,7 +402,34 @@ export default function TranscriptEditor(props) {
             mediaRef={mediaRef}
             transcriptDataLive={props.transcriptDataLive}
           />
-          {/* )} */}
+
+          {/* {transcriptsChunks.map((chunk, index) => {
+            if (index === active) {
+              return (
+                <TimedTextEditor
+                  mediaUrl={props.mediaUrl}
+                  isEditable={props.isEditable}
+                  autoSaveCsontentType={props.autoSaveContentType}
+                  showTimecodes={showTimecodes}
+                  showSpeakers={showSpeakers}
+                  // transcriptData={props.transcriptData}
+                  // transcriptData={currentTranscriptChunk}
+                  value={chunk}
+                  // handleSaveEditor={handleSaveEditor}
+                  handleSaveEditor={handleSaveEditor}
+                  handleAutoSaveChanges={handleAutoSaveChanges}
+                  showTitle={props.showTitle}
+                  currentTime={currentTime}
+                  //
+                  isPauseWhiletyping={isPauseWhiletyping}
+                  onWordClick={onWordClick}
+                  handleAnalyticsEvents={props.handleAnalyticsEvents}
+                  mediaRef={mediaRef}
+                  transcriptDataLive={props.transcriptDataLive}
+                />
+              );
+            }
+          })} */}
         </Col>
         <Col xs={{ span: 12, order: 2 }} sm={{ span: 2, order: 3 }} md={{ span: 2, order: 3 }} lg={{ span: 1, order: 3 }} xl={{ span: 2, order: 3 }}>
           <Row>
