@@ -15,6 +15,8 @@ import Tooltip from 'react-bootstrap/Tooltip';
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import ListGroup from 'react-bootstrap/ListGroup';
 import Accordion from 'react-bootstrap/Accordion';
+import Tabs from 'react-bootstrap/Tabs';
+import Tab from 'react-bootstrap/Tab';
 import { shortTimecode } from '../../util/timecode-converter';
 import download from '../../util/downlaod/index.js';
 import convertDpeToSlate from '../../util/dpe-to-slate';
@@ -27,6 +29,12 @@ import updateTimestampsHelper from '../../util/export-adapters/slate-to-dpe/upda
 import { createDpeParagraphsFromSlateJs } from '../../util/export-adapters/slate-to-dpe';
 import exportAdapter from '../../util/export-adapters';
 import TimedTextEditor from '../TimedTextEditor';
+// TODO: if this works out, remove PageWrapper, and move these two functions
+// in this folder
+import divideDpeTranscriptIntoChunks from '../PageWrapper/divide-dpe-transcript-into-chunks';
+import chunkParagraphs from '../PageWrapper/chunk-paragraphs';
+import chunkParagraphsFromDpeToSlateList from '../PageWrapper/chunk-paragraphs-from-dpe-to-slate-list';
+
 const PLAYBACK_RATE_VALUES = [0.2, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 3, 3.5];
 const SEEK_BACK_SEC = 15;
 const TOOTLIP_DELAY = 1000;
@@ -34,11 +42,11 @@ const TOOTLIP_LONGER_DELAY = 2000;
 
 const mediaRef = React.createRef();
 
-export default function SlateTranscriptEditor(props) {
+export default function TranscriptEditor(props) {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [playbackRate, setPlaybackRate] = useState(1);
-  const [value, setValue] = useState([]);
+  // const [value, setValue] = useState([]);
   const defaultShowSpeakersPreference = typeof props.showSpeakers === 'boolean' ? props.showSpeakers : true;
   const defaultShowTimecodesPreference = typeof props.showTimecodes === 'boolean' ? props.showTimecodes : true;
   const [showSpeakers, setShowSpeakers] = useState(defaultShowSpeakersPreference);
@@ -50,6 +58,16 @@ export default function SlateTranscriptEditor(props) {
   // used isContentModified to avoid unecessarily run alignment if the slate value contnet has not been modified by the user since
   // last save or alignment
   const [isContentModified, setIsContentIsModified] = useState(false);
+  //
+  const [key, setKey] = useState(0);
+  const { transcriptData } = props;
+  const wordsChunk = divideDpeTranscriptIntoChunks(transcriptData);
+  const transcriptsChunksTmp = chunkParagraphs(wordsChunk, transcriptData.paragraphs);
+  const transcriptsChunksAsSlate = chunkParagraphsFromDpeToSlateList(transcriptsChunksTmp);
+  const [transcriptsChunks, setTranscriptsChunks] = useState(transcriptsChunksAsSlate);
+  const currentChunk = transcriptsChunks[0];
+  const [currentTranscriptIndex, setCurrentTranscriptIndex] = useState(0);
+  const [currentTranscriptChunk, setCurrentTranscriptChunk] = useState(currentChunk);
 
   useEffect(() => {
     if (isProcessing) {
@@ -59,19 +77,19 @@ export default function SlateTranscriptEditor(props) {
     }
   }, [isProcessing]);
 
-  useEffect(() => {
-    if (props.transcriptData) {
-      const res = convertDpeToSlate(props.transcriptData);
-      setValue(res);
-    }
-  }, []);
+  // useEffect(() => {
+  //   if (props.transcriptData) {
+  //     const res = convertDpeToSlate(props.transcriptData);
+  //     setValue(res);
+  //   }
+  // }, []);
 
-  useEffect(() => {
-    const getUniqueSpeakers = pluck('speaker');
-    const uniqueSpeakers = getUniqueSpeakers(value);
-    setSpeakerOptions(uniqueSpeakers);
-    return () => ({});
-  }, [showSpeakersCheatShet]);
+  // useEffect(() => {
+  //   const getUniqueSpeakers = pluck('speaker');
+  //   const uniqueSpeakers = getUniqueSpeakers(value);
+  //   setSpeakerOptions(uniqueSpeakers);
+  //   return () => ({});
+  // }, [showSpeakersCheatShet]);
 
   useEffect(() => {
     // Update the document title using the browser API
@@ -92,8 +110,18 @@ export default function SlateTranscriptEditor(props) {
     }
   }, [mediaRef]);
 
+  // for tabs logic
+  const handleOnSelect = (k) => {
+    setKey(k);
+    setCurrentTranscriptIndex(parseInt(k));
+    const tmp = transcriptsChunks[parseInt(k)];
+    setCurrentTranscriptChunk(tmp);
+  };
+
   const getSlateContent = () => {
-    return value;
+    // TODO: recombine transcriptsChunks
+    // return value;
+    return [];
   };
 
   const getFileTitle = () => {
@@ -136,82 +164,94 @@ export default function SlateTranscriptEditor(props) {
 
   // TODO: refacto this function, to be cleaner and easier to follow.
   const handleRestoreTimecodes = async (inlineTimecodes = false) => {
-    if (!isContentModified && !inlineTimecodes) {
-      return value;
-    }
-    if (inlineTimecodes) {
-      const transcriptData = insertTimecodesInline({ transcriptData: props.transcriptData });
-      const alignedSlateData = await updateTimestamps(convertDpeToSlate(transcriptData), transcriptData);
-      setValue(alignedSlateData);
-      setIsContentIsModified(false);
-      return alignedSlateData;
-    } else {
-      const alignedSlateData = await updateTimestamps(value, props.transcriptData);
-      setValue(alignedSlateData);
-      setIsContentIsModified(false);
-      return alignedSlateData;
-    }
+    console.log('handleRestoreTimecodes');
+    // if (!isContentModified && !inlineTimecodes) {
+    //   // return value;
+    // }
+    // if (inlineTimecodes) {
+    //   const transcriptData = insertTimecodesInline({ transcriptData: props.transcriptData });
+    //   const alignedSlateData = await updateTimestamps(convertDpeToSlate(transcriptData), transcriptData);
+    //   setValue(alignedSlateData);
+    //   setIsContentIsModified(false);
+    //   return alignedSlateData;
+    // } else {
+    //   const alignedSlateData = await updateTimestamps(value, props.transcriptData);
+    //   setValue(alignedSlateData);
+    //   setIsContentIsModified(false);
+    //   return alignedSlateData;
+    // }
   };
 
   const handleExport = async ({ type, ext, speakers, timecodes, inlineTimecodes, hideTitle, atlasFormat, isDownload }) => {
-    try {
-      setIsProcessing(true);
-      let tmpValue = getSlateContent();
-      if (timecodes) {
-        tmpValue = await handleRestoreTimecodes();
-      }
+    console.log('handleExport');
+    // try {
+    //   setIsProcessing(true);
+    //   let tmpValue = getSlateContent();
+    //   if (timecodes) {
+    //     tmpValue = await handleRestoreTimecodes();
+    //   }
 
-      if (inlineTimecodes) {
-        tmpValue = await handleRestoreTimecodes(inlineTimecodes);
-      }
+    //   if (inlineTimecodes) {
+    //     tmpValue = await handleRestoreTimecodes(inlineTimecodes);
+    //   }
 
-      if (isContentModified && type === 'json-slate') {
-        tmpValue = await handleRestoreTimecodes();
-      }
+    //   if (isContentModified && type === 'json-slate') {
+    //     tmpValue = await handleRestoreTimecodes();
+    //   }
 
-      let editorContent = exportAdapter({
-        slateValue: tmpValue,
-        type,
-        transcriptTitle: getFileTitle(),
-        speakers,
-        timecodes,
-        inlineTimecodes,
-        hideTitle,
-        atlasFormat,
-        dpeTranscriptData: props.transcriptData,
-      });
+    //   let editorContent = exportAdapter({
+    //     slateValue: tmpValue,
+    //     type,
+    //     transcriptTitle: getFileTitle(),
+    //     speakers,
+    //     timecodes,
+    //     inlineTimecodes,
+    //     hideTitle,
+    //     atlasFormat,
+    //     dpeTranscriptData: props.transcriptData,
+    //   });
 
-      if (ext === 'json') {
-        editorContent = JSON.stringify(editorContent, null, 2);
-      }
-      if (ext !== 'docx' && isDownload) {
-        download(editorContent, `${getFileTitle()}.${ext}`);
-      }
-      return editorContent;
-    } finally {
-      setIsProcessing(false);
-    }
+    //   if (ext === 'json') {
+    //     editorContent = JSON.stringify(editorContent, null, 2);
+    //   }
+    //   if (ext !== 'docx' && isDownload) {
+    //     download(editorContent, `${getFileTitle()}.${ext}`);
+    //   }
+    //   return editorContent;
+    // } finally {
+    //   setIsProcessing(false);
+    // }
   };
 
-  const handleSaveEditor = async () => {
+  const handleSaveEditor = () => {
     console.log('handleSaveEditor');
-    const alignedWords = updateTimestampsHelper(value, props.transcriptData);
-    const editorContent = (value, alignedWords);
-    setValue(editorContent);
-    setIsContentIsModified(false);
+    // console.log('PageWrapper, handleSaveEditor', data);
+    // transcriptsChunks[currentTranscriptIndex] = data;
+    // setTranscriptsChunks(transcriptsChunks);
+    // setCurrentTranscriptChunk(data);
+    // props.handleSaveEditor(data);
+  };
 
-    const format = props.autoSaveContentType ? props.autoSaveContentType : 'digitalpaperedit';
-    if (format === 'digitalpaperedit') {
-      const editorContentInDpe = createDpeParagraphsFromSlateJs(value, alignedWords);
-      if (props.handleSaveEditor) {
-        const dpeTranscript = { paragraphs: editorContentInDpe, words: alignedWords };
-        props.handleSaveEditor(dpeTranscript);
-      }
-    } else {
-      if (props.handleSaveEditor) {
-        props.handleSaveEditor(editorContent);
-      }
-    }
+  const handleSave = async () => {
+    console.log('handleSave');
+
+    // const alignedWords = updateTimestampsHelper(value, props.transcriptData);
+    // const editorContent = (value, alignedWords);
+    // setValue(editorContent);
+    // setIsContentIsModified(false);
+
+    // const format = props.autoSaveContentType ? props.autoSaveContentType : 'digitalpaperedit';
+    // if (format === 'digitalpaperedit') {
+    //   const editorContentInDpe = createDpeParagraphsFromSlateJs(value, alignedWords);
+    //   if (props.handleSaveEditor) {
+    //     const dpeTranscript = { paragraphs: editorContentInDpe, words: alignedWords };
+    //     props.handleSaveEditor(dpeTranscript);
+    //   }
+    // } else {
+    //   if (props.handleSaveEditor) {
+    //     props.handleSaveEditor(editorContent);
+    //   }
+    // }
   };
 
   const handleSetPauseWhileTyping = () => {
@@ -219,11 +259,11 @@ export default function SlateTranscriptEditor(props) {
   };
 
   const handleAutoSaveChanges = (value) => {
-    if (props.handleAutoSaveChanges) {
-      props.handleAutoSaveChanges(value);
-    }
-    setIsContentIsModified(true);
-    setValue(value);
+    // if (props.handleAutoSaveChanges) {
+    //   props.handleAutoSaveChanges(value);
+    // }
+    // setIsContentIsModified(true);
+    // setValue(value);
   };
 
   return (
@@ -308,26 +348,70 @@ export default function SlateTranscriptEditor(props) {
         </Col>
 
         <Col xs={{ span: 12, order: 3 }} sm={{ span: 7, order: 2 }} md={{ span: 7, order: 2 }} lg={{ span: 8, order: 2 }} xl={{ span: 7, order: 2 }}>
-          <TimedTextEditor
-            mediaUrl={props.mediaUrl}
-            isEditable={props.isEditable}
-            autoSaveContentType={props.autoSaveContentType}
-            showTimecodes={showTimecodes}
-            showSpeakers={showSpeakers}
-            transcriptData={props.transcriptData}
-            // handleSaveEditor={handleSaveEditor}
-            handleAutoSaveChanges={handleAutoSaveChanges}
-            showTitle={props.showTitle}
-            currentTime={currentTime}
-            //
-            isPauseWhiletyping={isPauseWhiletyping}
-            onWordClick={onWordClick}
-            handleAnalyticsEvents={props.handleAnalyticsEvents}
-            // getSlateContent={getSlateContent}
-            mediaRef={mediaRef}
-            transcriptDataLive={props.transcriptDataLive}
-            value={value}
-          />
+          {transcriptsChunks.length > 1 && (
+            <Tabs id="controlled-tab-example" activeKey={key} onSelect={handleOnSelect}>
+              {transcriptsChunks.map((chunk, index) => {
+                // const startTime = chunk.words[0].start;
+                const startTime = chunk[0].startTimecode;
+                // const endTime = chunk.words[chunk.words.length - 1].end;
+                // const endTime = chunk[chunk.length - 1].startTimecode;
+                return (
+                  <Tab eventKey={index} index={index} title={`${startTime}`}>
+                    {/* This is so that we don't load the editor's for tabs that are not in view */}
+                    {/* {currentTranscriptIndex === index && ( */}
+                    <>
+                      <TimedTextEditor
+                        mediaUrl={props.mediaUrl}
+                        isEditable={props.isEditable}
+                        autoSaveCsontentType={props.autoSaveContentType}
+                        showTimecodes={showTimecodes}
+                        showSpeakers={showSpeakers}
+                        // transcriptData={props.transcriptData}
+                        // transcriptData={chunk}
+                        value={chunk}
+                        // handleSaveEditor={handleSaveEditor}
+                        handleSaveEditor={handleSaveEditor}
+                        handleAutoSaveChanges={handleAutoSaveChanges}
+                        showTitle={props.showTitle}
+                        currentTime={currentTime}
+                        //
+                        isPauseWhiletyping={isPauseWhiletyping}
+                        onWordClick={onWordClick}
+                        handleAnalyticsEvents={props.handleAnalyticsEvents}
+                        mediaRef={mediaRef}
+                        transcriptDataLive={props.transcriptDataLive}
+                      />
+                    </>
+                    {/* )} */}
+                  </Tab>
+                );
+              })}
+            </Tabs>
+          )}
+
+          {transcriptsChunks.length === 1 && (
+            <TimedTextEditor
+              mediaUrl={props.mediaUrl}
+              isEditable={props.isEditable}
+              autoSaveCsontentType={props.autoSaveContentType}
+              showTimecodes={showTimecodes}
+              showSpeakers={showSpeakers}
+              // transcriptData={props.transcriptData}
+              // transcriptData={currentTranscriptChunk}
+              value={currentTranscriptChunk}
+              // handleSaveEditor={handleSaveEditor}
+              handleSaveEditor={handleSaveEditor}
+              handleAutoSaveChanges={handleAutoSaveChanges}
+              showTitle={props.showTitle}
+              currentTime={currentTime}
+              //
+              isPauseWhiletyping={isPauseWhiletyping}
+              onWordClick={onWordClick}
+              handleAnalyticsEvents={props.handleAnalyticsEvents}
+              mediaRef={mediaRef}
+              transcriptDataLive={props.transcriptDataLive}
+            />
+          )}
         </Col>
         <Col xs={{ span: 12, order: 2 }} sm={{ span: 2, order: 3 }} md={{ span: 2, order: 3 }} lg={{ span: 1, order: 3 }} xl={{ span: 2, order: 3 }}>
           <Row>
@@ -617,7 +701,7 @@ export default function SlateTranscriptEditor(props) {
   );
 }
 
-SlateTranscriptEditor.propTypes = {
+TranscriptEditor.propTypes = {
   transcriptData: PropTypes.object.isRequired,
   mediaUrl: PropTypes.string.isRequired,
   // handleSaveEditor: PropTypes.func,
@@ -632,7 +716,7 @@ SlateTranscriptEditor.propTypes = {
   transcriptDataLive: PropTypes.object,
 };
 
-SlateTranscriptEditor.defaultProps = {
+TranscriptEditor.defaultProps = {
   showTitle: false,
   showTimecodes: true,
   showSpeakers: true,

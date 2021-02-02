@@ -61,18 +61,27 @@ const TimedTextEditor = (props) => {
   // };
   // useEffect(() => {
   //   if (props.transcriptData) {
-  //     const res = convertDpeToSlate(props.transcriptData);
-  //     setValue(res);
+  //     // const res = convertDpeToSlate(props.transcriptData);
+  //     // setValue(res);
+  //     setValue(value)
   //   }
   // }, []);
+
+  useEffect(() => {
+    if (props.value) {
+      // const res = convertDpeToSlate(props.transcriptData);
+      // setValue(res);
+      setValue(props.value);
+    }
+  }, [props.value]);
 
   // useEffect(() => {
   //   return getSlateContent(value);
   // }, [getSlateContent]);
 
-  useEffect(() => {
-    return; //setValue(props.value);
-  }, [props.value]);
+  // useEffect(() => {
+  //   return; //setValue(props.value);
+  // }, [props.value]);
 
   const TimedTextElement = (props) => {
     let textLg = 12;
@@ -243,38 +252,13 @@ const TimedTextEditor = (props) => {
     }
   };
 
-  // useEffect(() => {
-  //   if (props.transcriptDataLive) {
-  //     const nodes = convertDpeToSlate(props.transcriptDataLive);
-  //     // if the user is selecting the / typing the text
-  //     // Transforms.insertNodes would insert the node at seleciton point
-  //     // instead we check if they are in the editor
-  //     if (editor.selection) {
-  //       // get the position of the last node
-  //       const positionLastNode = [editor.children.length];
-  //       // insert the new nodes at the end of the document
-  //       Transforms.insertNodes(editor, nodes, {
-  //         at: positionLastNode,
-  //       });
-  //     }
-  //     // use not having selection in the editor allows us to also handle the initial use case
-  //     // where the might be no initial results
-  //     else {
-  //       // if there is no selection the default for insertNodes is to add the nodes at the end
-  //       Transforms.insertNodes(editor, nodes);
-  //     }
-  //   }
-  // }, [props.transcriptDataLive]);
-
   return (
     <>
       <style scoped>
-        {`
-              /* Next words */
-              .timecode[data-previous-timings*="${generatePreviousTimingsUpToCurrent(parseInt(props.currentTime), props.transcriptData)}"]{
+        {`/* Next words */
+               .timecode[data-previous-timings*="${generatePreviousTimingsUpToCurrent(parseInt(props.currentTime), props.value)}"]{
                   color:  #9E9E9E;
-              }
-          `}
+              }`}
       </style>
       <style scope>
         {`.editor-wrapper-container{
@@ -305,7 +289,7 @@ const TimedTextEditor = (props) => {
               }
               `}
       </style>
-      {props.value && props.value.length !== 0 ? (
+      {props.value ? (
         <>
           <section className="editor-wrapper-container">
             <Slate
