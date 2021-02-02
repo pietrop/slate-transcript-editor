@@ -7,7 +7,7 @@ function slateToDocx({
   value,
   speakers,
   timecodes,
-  inline_speakers,
+  inlineTimecodes,
   hideTitle,
   title = 'Transcript',
   creator = 'Slate Transcript Editor',
@@ -21,7 +21,6 @@ function slateToDocx({
 
   if (!hideTitle) {
     // Transcript Title
-    // TODO: get title in programmatically - optional value
     const textTitle = new TextRun(title);
     const paragraphTitle = new Paragraph();
     paragraphTitle.addRun(textTitle);
@@ -54,16 +53,16 @@ function slateToDocx({
     const paragraphContents = Node.string(slateParagraph);
     const textBreak = new TextRun('').break();
 
-    if (inline_speakers) {
+    if (inlineTimecodes) {
       paragraphSpeakerTimecodes.addRun(new TextRun(`${slateParagraph.speaker.toUpperCase()}:  ${paragraphContents}`));
     }
 
-    if (timecodes || speakers || inline_speakers) {
+    if (timecodes || speakers || inlineTimecodes) {
       doc.addParagraph(paragraphSpeakerTimecodes);
       doc.addParagraph(new Paragraph());
     }
 
-    if (!inline_speakers) {
+    if (!inlineTimecodes) {
       const paragraphText = new Paragraph(paragraphContents);
       paragraphText.addRun(textBreak);
       doc.addParagraph(paragraphText);
