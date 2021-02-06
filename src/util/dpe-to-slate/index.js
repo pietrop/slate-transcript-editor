@@ -12,6 +12,9 @@ import { shortTimecode } from '../timecode-converter';
  * eg if current time is `3` then `listOfPreviousTimingsUpToCurrentOne` "0 1 2"
  */
 
+//  TODO: should it consolidate generatePreviousTimingsUpToCurrent or are they for different porpuses?
+//  import generatePreviousTimingsUpToCurrent from './generate-previous-timings-up-to-current';
+
 /**
  * Generate a list of times, each rounded up to int.
  * from zero to the provided `time`.
