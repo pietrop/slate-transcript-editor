@@ -3,8 +3,6 @@
  * https://github.com/pietrop/react-transcript-editor/blob/master/packages/components/timed-text-editor/UpdateTimestamps/index.js
  * similar to updateTimestamps
  */
-// import { alignSTT } from 'stt-align-node';
-// import slateToText from '../txt';
 import countWords from '../../count-words';
 import updateTimestampsHelper from './update-timestamps/update-timestamps-helper';
 /**

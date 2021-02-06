@@ -42,6 +42,8 @@ import updateTimestamps from '../util/export-adapters/slate-to-dpe/update-timest
 import exportAdapter from '../util/export-adapters';
 import isEmpty from '../util/is-empty';
 import generatePreviousTimingsUpToCurrent from '../util/dpe-to-slate/generate-previous-timings-up-to-current';
+import getSelectionNodes from '../util/get-selection-nodes';
+
 const PLAYBACK_RATE_VALUES = [0.2, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 3, 3.5];
 const SEEK_BACK_SEC = 15;
 const PAUSE_WHILTE_TYPING_TIMEOUT_MILLISECONDS = 1500;
@@ -276,6 +278,10 @@ export default function SlateTranscriptEditor(props) {
               style={{ cursor: 'pointer' }}
               className={'timecode text-muted unselectable'}
               onClick={handleTimedTextClick}
+              // onClick={(e) => {
+              //   e.preventDefault();
+              // }}
+              onDoubleClick={handleTimedTextClick}
               title={props.element.startTimecode}
               data-start={props.element.start}
             >
@@ -321,11 +327,19 @@ export default function SlateTranscriptEditor(props) {
         mediaRef.current.play();
       }
     } else if (e.target.dataset.slateString) {
+      console.log('e.target.dataset.slateString');
       if (e.target.parentNode.dataset.start) {
-        const start = e.target.parentNode.dataset.start;
-        if (mediaRef && mediaRef.current && start) {
-          mediaRef.current.currentTime = parseFloat(start);
+        const { startSec } = getSelectionNodes(editor, editor.selection);
+        console.log('startSec', startSec);
+        if (mediaRef && mediaRef.current && startSec) {
+          mediaRef.current.currentTime = parseFloat(startSec);
           mediaRef.current.play();
+        } else {
+          // const start = e.target.parentNode.dataset.start;
+          // if (mediaRef && mediaRef.current && start) {
+          //   mediaRef.current.currentTime = parseFloat(start);
+          //   mediaRef.current.play();
+          // }
         }
       }
     }

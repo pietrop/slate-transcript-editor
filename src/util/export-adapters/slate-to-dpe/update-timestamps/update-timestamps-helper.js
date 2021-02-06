@@ -4,7 +4,9 @@
  *
  */
 import { alignSTT } from 'stt-align-node';
+// import alignSTT from '../../../stt-align-node';
 import slateToText from '../../txt';
+// Yo
 /**
  * Update timestamps usign stt-align module
  * @param {*} currentContent - slate js value
@@ -12,9 +14,20 @@ import slateToText from '../../txt';
  * @return slateJS value
  */
 export const updateTimestampsHelper = (currentContent, words) => {
-  const currentText = slateToText({ value: currentContent, speakers: false, timecodes: false, atlasFormat: false });
-  const alignedWords = alignSTT(words, currentText);
-  return alignedWords;
+  let tmpWords = words;
+  const currentText = slateToText({
+    value: currentContent,
+    speakers: false,
+    timecodes: false,
+    atlasFormat: false,
+  });
+  const alignedWords = alignSTT(tmpWords, currentText);
+  const alignedWordsCleanedUp = alignedWords.filter((word) => {
+    if (word.text) {
+      return word;
+    }
+  });
+  return alignedWordsCleanedUp;
 };
 
 export default updateTimestampsHelper;

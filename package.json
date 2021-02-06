@@ -57,7 +57,9 @@
     "@fortawesome/free-solid-svg-icons": "^5.12.1",
     "@fortawesome/react-fontawesome": "^0.1.5",
     "@storybook/addon-storysource": "^5.3.18",
+    "difflib": "^0.2.4",
     "docx": "4.7.1",
+    "number-to-words": "^1.2.4",
     "prop-types": "^15.7.2",
     "react-bootstrap": "^1.0.1",
     "sbd": "^1.0.18",
@@ -65,7 +67,7 @@
     "slate-history": "^0.59.0",
     "slate-react": "^0.59.0",
     "smpte-timecode": "^1.2.3",
-    "stt-align-node": "^1.1.7"
+    "stt-align-node": "^1.1.8"
   },
   "husky": {
     "hooks": {

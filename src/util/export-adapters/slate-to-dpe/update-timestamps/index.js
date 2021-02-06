@@ -7,6 +7,7 @@ import { shortTimecode } from '../../../timecode-converter';
 import { generatePreviousTimingsUpToCurrentOne } from '../../../dpe-to-slate';
 import countWords from '../../../count-words';
 import updateTimestampsHelper from './update-timestamps-helper';
+import getWordsForParagraph from '../../../get-words-for-paragraph';
 /**
  * Transposes the timecodes from stt json list of words onto
  * slateJs value paragraphs
@@ -27,6 +28,8 @@ export const createSlateContentFromSlateJsParagraphs = (currentContent, newEntit
     const blockEntites = newEntities.slice(totalWords, totalWords + wordsInBlock);
     let speaker = block.speaker;
     const start = parseFloat(blockEntites[0].start);
+    const end = parseFloat(blockEntites[blockEntites.length - 1].end);
+    const currentParagraph = { start, end };
     if (!speaker) {
       speaker = 'U_UKN';
     }
@@ -36,7 +39,13 @@ export const createSlateContentFromSlateJsParagraphs = (currentContent, newEntit
       start,
       previousTimings: generatePreviousTimingsUpToCurrentOne(blockEntites, start),
       startTimecode: shortTimecode(start),
-      children: [{ text }],
+      children: [
+        {
+          text,
+          words: blockEntites,
+          // getWordsForParagraph(currentParagraph, newEntities)
+        },
+      ],
     };
 
     updatedBlockArray.push(updatedBlock);
@@ -53,6 +62,8 @@ export const createSlateContentFromSlateJsParagraphs = (currentContent, newEntit
  */
 const updateTimestamps = (currentContent, words) => {
   const alignedWords = updateTimestampsHelper(currentContent, words);
+  // TODO: there seem to be some words without text attribute, so doing a quick fix clean up
+
   const updatedContent = createSlateContentFromSlateJsParagraphs(currentContent, alignedWords);
   return updatedContent;
 };
