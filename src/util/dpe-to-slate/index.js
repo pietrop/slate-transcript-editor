@@ -73,6 +73,7 @@ const convertDpeToSlate = (transcript) => {
         children: [
           {
             text: 'Text',
+            // words: []
           },
         ],
       },
@@ -88,7 +89,12 @@ const convertDpeToSlate = (transcript) => {
     // pre-computing the display of the formatting here so that it doesn't need to convert it in leaf render
     startTimecode: shortTimecode(paragraph.start),
     type: 'timedText',
-    children: [{ text: generateText(paragraph, words) }],
+    children: [
+      {
+        text: generateText(paragraph, words),
+        // words
+      },
+    ],
   }));
 };
 
