@@ -463,7 +463,7 @@ export default function SlateTranscriptEditor(props) {
               }
           `}
       </style>
-      <style scope>
+      <style scoped>
         {`.editor-wrapper-container{
                 padding: 8px 16px;
                 background: #f9f9f9;
