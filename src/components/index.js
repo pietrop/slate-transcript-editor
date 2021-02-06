@@ -18,6 +18,7 @@ import { createEditor, Editor, Transforms } from 'slate';
 // Import the Slate components and React plugin.
 import { Slate, Editable, withReact, ReactEditor } from 'slate-react';
 import { withHistory } from 'slate-history';
+import { css } from '@emotion/css';
 import {
   faSave,
   faFileDownload,
@@ -71,6 +72,53 @@ export default function SlateTranscriptEditor(props) {
   // used isContentModified to avoid unecessarily run alignment if the slate value contnet has not been modified by the user since
   // last save or alignment
   const [isContentModified, setIsContentIsModified] = useState(false);
+  const [search, setSearch] = useState();
+  // const getCurrrentTime = () => {
+  //   return currentTime;
+  // };
+  // const decorate = useCallback(
+  //   ([node, path]) => {
+  //     console.log('decorate', node, path);
+  //     const currentTime = 20; //getCurrrentTime();
+  //     console.log('currentTime', currentTime);
+  //     const ranges = [];
+  //     // currentTime
+
+  //     // if (currentTime && Text.isText(node)) {
+  //     if (node.children && node.children[0] && node.children[0].words) {
+  //       console.log('inside if');
+  //       const previousWords = node.children[0].words.filter((word) => {
+  //         return word.start <= currentTime;
+  //       });
+  //       console.log('previousWords', previousWords);
+  //       // if (search && Text.isText(node)) {
+  //       // const { text } = node;
+  //       // const parts = text.split(search);
+  //       // let offset = 0;
+  //       if (previousWords) {
+  //         ranges.push({
+  //           anchor: { path, offset: previousWords.length },
+  //           focus: { path, offset: previousWords.length },
+  //           highlight: true,
+  //         });
+  //       }
+
+  //       // parts.forEach((part, i) => {
+  //       //   if (i !== 0) {
+  //       //     ranges.push({
+  //       //       anchor: { path, offset: offset - search.length },
+  //       //       focus: { path, offset },
+  //       //       highlight: true,
+  //       //     });
+  //       //   }
+
+  //       //   offset = offset + part.length + search.length;
+  //       // });
+  //     }
+  //     return ranges;
+  //   },
+  //   [search]
+  // );
 
   useEffect(() => {
     if (isProcessing) {
@@ -178,6 +226,7 @@ export default function SlateTranscriptEditor(props) {
 
   const handleTimeUpdated = (e) => {
     setCurrentTime(e.target.currentTime);
+    console.log('e.target.currentTime', e.target.currentTime);
     // TODO: setting duration here as a workaround
     setDuration(mediaRef.current.duration);
   };
@@ -213,6 +262,10 @@ export default function SlateTranscriptEditor(props) {
         data-start={children.props.parent.start}
         data-previous-timings={children.props.parent.previousTimings}
         title={children.props.parent.start}
+        // className={css`
+        //   font-weight: ${leaf.bold && 'bold'};
+        //   background-color: ${leaf.highlight && '#ffeeba'};
+        // `}
         {...attributes}
       >
         {children}
@@ -611,6 +664,7 @@ export default function SlateTranscriptEditor(props) {
                   }}
                 >
                   <Editable
+                    // decorate={decorate}
                     readOnly={typeof props.isEditable === 'boolean' ? !props.isEditable : false}
                     renderElement={renderElement}
                     renderLeaf={renderLeaf}
