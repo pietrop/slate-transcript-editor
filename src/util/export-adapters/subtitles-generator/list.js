@@ -7,8 +7,8 @@ const subtitlesExportOptionsList = [
   { type: 'ttml', label: 'TTML', ext: 'ttml' },
   { type: 'premiereTTML', label: 'TTML for Adobe Premiere', ext: 'ttml' },
   { type: 'csv', label: 'CSV', ext: 'csv' },
-  { type: 'json', label: 'Json', ext: 'json' },
   { type: 'pre-segment-txt', label: 'Pre segmented txt', ext: 'txt' },
+  { type: 'json', label: 'Json', ext: 'json' },
 ];
 
 export default subtitlesExportOptionsList;

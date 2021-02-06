@@ -18,7 +18,17 @@ import { createEditor, Editor, Transforms } from 'slate';
 // Import the Slate components and React plugin.
 import { Slate, Editable, withReact, ReactEditor } from 'slate-react';
 import { withHistory } from 'slate-history';
-import { faSave, faShare, faUndo, faSync, faInfoCircle, faMehBlank, faPause, faMusic, faClosedCaptioning } from '@fortawesome/free-solid-svg-icons';
+import {
+  faSave,
+  faFileDownload,
+  faUndo,
+  faSync,
+  faInfoCircle,
+  // faMehBlank,
+  faPause,
+  // faMusic,
+  // faClosedCaptioning,
+} from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { shortTimecode } from '../util/timecode-converter';
 import download from '../util/downlaod/index.js';
@@ -27,10 +37,11 @@ import convertDpeToSlate from '../util/dpe-to-slate';
 import insertTimecodesInline from '../util/inline-interval-timecodes';
 import pluck from '../util/pluk';
 import subtitlesExportOptionsList from '../util/export-adapters/subtitles-generator/list.js';
-import updateTimestamps from '../util/update-timestamps';
+// import updateTimestamps from '../util/update-timestamps';
+import updateTimestamps from '../util/export-adapters/slate-to-dpe/update-timestamps';
 import exportAdapter from '../util/export-adapters';
 import isEmpty from '../util/is-empty';
-
+import generatePreviousTimingsUpToCurrent from '../util/generate-previous-timings-up-to-current';
 const PLAYBACK_RATE_VALUES = [0.2, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 3, 3.5];
 const SEEK_BACK_SEC = 15;
 const PAUSE_WHILTE_TYPING_TIMEOUT_MILLISECONDS = 1500;
@@ -306,14 +317,14 @@ export default function SlateTranscriptEditor(props) {
     if (e.target.classList.contains('timecode')) {
       const start = e.target.dataset.start;
       if (mediaRef && mediaRef.current) {
-        mediaRef.current.currentTime = parseInt(start);
+        mediaRef.current.currentTime = parseFloat(start);
         mediaRef.current.play();
       }
     } else if (e.target.dataset.slateString) {
       if (e.target.parentNode.dataset.start) {
         const start = e.target.parentNode.dataset.start;
         if (mediaRef && mediaRef.current && start) {
-          mediaRef.current.currentTime = parseInt(start);
+          mediaRef.current.currentTime = parseFloat(start);
           mediaRef.current.play();
         }
       }
@@ -397,19 +408,19 @@ export default function SlateTranscriptEditor(props) {
    * to provide current paragaph's highlight.
    * @param {Number} currentTime - float in seconds
    */
-  const generatePreviousTimingsUpToCurrent = (currentTime) => {
-    // edge case - empty transcription
-    if (isEmpty(props.transcriptData)) {
-      return '';
-    }
-    const lastWordStartTime = props.transcriptData.words[props.transcriptData.words.length - 1].start;
-    const lastWordStartTimeInt = parseInt(lastWordStartTime);
-    const emptyListOfTimes = Array(lastWordStartTimeInt);
-    const listOfTimesInt = [...emptyListOfTimes.keys()];
-    const listOfTimesUpToCurrentTimeInt = listOfTimesInt.splice(0, currentTime, 0);
-    const stringlistOfTimesUpToCurrentTimeInt = listOfTimesUpToCurrentTimeInt.join(' ');
-    return stringlistOfTimesUpToCurrentTimeInt;
-  };
+  // const generatePreviousTimingsUpToCurrent = (currentTime) => {
+  //   // edge case - empty transcription
+  //   if (isEmpty(props.transcriptData)) {
+  //     return '';
+  //   }
+  //   const lastWordStartTime = props.transcriptData.words[props.transcriptData.words.length - 1].start;
+  //   const lastWordStartTimeInt = parseInt(lastWordStartTime);
+  //   const emptyListOfTimes = Array(lastWordStartTimeInt);
+  //   const listOfTimesInt = [...emptyListOfTimes.keys()];
+  //   const listOfTimesUpToCurrentTimeInt = listOfTimesInt.splice(0, currentTime, 0);
+  //   const stringlistOfTimesUpToCurrentTimeInt = listOfTimesUpToCurrentTimeInt.join(' ');
+  //   return stringlistOfTimesUpToCurrentTimeInt;
+  // };
 
   const handleSetPauseWhileTyping = () => {
     setIsPauseWhiletyping(!isPauseWhiletyping);
@@ -447,9 +458,7 @@ export default function SlateTranscriptEditor(props) {
       <style scoped>
         {`
               /* Next words */
-              .timecode[data-previous-timings*="${
-                mediaRef && mediaRef.current && mediaRef.current.duration && generatePreviousTimingsUpToCurrent(parseInt(currentTime))
-              }"]{
+             .timecode[data-previous-timings*="${generatePreviousTimingsUpToCurrent(parseInt(currentTime), value)}"]{
                   color:  #9E9E9E;
               }
           `}
@@ -613,8 +622,16 @@ export default function SlateTranscriptEditor(props) {
                 overlay={<Tooltip id="tooltip-disabled">Export options</Tooltip>}
               >
                 <span className="d-inline-block">
-                  <DropdownButton disabled={isProcessing} id="dropdown-basic-button" title={<FontAwesomeIcon icon={faShare} />} variant="light">
+                  <DropdownButton
+                    disabled={isProcessing}
+                    id="dropdown-basic-button"
+                    title={<FontAwesomeIcon icon={faFileDownload} />}
+                    variant="light"
+                  >
                     {/* TODO: need to run re-alignement if exportin with timecodes true, otherwise they'll be inaccurate */}
+                    <Dropdown.Item style={{ color: 'black' }} disabled>
+                      <b>Text Export</b>
+                    </Dropdown.Item>
                     <Dropdown.Item
                       onClick={() => {
                         handleExport({
@@ -752,6 +769,27 @@ export default function SlateTranscriptEditor(props) {
                       Word (OHMS)
                     </Dropdown.Item>
                     <Dropdown.Divider />
+
+                    <Dropdown.Item style={{ color: 'black' }} disabled>
+                      <b>Closed Captions Export</b>
+                    </Dropdown.Item>
+                    {subtitlesExportOptionsList.map(({ type, label, ext }, index) => {
+                      return (
+                        <Dropdown.Item
+                          key={index + label}
+                          onClick={() => {
+                            handleExport({ type, ext, isDownload: true });
+                          }}
+                        >
+                          {label} (<code>.{ext}</code>)
+                        </Dropdown.Item>
+                      );
+                    })}
+                    <Dropdown.Divider />
+                    <Dropdown.Item style={{ color: 'black' }} disabled>
+                      <b>Developer options</b>
+                    </Dropdown.Item>
+
                     <Dropdown.Item
                       onClick={() => {
                         handleExport({
@@ -782,7 +820,7 @@ export default function SlateTranscriptEditor(props) {
                 </span>
               </OverlayTrigger>
             </Col>
-            <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
+            {/* <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
               <OverlayTrigger
                 OverlayTrigger
                 delay={TOOTLIP_LONGER_DELAY}
@@ -809,7 +847,7 @@ export default function SlateTranscriptEditor(props) {
                   })}
                 </DropdownButton>
               </OverlayTrigger>
-            </Col>
+            </Col> */}
             <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
               <OverlayTrigger
                 OverlayTrigger
@@ -822,23 +860,23 @@ export default function SlateTranscriptEditor(props) {
                 </Button>
               </OverlayTrigger>
             </Col>
-            <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
-              <OverlayTrigger
-                delay={TOOTLIP_DELAY}
-                placement={'bottom'}
-                overlay={
-                  <Tooltip id="tooltip-disabled">
-                    To insert a paragraph break, and split a pargraph in two, put the cursor at a point where you'd want to add a paragraph break in
-                    the text and either click this button or hit enter key
-                  </Tooltip>
-                }
-              >
-                <Button disabled={isProcessing} onClick={breakParagraph} variant="light">
-                  {/* <FontAwesomeIcon icon={ faICursor } /> */}↵
-                </Button>
-              </OverlayTrigger>
-            </Col>
-            <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
+            {/* <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
+                <OverlayTrigger
+                  delay={TOOTLIP_DELAY}
+                  placement={'bottom'}
+                  overlay={
+                    <Tooltip id="tooltip-disabled">
+                      To insert a paragraph break, and split a pargraph in two, put the cursor at a point where you'd want to add a paragraph break in
+                      the text and either click this button or hit enter key
+                    </Tooltip>
+                  }
+                >
+                  <Button disabled={isProcessing} onClick={breakParagraph} variant="light">
+                    ↵
+                  </Button>
+                </OverlayTrigger>
+              </Col> */}
+            {/* <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
               <OverlayTrigger
                 delay={TOOTLIP_DELAY}
                 placement={'bottom'}
@@ -850,8 +888,8 @@ export default function SlateTranscriptEditor(props) {
                   <FontAwesomeIcon icon={faMehBlank} />
                 </Button>
               </OverlayTrigger>
-            </Col>
-            <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
+            </Col> */}
+            {/* <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
               <OverlayTrigger delay={TOOTLIP_DELAY} placement={'bottom'} overlay={<Tooltip id="tooltip-disabled">Insert a ♫ in the text</Tooltip>}>
                 <span className="d-inline-block">
                   <Button onClick={handleInsertMusicNote} variant={'light'}>
@@ -859,7 +897,7 @@ export default function SlateTranscriptEditor(props) {
                   </Button>
                 </span>
               </OverlayTrigger>
-            </Col>
+            </Col> */}
             <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
               <OverlayTrigger
                 delay={TOOTLIP_DELAY}

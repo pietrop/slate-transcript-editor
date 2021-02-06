@@ -3,16 +3,15 @@
  * https://github.com/pietrop/react-transcript-editor/blob/master/packages/components/timed-text-editor/UpdateTimestamps/index.js
  *
  */
-import { alignSTT } from 'stt-align-node';
-import slateToText from '../export-adapters/txt';
-import { shortTimecode } from '../timecode-converter';
-import { generatePreviousTimingsUpToCurrentOne } from '../dpe-to-slate';
-import countWords from '../count-words';
+import { shortTimecode } from '../../../timecode-converter';
+import { generatePreviousTimingsUpToCurrentOne } from '../../../dpe-to-slate';
+import countWords from '../../../count-words';
+import updateTimestampsHelper from './update-timestamps-helper';
 /**
  * Transposes the timecodes from stt json list of words onto
  * slateJs value paragraphs
  */
-const createContentFromSlateJsParagraphs = (currentContent, newEntities) => {
+export const createSlateContentFromSlateJsParagraphs = (currentContent, newEntities) => {
   // Update entites to block structure.
   const updatedBlockArray = [];
   let totalWords = 0;
@@ -53,9 +52,8 @@ const createContentFromSlateJsParagraphs = (currentContent, newEntities) => {
  * @return slateJS value
  */
 const updateTimestamps = (currentContent, words) => {
-  const currentText = slateToText({ value: currentContent, speakers: false, timecodes: false, atlasFormat: false });
-  const alignedWords = alignSTT(words, currentText);
-  const updatedContent = createContentFromSlateJsParagraphs(currentContent, alignedWords);
+  const alignedWords = updateTimestampsHelper(currentContent, words);
+  const updatedContent = createSlateContentFromSlateJsParagraphs(currentContent, alignedWords);
   return updatedContent;
 };
 

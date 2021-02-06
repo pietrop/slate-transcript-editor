@@ -12,6 +12,9 @@ import { shortTimecode } from '../timecode-converter';
  * eg if current time is `3` then `listOfPreviousTimingsUpToCurrentOne` "0 1 2"
  */
 
+//  TODO: should it consolidate generatePreviousTimingsUpToCurrent or are they for different porpuses?
+//  import generatePreviousTimingsUpToCurrent from './generate-previous-timings-up-to-current';
+
 /**
  * Generate a list of times, each rounded up to int.
  * from zero to the provided `time`.
@@ -21,7 +24,11 @@ import { shortTimecode } from '../timecode-converter';
 
 export const generatePreviousTimings = (time) => {
   // https://stackoverflow.com/questions/3746725/how-to-create-an-array-containing-1-n
-  return [...Array(parseInt(time)).keys()];
+  if (time) {
+    return [...Array(parseInt(time)).keys()];
+  } else {
+    return [0];
+  }
 };
 
 /**
@@ -68,6 +75,8 @@ const convertDpeToSlate = (transcript) => {
         children: [
           {
             text: 'Text',
+            // Adding list of words in slateJs paragraphs
+            words: [],
           },
         ],
       },
@@ -83,7 +92,13 @@ const convertDpeToSlate = (transcript) => {
     // pre-computing the display of the formatting here so that it doesn't need to convert it in leaf render
     startTimecode: shortTimecode(paragraph.start),
     type: 'timedText',
-    children: [{ text: generateText(paragraph, words) }],
+    children: [
+      {
+        text: generateText(paragraph, words),
+        // Adding list of words in slateJs paragraphs
+        words,
+      },
+    ],
   }));
 };
 
