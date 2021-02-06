@@ -41,7 +41,7 @@ import subtitlesExportOptionsList from '../util/export-adapters/subtitles-genera
 import updateTimestamps from '../util/export-adapters/slate-to-dpe/update-timestamps';
 import exportAdapter from '../util/export-adapters';
 import isEmpty from '../util/is-empty';
-import generatePreviousTimingsUpToCurrent from '../util/generate-previous-timings-up-to-current';
+import generatePreviousTimingsUpToCurrent from '../util/dpe-to-slate/generate-previous-timings-up-to-current';
 const PLAYBACK_RATE_VALUES = [0.2, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 3, 3.5];
 const SEEK_BACK_SEC = 15;
 const PAUSE_WHILTE_TYPING_TIMEOUT_MILLISECONDS = 1500;

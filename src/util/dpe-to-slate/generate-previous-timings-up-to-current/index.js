@@ -1,11 +1,11 @@
-import { generatePreviousTimingsUpToCurrentOne } from '../dpe-to-slate';
+// import { generatePreviousTimingsUpToCurrentOne } from '../dpe-to-slate';
 
 /**
  * See explanation in `src/utils/dpe-to-slate/index.js` for how this function works with css injection
  * to provide current paragaph's highlight.
  * @param {Number} currentTime - float in seconds
  */
-import isEmpty from '../../util/is-empty';
+import isEmpty from '../../is-empty';
 /**
  *
  * @param {*} currentTime
