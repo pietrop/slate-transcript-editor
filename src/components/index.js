@@ -455,7 +455,7 @@ export default function SlateTranscriptEditor(props) {
   };
   return (
     <Container fluid style={{ backgroundColor: '#eee', height: '100vh', paddingTop: '1em' }}>
-      <style scoped>
+      <style scope>
         {`
               /* Next words */
              .timecode[data-previous-timings*="${generatePreviousTimingsUpToCurrent(parseInt(currentTime), value)}"]{
