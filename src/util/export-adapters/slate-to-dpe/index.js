@@ -45,6 +45,7 @@ export const createDpeParagraphsFromSlateJs = (currentContent, newEntities) => {
  */
 const converSlateToDpe = (currentContent, words) => {
   const alignedWords = updateTimestampsHelper(currentContent, words);
+  console.log('alignedWords', alignedWords);
   const updatedContent = createDpeParagraphsFromSlateJs(currentContent, alignedWords);
   return { words: alignedWords, paragraphs: updatedContent };
 };

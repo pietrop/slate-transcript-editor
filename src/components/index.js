@@ -149,17 +149,6 @@ export default function SlateTranscriptEditor(props) {
     return tmpMediaType;
   };
 
-  const breakParagraph = () => {
-    Editor.insertBreak(editor);
-  };
-  const insertTextInaudible = () => {
-    Transforms.insertText(editor, '[INAUDIBLE]');
-  };
-
-  const handleInsertMusicNote = () => {
-    Transforms.insertText(editor, '♫'); // or ♪
-  };
-
   const handleSetShowSpeakersCheatShet = () => {
     setShowSpeakersCheatShet(!showSpeakersCheatShet);
   };
@@ -336,6 +325,7 @@ export default function SlateTranscriptEditor(props) {
 
   // TODO: refacto this function, to be cleaner and easier to follow.
   const handleRestoreTimecodes = async (inlineTimecodes = false) => {
+    console.log('handleRestoreTimecodes');
     if (!isContentModified && !inlineTimecodes) {
       return value;
     }
@@ -416,7 +406,52 @@ export default function SlateTranscriptEditor(props) {
     setIsPauseWhiletyping(!isPauseWhiletyping);
   };
 
+  // TODO: revisit logic for
+  // - splitting paragraph via enter key
+  // - merging paragraph via delete
+  // - merging paragraphs via deleting across paragraphs
   const handleOnKeyDown = (event) => {
+    console.log('event.key', event.key);
+    if (event.key === 'Enter') {
+      // intercept Enter, and
+      event.preventDefault();
+      console.log('disabling enter/paragraph split while tweaking alignment');
+      console.log('For now cdisabling enter key to split a paragraph, while figuring out the aligment issue');
+      return;
+      const selection = editor.selection;
+      console.log('selection', selection);
+      const orderedSelection = [selection.anchor, selection.focus].sort((a, b) => {
+        return a.path[0] - b.path[0];
+      });
+
+      const selectionStart = orderedSelection[0];
+      const selectionEnd = orderedSelection[1];
+      const currentParagraph = editor.children[selectionStart.path[0]];
+      console.log('selectionStart.path[0]', selectionStart.path[0]);
+      console.log('currentParagraph', currentParagraph);
+      // Editor.insertBreak(editor);
+      // Transforms.splitNodes(editor);
+      // const element = { type: 'image', url, children: [{ text: '' }] };
+      Editor.deleteFragment(editor, selectionStart.path[0]);
+      const { startSec, endSec } = getSelectionNodes(editor, editor.selection);
+    }
+    if (event.key === 'Backspace') {
+      const selection = editor.selection;
+      console.log('selection', selection);
+      console.log(selection.anchor.path[0], selection.focus.path[0]);
+      // across paragraph
+      if (selection.anchor.path[0] !== selection.focus.path[0]) {
+        console.log('For now cannot merge paragraph via delete across paragraphs, while figuring out the aligment issue');
+        event.preventDefault();
+        return;
+      }
+      // beginning of a paragrraph
+      if (selection.anchor.offset === 0 && selection.focus.offset === 0) {
+        console.log('For now cannot merge paragraph via delete, while figuring out the aligment issue');
+        event.preventDefault();
+        return;
+      }
+    }
     setIsContentIsModified(true);
     if (isPauseWhiletyping) {
       // logic for pause while typing
@@ -852,6 +887,7 @@ export default function SlateTranscriptEditor(props) {
                   disabled={isProcessing}
                   onClick={async () => {
                     try {
+                      console.log('faSync');
                       setIsProcessing(true);
                       await handleRestoreTimecodes();
                     } finally {

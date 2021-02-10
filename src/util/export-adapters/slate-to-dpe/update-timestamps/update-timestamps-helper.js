@@ -6,31 +6,63 @@
 import { alignSTT } from 'stt-align-node';
 // import alignSTT from '../../../stt-align-node';
 import slateToText from '../../txt';
-// Yo
+import convertDpeToSlate from '../../../dpe-to-slate';
+import { shortTimecode } from '../../../timecode-converter/index.js';
+import _ from 'lodash';
+// import difference from 'lodash/difference';
+
+function comparator(object, other) {
+  return _.isEqual(object.children[0].text, other.children[0].text);
+}
+
 /**
  * Update timestamps usign stt-align module
  * @param {*} currentContent - slate js value
  * @param {*} words - list of stt words
  * @return slateJS value
  */
+// TODO: in stt-align-node if all the words are completely diff, it seems to freeze.
+// Look into why in stt-align-node github repo etc..
 export const updateTimestampsHelper = (currentContent, dpeTranscript) => {
+  // TODO: figure out if can remove the cloneDeep option
+  const newCurrentContent = _.cloneDeep(currentContent);
   // trying to align only text that changed
 
-  // covert t=slate to text to use alignment module
-  const currentText = slateToText({
-    value: currentContent,
-    speakers: false,
-    timecodes: false,
-    atlasFormat: false,
+  // TODO: ideally, you save the slate converted content in the parent component when
+  // component is initialized so don't need to re-convert this from dpe all the time.
+  const originalContentSlateFormat = convertDpeToSlate(dpeTranscript);
+
+  // TODO: add the ID further upstream to be able to skip this step.
+  // we are adding the index for the paragraph,to be able to update the words attribute in the paragraph and easily replace that paragraph in the
+  // slate editor content.
+  // Obv this wouldn't work, if re-enable the edge cases, disabled above in handleOnKeyDown
+  const currentSlateContentWithId = currentContent.map((paragraph, index) => {
+    const newParagraph = { ...paragraph };
+    newParagraph.id = index;
+    return newParagraph;
   });
-  const alignedWords = alignSTT(dpeTranscript, currentText);
-  // clean up
-  const alignedWordsCleanedUp = alignedWords.filter((word) => {
-    if (word.text) {
-      return word;
-    }
+  const diffParagraphs = _.differenceWith(currentSlateContentWithId, originalContentSlateFormat, comparator);
+
+  diffParagraphs.forEach((diffParagraph) => {
+    // TODO: figure out if can remove the cloneDeep option
+    let newDiffParagraph = _.cloneDeep(diffParagraph);
+    let alignedWordsTest = alignSTT(newDiffParagraph.children[0], newDiffParagraph.children[0].text);
+    newDiffParagraph.children[0].words = alignedWordsTest;
+    // also adjust paragraph timecode
+    newDiffParagraph.start = alignedWordsTest[0].start;
+    newDiffParagraph.startTimecode = shortTimecode(alignedWordsTest[0].start);
+    newCurrentContent[newDiffParagraph.id] = newDiffParagraph;
   });
-  return alignedWordsCleanedUp;
+
+  // covert slate to text to use alignment module
+  // const currentText = slateToText({
+  //   value: currentContent,
+  //   speakers: false,
+  //   timecodes: false,
+  //   atlasFormat: false,
+  // });
+  // const alignedWords = alignSTT(dpeTranscript, currentText);
+  return newCurrentContent;
 };
 
 export default updateTimestampsHelper;

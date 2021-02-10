@@ -26,7 +26,7 @@ export const createSlateContentFromSlateJsParagraphs = (currentContent, newEntit
     const wordsInBlock = countWords(text);
     const blockEntites = newEntities.slice(totalWords, totalWords + wordsInBlock);
     let speaker = block.speaker;
-    console.log('blockEntites', blockEntites);
+    // console.log('blockEntites', blockEntites);
     const start = parseFloat(blockEntites[0].start);
     const end = parseFloat(blockEntites[blockEntites.length - 1].end);
     const currentParagraph = { start, end };
@@ -60,10 +60,8 @@ export const createSlateContentFromSlateJsParagraphs = (currentContent, newEntit
  * @return slateJS value
  */
 const updateTimestamps = (currentContent, words) => {
-  const alignedWords = updateTimestampsHelper(currentContent, words);
-  // TODO: there seem to be some words without text attribute, so doing a quick fix clean up
-
-  const updatedContent = createSlateContentFromSlateJsParagraphs(currentContent, alignedWords);
+  const updatedContent = updateTimestampsHelper(currentContent, words);
+  // const updatedContent = createSlateContentFromSlateJsParagraphs(currentContent, alignedWords);
   return updatedContent;
 };
 
