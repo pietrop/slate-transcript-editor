@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import PropTypes from 'prop-types';
+import PropTypes, { string } from 'prop-types';
 import path from 'path';
 import Button from 'react-bootstrap/Button';
 import DropdownButton from 'react-bootstrap/DropdownButton';
@@ -18,18 +18,7 @@ import { createEditor, Editor, Transforms } from 'slate';
 // Import the Slate components and React plugin.
 import { Slate, Editable, withReact, ReactEditor } from 'slate-react';
 import { withHistory } from 'slate-history';
-import { css } from '@emotion/css';
-import {
-  faSave,
-  faFileDownload,
-  faUndo,
-  faSync,
-  faInfoCircle,
-  // faMehBlank,
-  faPause,
-  // faMusic,
-  // faClosedCaptioning,
-} from '@fortawesome/free-solid-svg-icons';
+import { faSave, faFileDownload, faUndo, faSync, faInfoCircle, faPause } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { shortTimecode } from '../util/timecode-converter';
 import download from '../util/downlaod/index.js';
@@ -38,10 +27,8 @@ import convertDpeToSlate from '../util/dpe-to-slate';
 import insertTimecodesInline from '../util/inline-interval-timecodes';
 import pluck from '../util/pluk';
 import subtitlesExportOptionsList from '../util/export-adapters/subtitles-generator/list.js';
-// import updateTimestamps from '../util/update-timestamps';
 import updateTimestamps from '../util/export-adapters/slate-to-dpe/update-timestamps';
 import exportAdapter from '../util/export-adapters';
-import isEmpty from '../util/is-empty';
 import generatePreviousTimingsUpToCurrent from '../util/dpe-to-slate/generate-previous-timings-up-to-current';
 import getSelectionNodes from '../util/get-selection-nodes';
 
@@ -72,53 +59,6 @@ export default function SlateTranscriptEditor(props) {
   // used isContentModified to avoid unecessarily run alignment if the slate value contnet has not been modified by the user since
   // last save or alignment
   const [isContentModified, setIsContentIsModified] = useState(false);
-  const [search, setSearch] = useState();
-  // const getCurrrentTime = () => {
-  //   return currentTime;
-  // };
-  // const decorate = useCallback(
-  //   ([node, path]) => {
-  //     console.log('decorate', node, path);
-  //     const currentTime = 20; //getCurrrentTime();
-  //     console.log('currentTime', currentTime);
-  //     const ranges = [];
-  //     // currentTime
-
-  //     // if (currentTime && Text.isText(node)) {
-  //     if (node.children && node.children[0] && node.children[0].words) {
-  //       console.log('inside if');
-  //       const previousWords = node.children[0].words.filter((word) => {
-  //         return word.start <= currentTime;
-  //       });
-  //       console.log('previousWords', previousWords);
-  //       // if (search && Text.isText(node)) {
-  //       // const { text } = node;
-  //       // const parts = text.split(search);
-  //       // let offset = 0;
-  //       if (previousWords) {
-  //         ranges.push({
-  //           anchor: { path, offset: previousWords.length },
-  //           focus: { path, offset: previousWords.length },
-  //           highlight: true,
-  //         });
-  //       }
-
-  //       // parts.forEach((part, i) => {
-  //       //   if (i !== 0) {
-  //       //     ranges.push({
-  //       //       anchor: { path, offset: offset - search.length },
-  //       //       focus: { path, offset },
-  //       //       highlight: true,
-  //       //     });
-  //       //   }
-
-  //       //   offset = offset + part.length + search.length;
-  //       // });
-  //     }
-  //     return ranges;
-  //   },
-  //   [search]
-  // );
 
   useEffect(() => {
     if (isProcessing) {
@@ -262,10 +202,6 @@ export default function SlateTranscriptEditor(props) {
         data-start={children.props.parent.start}
         data-previous-timings={children.props.parent.previousTimings}
         title={children.props.parent.start}
-        // className={css`
-        //   font-weight: ${leaf.bold && 'bold'};
-        //   background-color: ${leaf.highlight && '#ffeeba'};
-        // `}
         {...attributes}
       >
         {children}
@@ -475,19 +411,6 @@ export default function SlateTranscriptEditor(props) {
    * to provide current paragaph's highlight.
    * @param {Number} currentTime - float in seconds
    */
-  // const generatePreviousTimingsUpToCurrent = (currentTime) => {
-  //   // edge case - empty transcription
-  //   if (isEmpty(props.transcriptData)) {
-  //     return '';
-  //   }
-  //   const lastWordStartTime = props.transcriptData.words[props.transcriptData.words.length - 1].start;
-  //   const lastWordStartTimeInt = parseInt(lastWordStartTime);
-  //   const emptyListOfTimes = Array(lastWordStartTimeInt);
-  //   const listOfTimesInt = [...emptyListOfTimes.keys()];
-  //   const listOfTimesUpToCurrentTimeInt = listOfTimesInt.splice(0, currentTime, 0);
-  //   const stringlistOfTimesUpToCurrentTimeInt = listOfTimesUpToCurrentTimeInt.join(' ');
-  //   return stringlistOfTimesUpToCurrentTimeInt;
-  // };
 
   const handleSetPauseWhileTyping = () => {
     setIsPauseWhiletyping(!isPauseWhiletyping);
@@ -530,7 +453,7 @@ export default function SlateTranscriptEditor(props) {
               }
           `}
       </style>
-      <style scope>
+      <style scoped>
         {`.editor-wrapper-container{
                 padding: 8px 16px;
                 background: #f9f9f9;
@@ -664,7 +587,6 @@ export default function SlateTranscriptEditor(props) {
                   }}
                 >
                   <Editable
-                    // decorate={decorate}
                     readOnly={typeof props.isEditable === 'boolean' ? !props.isEditable : false}
                     renderElement={renderElement}
                     renderLeaf={renderLeaf}
@@ -888,34 +810,6 @@ export default function SlateTranscriptEditor(props) {
                 </span>
               </OverlayTrigger>
             </Col>
-            {/* <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
-              <OverlayTrigger
-                OverlayTrigger
-                delay={TOOTLIP_LONGER_DELAY}
-                placement={'bottom'}
-                overlay={<Tooltip id="tooltip-disabled">Export in caption format</Tooltip>}
-              >
-                <DropdownButton
-                  disabled={isProcessing}
-                  id="dropdown-basic-button"
-                  title={<FontAwesomeIcon icon={faClosedCaptioning} />}
-                  variant="light"
-                >
-                  {subtitlesExportOptionsList.map(({ type, label, ext }, index) => {
-                    return (
-                      <Dropdown.Item
-                        key={index + label}
-                        onClick={() => {
-                          handleExport({ type, ext, isDownload: true });
-                        }}
-                      >
-                        {label} (<code>.{ext}</code>)
-                      </Dropdown.Item>
-                    );
-                  })}
-                </DropdownButton>
-              </OverlayTrigger>
-            </Col> */}
             <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
               <OverlayTrigger
                 OverlayTrigger
@@ -928,44 +822,6 @@ export default function SlateTranscriptEditor(props) {
                 </Button>
               </OverlayTrigger>
             </Col>
-            {/* <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
-                <OverlayTrigger
-                  delay={TOOTLIP_DELAY}
-                  placement={'bottom'}
-                  overlay={
-                    <Tooltip id="tooltip-disabled">
-                      To insert a paragraph break, and split a pargraph in two, put the cursor at a point where you'd want to add a paragraph break in
-                      the text and either click this button or hit enter key
-                    </Tooltip>
-                  }
-                >
-                  <Button disabled={isProcessing} onClick={breakParagraph} variant="light">
-                    ↵
-                  </Button>
-                </OverlayTrigger>
-              </Col> */}
-            {/* <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
-              <OverlayTrigger
-                delay={TOOTLIP_DELAY}
-                placement={'bottom'}
-                overlay={
-                  <Tooltip id="tooltip-disabled">Put the cursor at a point where you'd want to add [INAUDIBLE] text, and click this button</Tooltip>
-                }
-              >
-                <Button disabled={isProcessing} onClick={insertTextInaudible} variant="light">
-                  <FontAwesomeIcon icon={faMehBlank} />
-                </Button>
-              </OverlayTrigger>
-            </Col> */}
-            {/* <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
-              <OverlayTrigger delay={TOOTLIP_DELAY} placement={'bottom'} overlay={<Tooltip id="tooltip-disabled">Insert a ♫ in the text</Tooltip>}>
-                <span className="d-inline-block">
-                  <Button onClick={handleInsertMusicNote} variant={'light'}>
-                    <FontAwesomeIcon icon={faMusic} />
-                  </Button>
-                </span>
-              </OverlayTrigger>
-            </Col> */}
             <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
               <OverlayTrigger
                 delay={TOOTLIP_DELAY}
@@ -1032,25 +888,25 @@ export default function SlateTranscriptEditor(props) {
   );
 }
 
-SlateTranscriptEditor.propTypes = {
-  transcriptData: PropTypes.object.isRequired,
-  mediaUrl: PropTypes.string.isRequired,
-  handleSaveEditor: PropTypes.func,
-  handleAutoSaveChanges: PropTypes.func,
-  autoSaveContentType: PropTypes.string,
-  isEditable: PropTypes.boolean,
-  showTimecodes: PropTypes.boolean,
-  showSpeakers: PropTypes.boolean,
-  title: PropTypes.string,
-  showTitle: PropTypes.boolean,
-  mediaType: PropTypes.string,
-  transcriptDataLive: PropTypes.object,
-};
+// SlateTranscriptEditor.propTypes = {
+//   transcriptData: PropTypes.object.isRequired,
+//   mediaUrl: PropTypes.string.isRequired,
+//   handleSaveEditor: PropTypes.func,
+//   handleAutoSaveChanges: PropTypes.func,
+//   autoSaveContentType: PropTypes.string,
+//   isEditable: PropTypes.boolean,
+//   showTimecodes: PropTypes.boolean,
+//   showSpeakers: PropTypes.boolean,
+//   title: PropTypes.string,
+//   showTitle: PropTypes.boolean,
+//   mediaType: PropTypes.string,
+//   transcriptDataLive: PropTypes.object,
+// };
 
-SlateTranscriptEditor.defaultProps = {
-  showTitle: false,
-  showTimecodes: true,
-  showSpeakers: true,
-  mediaType: 'digitalpaperedit',
-  isEditable: true,
-};
+// SlateTranscriptEditor.defaultProps = {
+//   showTitle: false,
+//   showTimecodes: true,
+//   showSpeakers: true,
+//   mediaType: 'digitalpaperedit',
+//   isEditable: true,
+// };

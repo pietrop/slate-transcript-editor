@@ -13,15 +13,18 @@ import slateToText from '../../txt';
  * @param {*} words - list of stt words
  * @return slateJS value
  */
-export const updateTimestampsHelper = (currentContent, words) => {
-  let tmpWords = words;
+export const updateTimestampsHelper = (currentContent, dpeTranscript) => {
+  // trying to align only text that changed
+
+  // covert t=slate to text to use alignment module
   const currentText = slateToText({
     value: currentContent,
     speakers: false,
     timecodes: false,
     atlasFormat: false,
   });
-  const alignedWords = alignSTT(tmpWords, currentText);
+  const alignedWords = alignSTT(dpeTranscript, currentText);
+  // clean up
   const alignedWordsCleanedUp = alignedWords.filter((word) => {
     if (word.text) {
       return word;

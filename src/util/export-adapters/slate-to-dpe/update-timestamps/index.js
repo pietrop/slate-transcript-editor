@@ -7,7 +7,6 @@ import { shortTimecode } from '../../../timecode-converter';
 import { generatePreviousTimingsUpToCurrentOne } from '../../../dpe-to-slate';
 import countWords from '../../../count-words';
 import updateTimestampsHelper from './update-timestamps-helper';
-import getWordsForParagraph from '../../../get-words-for-paragraph';
 /**
  * Transposes the timecodes from stt json list of words onto
  * slateJs value paragraphs
@@ -27,6 +26,7 @@ export const createSlateContentFromSlateJsParagraphs = (currentContent, newEntit
     const wordsInBlock = countWords(text);
     const blockEntites = newEntities.slice(totalWords, totalWords + wordsInBlock);
     let speaker = block.speaker;
+    console.log('blockEntites', blockEntites);
     const start = parseFloat(blockEntites[0].start);
     const end = parseFloat(blockEntites[blockEntites.length - 1].end);
     const currentParagraph = { start, end };
@@ -43,7 +43,6 @@ export const createSlateContentFromSlateJsParagraphs = (currentContent, newEntit
         {
           text,
           words: blockEntites,
-          // getWordsForParagraph(currentParagraph, newEntities)
         },
       ],
     };
