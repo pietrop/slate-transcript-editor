@@ -4,7 +4,6 @@ import { withKnobs, text, boolean, number, object, select } from '@storybook/add
 import { withInfo } from '@storybook/addon-info';
 
 import SlateTranscriptEditor from './index.js';
-import 'bootstrap-css-only';
 
 export default {
   title: 'SlateTranscriptEditor',
