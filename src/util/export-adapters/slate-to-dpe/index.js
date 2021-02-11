@@ -10,16 +10,25 @@ import updateTimestampsHelper from './update-timestamps/update-timestamps-helper
  * dpe transcript with paragraphs and words
  */
 export const createDpeParagraphsFromSlateJs = (currentContent, newEntities) => {
+  console.log('currentContent', currentContent);
   // Update entites to block structure.
-  const updatedBlockArray = [];
+  // const updatedBlockArray = [];
   let totalWords = 0;
 
-  for (const blockIndex in currentContent) {
-    const block = currentContent[blockIndex];
+  const updatedBlockArray = currentContent.map((block) => {
+    // const block = currentContent[blockIndex];
     const text = block.children[0].text;
     const wordsInBlock = countWords(text);
+    console.log('totalWords, totalWords , wordsInBlock, totalWords + wordsInBlock', totalWords, totalWords, wordsInBlock, totalWords + wordsInBlock);
+    console.log('newEntities', newEntities);
     const blockEntites = newEntities.slice(totalWords, totalWords + wordsInBlock);
+    console.log('blockEntites', blockEntites);
+
+    // if (!blockEntites) {
+    //   return updatedBlockArray;
+    // } else {
     let speaker = block.speaker;
+    console.log('blockEntites[0].start', blockEntites[0], blockEntites);
     const start = parseFloat(blockEntites[0].start);
     const end = parseFloat(blockEntites[blockEntites.length - 1].end);
     if (!speaker) {
@@ -31,9 +40,11 @@ export const createDpeParagraphsFromSlateJs = (currentContent, newEntities) => {
       end,
     };
 
-    updatedBlockArray.push(updatedBlock);
+    // updatedBlockArray.push(updatedBlock);
     totalWords += wordsInBlock;
-  }
+    return updatedBlock;
+    // }
+  });
   return updatedBlockArray;
 };
 

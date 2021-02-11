@@ -396,13 +396,13 @@ function SlateTranscriptEditor(props) {
       return value;
     }
     if (inlineTimecodes) {
-      const transcriptData = insertTimecodesInline({ transcriptData: props.transcriptData });
+      const transcriptData = insertTimecodesInline({ transcriptData: JSON.parse(JSON.stringify(props.transcriptData)) });
       const alignedSlateData = await updateTimestamps(convertDpeToSlate(transcriptData), transcriptData);
       setValue(alignedSlateData);
       setIsContentIsModified(false);
       return alignedSlateData;
     } else {
-      const alignedSlateData = await updateTimestamps(value, props.transcriptData);
+      const alignedSlateData = await updateTimestamps(value, JSON.parse(JSON.stringify(props.transcriptData)));
       setValue(alignedSlateData);
       setIsContentIsModified(false);
       return alignedSlateData;
