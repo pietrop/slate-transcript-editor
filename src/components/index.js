@@ -545,7 +545,7 @@ function SlateTranscriptEditor(props) {
     }
   };
   return (
-    <>
+    <div style={{ paddingTop: '1em' }}>
       <CssBaseline />
       <Container>
         <Paper elevation={3} />
@@ -593,34 +593,20 @@ function SlateTranscriptEditor(props) {
         )}
 
         <Grid container direction="row" justify="space-around" alignItems="flex-start" spacing={2}>
-          <Grid
-            item
-            xs={12}
-            sm={getMediaType() === 'audio' ? 10 : 3}
-            md={getMediaType() === 'audio' ? 10 : 3}
-            lg={getMediaType() === 'audio' ? 8 : 3}
-            xl={getMediaType() === 'audio' ? 8 : 3}
-          >
+          <Grid item xs={12} sm={3} md={3} lg={3} xl={3}>
             <Grid container direction="column" justify="space-between" alignItems="flex-start">
-              <Grid item>
-                <video
-                  ref={mediaRef}
-                  src={props.mediaUrl}
-                  width={'100%'}
-                  height={getMediaType() === 'audio' ? '60em' : 'auto'}
-                  controls
-                  playsInline
-                ></video>
+              <Grid item style={{ backgroundColor: 'black' }}>
+                <video ref={mediaRef} src={props.mediaUrl} width={'100%'} height="auto" controls playsInline></video>
               </Grid>
               <Grid item>
-                <Grid container container direction="row" justify="space-between" alignItems="center">
+                <Grid container direction="row" justify="flex-start" alignItems="flex-start" spacing={0}>
                   <Grid item>
                     <Button disabled>{shortTimecode(currentTime)}</Button>
                     <Button disabled>{duration ? ` | ${shortTimecode(duration)}` : '00:00:00'}</Button>
                   </Grid>
-                  {/* <Grid item>
+                  <Grid item>
                     <FormControl>
-                       <InputLabel id="demo-simple-select-label">Speed</InputLabel> 
+                      {/* <InputLabel id="demo-simple-select-label">Speed</InputLabel> */}
                       <Select labelId="demo-simple-select-label" id="demo-simple-select" value={playbackRate} onChange={handleSetPlaybackRate}>
                         {PLAYBACK_RATE_VALUES.map((playbackRateValue, index) => {
                           return (
@@ -631,9 +617,9 @@ function SlateTranscriptEditor(props) {
                           );
                         })}
                       </Select>
-                      <FormHelperText>Speed</FormHelperText>
+                      {/* <FormHelperText>Speed</FormHelperText> */}
                     </FormControl>
-                  </Grid> */}
+                  </Grid>
                   <Grid item>
                     <Tooltip title={`Seek back by ${SEEK_BACK_SEC} seconds`}>
                       <Button color="primary" onClick={handleSeekBack} block="true">
@@ -644,7 +630,7 @@ function SlateTranscriptEditor(props) {
                   </Grid>
                 </Grid>
               </Grid>
-              <Grid item>
+              {/* <Grid item>
                 <Grid container direction="row" justify="flex-start" alignItems="flex-start">
                   <div style={{ width: 120 }}>
                     <FormHelperText>Speed</FormHelperText>
@@ -675,8 +661,8 @@ function SlateTranscriptEditor(props) {
                       <ClearOutlinedIcon color="primary" />
                     </Button>
                   </Tooltip>
-                </Grid>
-              </Grid>
+                </Grid> 
+              </Grid>*/}
               <Grid item>
                 {/* <br />
                 <Typography variant="subtitle2" gutterBottom>
@@ -717,14 +703,7 @@ function SlateTranscriptEditor(props) {
             </Grid>
           </Grid>
 
-          <Grid
-            item
-            xs={12}
-            sm={getMediaType() === 'audio' ? 10 : 7}
-            md={getMediaType() === 'audio' ? 10 : 7}
-            lg={getMediaType() === 'audio' ? 8 : 8}
-            xl={getMediaType() === 'audio' ? 8 : 7}
-          >
+          <Grid item xs={12} sm={7} md={7} lg={8} xl={7}>
             {value.length !== 0 ? (
               <>
                 <Paper elevation={3}>
@@ -756,8 +735,8 @@ function SlateTranscriptEditor(props) {
             )}
           </Grid>
 
-          <Grid item xs={12} sm={2} md={2} lg={1} xl={2}>
-            <Grid container direction="column" justify="flex-start" alignItems="flex-start">
+          <Grid item xs={12} sm={1} md={1} lg={1} xl={2}>
+            <Grid container direction="row" justify="flex-start" alignItems="flex-start">
               <div>
                 <Tooltip title={'Export options'}>
                   <Button aria-controls="simple-menu" aria-haspopup="true" onClick={handleMenuClick}>
@@ -1039,7 +1018,7 @@ function SlateTranscriptEditor(props) {
           </Grid>
         </Grid>
       </Container>
-    </>
+    </div>
   );
 }
 
