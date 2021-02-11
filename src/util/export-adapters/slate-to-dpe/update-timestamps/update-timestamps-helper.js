@@ -21,6 +21,7 @@ function comparator(object, other) {
  * @param {*} words - list of stt words
  * @return slateJS value
  */
+// TODO: do optimization mentions in TODOS below and try out on 5 hours long to see if UI Still freezes.
 // TODO: in stt-align-node if all the words are completely diff, it seems to freeze.
 // Look into why in stt-align-node github repo etc..
 export const updateTimestampsHelper = (currentContent, dpeTranscript) => {
@@ -49,6 +50,8 @@ export const updateTimestampsHelper = (currentContent, dpeTranscript) => {
     let alignedWordsTest = alignSTT(newDiffParagraph.children[0], newDiffParagraph.children[0].text);
     newDiffParagraph.children[0].words = alignedWordsTest;
     // also adjust paragraph timecode
+    // NOTE: in current implementation paragraphs cannot be modified, so this part is not necessary
+    // but keeping because eventually will handle use cases where paragraphs are modified.
     newDiffParagraph.start = alignedWordsTest[0].start;
     newDiffParagraph.startTimecode = shortTimecode(alignedWordsTest[0].start);
     newCurrentContent[newDiffParagraph.id] = newDiffParagraph;
