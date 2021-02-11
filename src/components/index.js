@@ -949,7 +949,7 @@ function SlateTranscriptEditor(props) {
               </Tooltip>
 
               {/* TODO: Disabiling until find a way to handle timecodes and alignment on paragraph break */}
-              <Tooltip
+              {/*   <Tooltip
                 title={`To insert a paragraph break, and split a pargraph in two, put the cursor at a point where you'd want to add a paragraph break in the text and either click this button or hit enter key`}
               >
                 <Button disabled={isProcessing} onClick={breakParagraph} color="primary" disabled>
@@ -967,7 +967,7 @@ function SlateTranscriptEditor(props) {
                 <Button disabled={isProcessing} onClick={handleInsertMusicNote} color="primary">
                   <MusicNoteOutlinedIcon color="primary" />
                 </Button>
-              </Tooltip>
+              </Tooltip> */}
 
               <Tooltip
                 title={` Turn ${
