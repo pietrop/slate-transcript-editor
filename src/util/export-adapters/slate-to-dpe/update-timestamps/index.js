@@ -26,7 +26,6 @@ export const createSlateContentFromSlateJsParagraphs = (currentContent, newEntit
     const wordsInBlock = countWords(text);
     const blockEntites = newEntities.slice(totalWords, totalWords + wordsInBlock);
     let speaker = block.speaker;
-    // console.log('blockEntites', blockEntites);
     const start = parseFloat(blockEntites[0].start);
     const end = parseFloat(blockEntites[blockEntites.length - 1].end);
     const currentParagraph = { start, end };
@@ -61,7 +60,6 @@ export const createSlateContentFromSlateJsParagraphs = (currentContent, newEntit
  */
 const updateTimestamps = (currentContent, words) => {
   const updatedContent = updateTimestampsHelper(currentContent, words);
-  // const updatedContent = createSlateContentFromSlateJsParagraphs(currentContent, alignedWords);
   return updatedContent;
 };
 

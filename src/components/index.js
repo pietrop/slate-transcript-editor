@@ -220,7 +220,6 @@ function SlateTranscriptEditor(props) {
 
   const handleTimeUpdated = (e) => {
     setCurrentTime(e.target.currentTime);
-    console.log('e.target.currentTime', e.target.currentTime);
     // TODO: setting duration here as a workaround
     setDuration(mediaRef.current.duration);
   };
@@ -371,10 +370,8 @@ function SlateTranscriptEditor(props) {
         mediaRef.current.play();
       }
     } else if (e.target.dataset.slateString) {
-      console.log('e.target.dataset.slateString');
       if (e.target.parentNode.dataset.start) {
         const { startSec } = getSelectionNodes(editor, editor.selection);
-        console.log('startSec', startSec);
         if (mediaRef && mediaRef.current && startSec) {
           mediaRef.current.currentTime = parseFloat(startSec);
           mediaRef.current.play();
@@ -391,7 +388,7 @@ function SlateTranscriptEditor(props) {
 
   // TODO: refacto this function, to be cleaner and easier to follow.
   const handleRestoreTimecodes = async (inlineTimecodes = false) => {
-    console.log('handleRestoreTimecodes');
+    console.info('handleRestoreTimecodes');
     if (!isContentModified && !inlineTimecodes) {
       return value;
     }
@@ -477,15 +474,12 @@ function SlateTranscriptEditor(props) {
   // - merging paragraph via delete
   // - merging paragraphs via deleting across paragraphs
   const handleOnKeyDown = (event) => {
-    console.log('event.key', event.key);
     if (event.key === 'Enter') {
       // intercept Enter, and
       event.preventDefault();
-      console.log('disabling enter/paragraph split while tweaking alignment');
-      console.log('For now cdisabling enter key to split a paragraph, while figuring out the aligment issue');
+      console.info('For now disabling enter key to split a paragraph, while figuring out the aligment issue');
       return;
       const selection = editor.selection;
-      console.log('selection', selection);
       const orderedSelection = [selection.anchor, selection.focus].sort((a, b) => {
         return a.path[0] - b.path[0];
       });
@@ -493,8 +487,6 @@ function SlateTranscriptEditor(props) {
       const selectionStart = orderedSelection[0];
       const selectionEnd = orderedSelection[1];
       const currentParagraph = editor.children[selectionStart.path[0]];
-      console.log('selectionStart.path[0]', selectionStart.path[0]);
-      console.log('currentParagraph', currentParagraph);
       // Editor.insertBreak(editor);
       // Transforms.splitNodes(editor);
       // const element = { type: 'image', url, children: [{ text: '' }] };
@@ -503,17 +495,15 @@ function SlateTranscriptEditor(props) {
     }
     if (event.key === 'Backspace') {
       const selection = editor.selection;
-      console.log('selection', selection);
-      console.log(selection.anchor.path[0], selection.focus.path[0]);
       // across paragraph
       if (selection.anchor.path[0] !== selection.focus.path[0]) {
-        console.log('For now cannot merge paragraph via delete across paragraphs, while figuring out the aligment issue');
+        console.info('For now cannot merge paragraph via delete across paragraphs, while figuring out the aligment issue');
         event.preventDefault();
         return;
       }
       // beginning of a paragrraph
       if (selection.anchor.offset === 0 && selection.focus.offset === 0) {
-        console.log('For now cannot merge paragraph via delete, while figuring out the aligment issue');
+        console.info('For now cannot merge paragraph via delete, while figuring out the aligment issue');
         event.preventDefault();
         return;
       }
@@ -647,7 +637,6 @@ function SlateTranscriptEditor(props) {
                       track
                       onChange={(e, n) => {
                         handleSetPlaybackRate(n);
-                        console.log('changed slider', e, n);
                       }}
                     />
                   </div>
@@ -996,7 +985,6 @@ function SlateTranscriptEditor(props) {
                   disabled={isProcessing}
                   onClick={async () => {
                     try {
-                      console.log('faSync');
                       setIsProcessing(true);
                       await handleRestoreTimecodes();
                     } finally {
