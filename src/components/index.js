@@ -663,22 +663,10 @@ function SlateTranscriptEditor(props) {
                   {getFileName()}
                 </Typography>
                 <br />
-                <Typography variant="subtitle2" gutterBottom>
-                  Speakers
-                </Typography>
-                {speakerOptions.map((speakerName, index) => {
-                  return (
-                    <Typography variant="body2" gutterBottom key={index + speakerName} className={'text-truncate'} title={speakerName.toUpperCase()}>
-                      {speakerName}
-                    </Typography>
-                  );
-                })} */}
+                */}
 
                 <Link
-                  // color="primary"
                   color="inherit"
-                  // disabled={open}
-                  // variant="outlined"
                   onClick={() => {
                     setShowSpeakersCheatShet(!showSpeakersCheatShet);
                   }}
@@ -703,23 +691,6 @@ function SlateTranscriptEditor(props) {
                     );
                   })}
                 </Collapse>
-
-                {/* <Accordion onClick={handleSetShowSpeakersCheatShet}>
-                <Accordion.Toggle as={Button} variant="link" eventKey="0">
-                  <Badge color="primary">Speakers</Badge>
-                </Accordion.Toggle>
-                <Accordion.Collapse eventKey="0">
-                  <ListGroup>
-                    {speakerOptions.map((speakerName, index) => {
-                      return (
-                        <ListGroup.Item key={index + speakerName} className={'text-truncate'} title={speakerName.toUpperCase()}>
-                          {speakerName.toUpperCase()}
-                        </ListGroup.Item>
-                      );
-                    })}
-                  </ListGroup>
-                </Accordion.Collapse>
-              </Accordion> */}
               </Grid>
             </Grid>
           </Grid>
