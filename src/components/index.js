@@ -226,8 +226,8 @@ function SlateTranscriptEditor(props) {
     setDuration(mediaRef.current.duration);
   };
 
-  const handleSetPlaybackRate = (n) => {
-    //e.target.value
+  const handleSetPlaybackRate = (e) => {
+    const n = e.target.value;
     const tmpNewPlaybackRateValue = parseFloat(n);
     if (mediaRef && mediaRef.current) {
       mediaRef.current.playbackRate = tmpNewPlaybackRateValue;
