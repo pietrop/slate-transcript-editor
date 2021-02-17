@@ -51,7 +51,7 @@ function handleSplitParagraph(editor) {
       console.log('blockParagraphBefore', blockParagraphBefore);
       console.log('blockParagraphAfter', blockParagraphAfter);
       SlateHelpers.removeNodes({ editor });
-      SlateHelpers.setNode({ editor, block: blockParagraphBefore, path: path });
+      //   SlateHelpers.setNode({ editor, block: blockParagraphBefore, path: path });
       SlateHelpers.insertNodesAtSelection({ editor, blocks: [blockParagraphBefore, blockParagraphAfter], moveSelection: true });
       //   SlateHelpers.setNode(blockParagraphBefore);
       //   SlateHelpers.insertNodesAtSelection({ editor, blocks: [blockParagraphAfter], moveSelection: true });
