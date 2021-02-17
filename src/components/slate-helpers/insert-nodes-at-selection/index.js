@@ -17,7 +17,7 @@ Transforms.insertNodes(editor, [
 const nextPoint = Editor.after(editor, editor.selection.anchor);
 Editor.setSelection(editor, {anchor:nextPoint, focus:nextPoint})
 */
-import { Transforms } from 'slate';
+import { Transforms, Editor } from 'slate';
 
 /**
  *
@@ -29,7 +29,7 @@ function insertNodesAtSelection({ editor, blocks, moveSelection = false }) {
   // move selection to that point
   if (moveSelection) {
     const nextPoint = Editor.after(editor, editor.selection.anchor);
-    Editor.setSelection(editor, { anchor: nextPoint, focus: nextPoint });
+    Transforms.setSelection(editor, { anchor: nextPoint, focus: nextPoint });
   }
 }
 

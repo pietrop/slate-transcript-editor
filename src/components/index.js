@@ -475,12 +475,11 @@ function SlateTranscriptEditor(props) {
   // - merging paragraphs via deleting across paragraphs
   const handleOnKeyDown = (event) => {
     if (event.key === 'Enter') {
-      // intercept Enter, and
+      // intercept Enter, and handle timecodes when splitting a paragraph
       event.preventDefault();
-      console.info('For now disabling enter key to split a paragraph, while figuring out the aligment issue');
-      //////////////////////////////////////////
+      // console.info('For now disabling enter key to split a paragraph, while figuring out the aligment issue');
       handleSetPauseWhileTyping(editor);
-      // Edge case, hit enters after having typed some other words?
+      // TODO: Edge case, hit enters after having typed some other words?
       SlateHelpers.handleSplitParagraph(editor);
     }
     if (event.key === 'Backspace') {

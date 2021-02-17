@@ -13,15 +13,10 @@ import countWords from '../../../util/count-words';
 import SlateHelpers from '../index';
 
 function handleSplitParagraph(editor) {
-  const [blockNode, path] = SlateHelpers.getClosestBlock(editor);
-  const currentBlockNode = blockNode;
-
   console.log('editor.selection', editor.selection);
   const { anchor, focus } = editor.selection;
   const { offset: anchorOffset, path: anchorPath } = anchor;
-  const anchorPathBlockNumber = anchorPath[0];
   const { offset: focusOffset, path: focusPath } = focus;
-  const focusPathBlockNumber = focusPath[0];
 
   if (isSameBlock(anchorPath, focusPath)) {
     if (isBeginningOftheBlock(anchorOffset, focusOffset)) {
@@ -29,6 +24,10 @@ function handleSplitParagraph(editor) {
       return;
     }
     if (isSelectionCollapsed(anchorOffset, focusOffset)) {
+      const [blockNode, path] = SlateHelpers.getClosestBlock(editor);
+      const currentBlockNode = blockNode;
+
+      console.log('isSelectionCollapsed', isSelectionCollapsed(anchorOffset, focusOffset));
       const text = currentBlockNode.children[0].text;
       const currentBlockWords = currentBlockNode.children[0].words;
       const { speaker, start } = currentBlockNode;
@@ -48,51 +47,21 @@ function handleSplitParagraph(editor) {
         words: wordsAfter,
       });
 
-      console.log('blockParagraphBefore', blockParagraphBefore);
-      console.log('blockParagraphAfter', blockParagraphAfter);
       SlateHelpers.removeNodes({ editor });
-      //   SlateHelpers.setNode({ editor, block: blockParagraphBefore, path: path });
       SlateHelpers.insertNodesAtSelection({ editor, blocks: [blockParagraphBefore, blockParagraphAfter], moveSelection: true });
-      //   SlateHelpers.setNode(blockParagraphBefore);
-      //   SlateHelpers.insertNodesAtSelection({ editor, blocks: [blockParagraphAfter], moveSelection: true });
-      // remove paragraph
-      //insert these two?
+      return;
     } else {
       console.info('in same block but with wide selection, not handling this use case for now, and collapsing the selection instead');
       SlateHelpers.collapseSelectionToAsinglePoint(editor);
       return;
     }
   } else {
-    console.info('in DIFFERENT block, not handling this use case for now, and collapsing the selection instead');
+    console.info('in different block, not handling this use case for now, and collapsing the selection instead');
     SlateHelpers.collapseSelectionToAsinglePoint(editor);
     return;
-    // if it's not the same block we can assume the selection is not collapsed either
   }
 
-  // SlateHelpers.collapseSelectionToAsinglePoint(editor);
-
-  // console.log(blockNode, path);
-  // get current block
-
-  // get offset
-
-  // split into two blocks
-  // split text in children[0].text
-  // also split words in children[0].words
-  // adjust start time (start and startTimecode) of second block, which is start time of second lsit of words
-  // adjust previousTimings
-
-  //delete original block
-  // or modify original block
-  // and only insert second block
-
-  // insert these two blocks
-  // SlateHelpers.insertNodesAtSelection({ editor, blocks: [block] });
-
-  // Editor.insertBreak(editor);
-
   //////////////////////////////////////////
-
   //   return;
   //   const selection = editor.selection;
   //   const orderedSelection = [selection.anchor, selection.focus].sort((a, b) => {
