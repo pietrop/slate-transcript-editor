@@ -16,7 +16,6 @@ import isTextSameAsWordsList from './is-text-same-as-words-list';
 function handleSplitParagraph(editor) {
   // get char offset
   const { anchor, focus } = editor.selection;
-  console.log('editor.selection', editor.selection);
   const { offset: anchorOffset, path: anchorPath } = anchor;
   const { offset: focusOffset, path: focusPath } = focus;
 
@@ -52,7 +51,6 @@ function handleSplitParagraph(editor) {
         //   offset: nextPointOffset,
         // };
         // SlateHelpers.setSelection({ editor, nextPoint });
-
         return;
       }
       ////////////////////////////////////////////

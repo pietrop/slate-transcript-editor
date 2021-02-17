@@ -483,8 +483,7 @@ function SlateTranscriptEditor(props) {
       SlateHelpers.handleSplitParagraph(editor);
     }
     if (event.key === 'Backspace') {
-      event.preventDefault();
-      SlateHelpers.handleDeleteInParagraph(editor);
+      SlateHelpers.handleDeleteInParagraph({ editor, event });
     }
     setIsContentIsModified(true);
     if (isPauseWhiletyping) {

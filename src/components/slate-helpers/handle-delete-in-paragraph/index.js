@@ -1,21 +1,21 @@
-import { Transforms } from 'slate';
 import isSameBlock from '../handle-split-paragraph/is-same-block';
 import isBeginningOftheBlock from '../handle-split-paragraph/is-beginning-of-the-block';
 import isSelectionCollapsed from '../handle-split-paragraph/is-selection-collapsed';
 import SlateHelpers from '../index';
 
-function handleDeleteInParagraph(editor) {
+// TODO: refacto clean up to make more legibl
+function handleDeleteInParagraph({ editor, event }) {
   const { anchor, focus } = editor.selection;
-  console.log('editor.selection', editor.selection);
+
   const { offset: anchorOffset, path: anchorPath } = anchor;
   const { offset: focusOffset, path: focusPath } = focus;
 
   if (isSameBlock(anchorPath, focusPath)) {
     if (isBeginningOftheBlock(anchorOffset, focusOffset)) {
+      event.preventDefault();
       console.info('in the same block, but at the beginning of a paragraph for now you are not allowed to create an empty new line');
       const [blockNode, path] = SlateHelpers.getClosestBlock(editor);
       const currentBlockNode = blockNode;
-      console.log('path', path);
       const currentBlockNumber = path[0];
       if (currentBlockNumber === 0) {
         return;
@@ -28,12 +28,9 @@ function handleDeleteInParagraph(editor) {
 
       const previousBlockEndOffset = previousBlock.children[0].text.length;
       const previousBlocText = previousBlock.children[0].text;
-
       const previousBlockWordsList = previousBlock.children[0].words;
-
       const currentBlockText = currentBlockNode.children[0].text;
       const currentBlockWordsList = currentBlockNode.children[0].words;
-
       const newText = previousBlocText + ' ' + currentBlockText;
       const newWords = [...previousBlockWordsList, ...currentBlockWordsList];
 
@@ -62,8 +59,6 @@ function handleDeleteInParagraph(editor) {
         text: newText,
         words: newWords,
       });
-      console.log('newBlockParagsraph', newBlockParagraph);
-      console.log('options', options);
 
       SlateHelpers.removeNodes({ editor, options });
 
@@ -85,13 +80,16 @@ function handleDeleteInParagraph(editor) {
       return;
     }
     if (isSelectionCollapsed(anchorOffset, focusOffset)) {
-      console.log('isSelectionCollapsed');
+      //  In same block but with selection collapsed
+      // event.preventDefault();
+      return;
     } else {
-      console.info('in same block but with wide selection, not handling this use case for now, and collapsing the selection instead');
-      SlateHelpers.collapseSelectionToAsinglePoint(editor);
+      // In same block but with wide selection
+      //   event.preventDefault();
       return;
     }
   } else {
+    event.preventDefault();
     console.info('in different block, not handling this use case for now, and collapsing the selection instead');
     SlateHelpers.collapseSelectionToAsinglePoint(editor);
     return;
