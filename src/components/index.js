@@ -50,7 +50,8 @@ import subtitlesExportOptionsList from '../util/export-adapters/subtitles-genera
 import updateTimestamps from '../util/export-adapters/slate-to-dpe/update-timestamps';
 import exportAdapter from '../util/export-adapters';
 import generatePreviousTimingsUpToCurrent from '../util/dpe-to-slate/generate-previous-timings-up-to-current';
-import getSelectionNodes from '../util/get-selection-nodes';
+import SlateHelpers from './slate-helpers';
+import countWords from '../util/count-words';
 
 import 'fontsource-roboto';
 import './index.css';
@@ -182,9 +183,6 @@ function SlateTranscriptEditor(props) {
     setAnchorMenuEl(null);
   };
 
-  const breakParagraph = () => {
-    Editor.insertBreak(editor);
-  };
   const insertTextInaudible = () => {
     Transforms.insertText(editor, '[INAUDIBLE]');
   };
@@ -373,7 +371,7 @@ function SlateTranscriptEditor(props) {
       }
     } else if (e.target.dataset.slateString) {
       if (e.target.parentNode.dataset.start) {
-        const { startSec } = getSelectionNodes(editor, editor.selection);
+        const { startSec } = SlateHelpers.getSelectionNodes(editor, editor.selection);
         if (mediaRef && mediaRef.current && startSec) {
           mediaRef.current.currentTime = parseFloat(startSec);
           mediaRef.current.play();
@@ -480,20 +478,10 @@ function SlateTranscriptEditor(props) {
       // intercept Enter, and
       event.preventDefault();
       console.info('For now disabling enter key to split a paragraph, while figuring out the aligment issue');
-      return;
-      const selection = editor.selection;
-      const orderedSelection = [selection.anchor, selection.focus].sort((a, b) => {
-        return a.path[0] - b.path[0];
-      });
-
-      const selectionStart = orderedSelection[0];
-      const selectionEnd = orderedSelection[1];
-      const currentParagraph = editor.children[selectionStart.path[0]];
-      // Editor.insertBreak(editor);
-      // Transforms.splitNodes(editor);
-      // const element = { type: 'image', url, children: [{ text: '' }] };
-      Editor.deleteFragment(editor, selectionStart.path[0]);
-      const { startSec, endSec } = getSelectionNodes(editor, editor.selection);
+      //////////////////////////////////////////
+      handleSetPauseWhileTyping(editor);
+      // Edge case, hit enters after having typed some other words?
+      SlateHelpers.handleSplitParagraph(editor);
     }
     if (event.key === 'Backspace') {
       const selection = editor.selection;
@@ -955,7 +943,7 @@ function SlateTranscriptEditor(props) {
               {/*   <Tooltip
                 title={`To insert a paragraph break, and split a pargraph in two, put the cursor at a point where you'd want to add a paragraph break in the text and either click this button or hit enter key`}
               >
-                <Button disabled={isProcessing} onClick={breakParagraph} color="primary" disabled>
+                <Button disabled={isProcessing} onClick={SlateHelpers.breakParagraph} color="primary" disabled>
                   <KeyboardReturnOutlinedIcon color="primary" />
                 </Button>
               </Tooltip>
