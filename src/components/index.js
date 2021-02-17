@@ -53,7 +53,6 @@ import generatePreviousTimingsUpToCurrent from '../util/dpe-to-slate/generate-pr
 import SlateHelpers from './slate-helpers';
 import countWords from '../util/count-words';
 
-import 'fontsource-roboto';
 import './index.css';
 
 const PLAYBACK_RATE_VALUES = [0.2, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 3, 3.5];
@@ -925,10 +924,16 @@ function SlateTranscriptEditor(props) {
               </Tooltip>
 
               {/* TODO: Disabiling until find a way to handle timecodes and alignment on paragraph break */}
-              {/*   <Tooltip
+              <Tooltip
                 title={`To insert a paragraph break, and split a pargraph in two, put the cursor at a point where you'd want to add a paragraph break in the text and either click this button or hit enter key`}
               >
-                <Button disabled={isProcessing} onClick={SlateHelpers.breakParagraph} color="primary" disabled>
+                <Button
+                  disabled={isProcessing}
+                  onClick={() => {
+                    SlateHelpers.handleSplitParagraph(editor);
+                  }}
+                  color="primary"
+                >
                   <KeyboardReturnOutlinedIcon color="primary" />
                 </Button>
               </Tooltip>
@@ -943,7 +948,7 @@ function SlateTranscriptEditor(props) {
                 <Button disabled={isProcessing} onClick={handleInsertMusicNote} color="primary">
                   <MusicNoteOutlinedIcon color="primary" />
                 </Button>
-              </Tooltip> */}
+              </Tooltip>
 
               <Tooltip
                 title={` Turn ${

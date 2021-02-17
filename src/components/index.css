@@ -1,4 +1,4 @@
 /* TODO: Temporary, need to scope this to the component in a sensible way */
-* {
+.editor-wrapper-container {
   font-family: Roboto, sans-serif;
 }
