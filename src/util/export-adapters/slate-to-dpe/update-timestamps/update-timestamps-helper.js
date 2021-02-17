@@ -8,6 +8,7 @@ import { alignSTT } from 'stt-align-node';
 import slateToText from '../../txt';
 import convertDpeToSlate from '../../../dpe-to-slate';
 import { shortTimecode } from '../../../timecode-converter/index.js';
+import SlateHelpers from '../../../../components/slate-helpers';
 import _ from 'lodash';
 // import difference from 'lodash/difference';
 
@@ -15,6 +16,29 @@ function comparator(object, other) {
   return _.isEqual(object.children[0].text, other.children[0].text);
 }
 
+export const updateTimestampsHelperForSpecificParagraph = ({ editor, path }) => {
+  let newDiffParagraph;
+  if (path) {
+    newDiffParagraph = SlateHelpers.getNodebyPath({ editor, path });
+  } else {
+    const [blockNode, path] = SlateHelpers.getClosestBlock(editor);
+    newDiffParagraph = JSON.parse(JSON.stringify(blockNode));
+  }
+
+  const alignedWordsTest = alignSTT(newDiffParagraph.children[0], newDiffParagraph.children[0].text);
+  newDiffParagraph.children[0].words = alignedWordsTest;
+  newDiffParagraph.start = alignedWordsTest[0].start;
+  newDiffParagraph.startTimecode = shortTimecode(alignedWordsTest[0].start);
+
+  console.log('newDiffParagraph', newDiffParagraph);
+  SlateHelpers.removeNodes({ editor });
+  // insert these two blocks
+  SlateHelpers.insertNodesAtSelection({
+    editor,
+    blocks: [newDiffParagraph],
+    // moveSelection: true,
+  });
+};
 /**
  * Update timestamps usign stt-align module
  * @param {*} currentContent - slate js value

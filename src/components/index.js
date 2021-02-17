@@ -48,6 +48,7 @@ import insertTimecodesInline from '../util/inline-interval-timecodes';
 import pluck from '../util/pluk';
 import subtitlesExportOptionsList from '../util/export-adapters/subtitles-generator/list.js';
 import updateTimestamps from '../util/export-adapters/slate-to-dpe/update-timestamps';
+import { updateTimestampsHelperForSpecificParagraph } from '../util/export-adapters/slate-to-dpe/update-timestamps/update-timestamps-helper';
 import exportAdapter from '../util/export-adapters';
 import generatePreviousTimingsUpToCurrent from '../util/dpe-to-slate/generate-previous-timings-up-to-current';
 import SlateHelpers from './slate-helpers';
@@ -503,10 +504,13 @@ function SlateTranscriptEditor(props) {
       const tmpSaveTimer = setTimeout(() => {
         if (mediaRef && mediaRef.current) {
           mediaRef.current.play();
+          // updateTimestampsHelperForSpecificParagraph({ editor });
+          // isContentModified(false);
         }
       }, PAUSE_WHILTE_TYPING_TIMEOUT_MILLISECONDS);
       setSaveTimer(tmpSaveTimer);
     }
+    // auto align when not typing
   };
   return (
     <div style={{ paddingTop: '1em' }}>
@@ -956,7 +960,12 @@ function SlateTranscriptEditor(props) {
                 } pause while typing functionality. As you start typing the media while pause playback
                       until you stop. Not reccomended on longer transcript as it might present performance issues.`}
               >
-                <Button disabled={isProcessing} onClick={handleSetPauseWhileTyping} color={isPauseWhiletyping ? 'secondary' : 'primary'}>
+                <Button
+                  disabled={isProcessing}
+                  onClick={handleSetPauseWhileTyping}
+                  variant={isPauseWhiletyping ? 'outlined' : ''}
+                  color={isPauseWhiletyping ? 'secondary' : 'primary'}
+                >
                   <PauseOutlinedIcon color="primary" />
                 </Button>
               </Tooltip>
