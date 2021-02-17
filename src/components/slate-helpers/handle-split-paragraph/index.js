@@ -11,10 +11,12 @@ import splitTextAtOffset from './split-text-at-offset';
 import splitWordsListAtOffset from './split-words-list-at-offset';
 import countWords from '../../../util/count-words';
 import SlateHelpers from '../index';
+import isTextSameAsWordsList from './is-text-same-as-words-list';
 
 function handleSplitParagraph(editor) {
-  console.log('editor.selection', editor.selection);
+  // get char offset
   const { anchor, focus } = editor.selection;
+  console.log('editor.selection', editor.selection);
   const { offset: anchorOffset, path: anchorPath } = anchor;
   const { offset: focusOffset, path: focusPath } = focus;
 
@@ -24,21 +26,46 @@ function handleSplitParagraph(editor) {
       return;
     }
     if (isSelectionCollapsed(anchorOffset, focusOffset)) {
+      // get current block
       const [blockNode, path] = SlateHelpers.getClosestBlock(editor);
       const currentBlockNode = blockNode;
-
-      console.log('isSelectionCollapsed', isSelectionCollapsed(anchorOffset, focusOffset));
+      // split into two blocks
       const text = currentBlockNode.children[0].text;
-      const currentBlockWords = currentBlockNode.children[0].words;
-      const { speaker, start } = currentBlockNode;
+      // split text in
       const [textBefore, textAfter] = splitTextAtOffset(text, anchorOffset);
+      // also split words list
+      const currentBlockWords = currentBlockNode.children[0].words;
       // TODO: edge case splitting in the middle of a word eg find a way to prevent that for now? or is not a problem?
       const numberOfWordsBefore = countWords(textBefore);
       const [wordsBefore, wordsAfter] = splitWordsListAtOffset(currentBlockWords, numberOfWordsBefore);
-      console.log('wordsBefore', wordsBefore);
-      console.log('wordsAfter', wordsAfter);
+      ////////////////////////////////////////////
+      // if cursor in the middle of a word then move cursor to space just before
+      const isCaretInMiddleOfAword = isTextSameAsWordsList(textBefore, wordsBefore);
+      if (isCaretInMiddleOfAword) {
+        // TODO: code below doesn't work
+        // TODO: next line has some code repetition, see if can do DRY.
+        // const textBeforeList = textBefore.trim().replace(/\s\s+/g, ' ').split(' ');
+        // textBeforeList.pop();
+        // const nextPointOffset = textBeforeList.join(' ').trim().length;
+        // const nextPoint = {
+        //   path,
+        //   offset: nextPointOffset,
+        // };
+        // SlateHelpers.setSelection({ editor, nextPoint });
 
-      const blockParagraphBefore = SlateHelpers.createNewParagraphBlock({ speaker, start, text: textBefore, words: wordsBefore });
+        return;
+      }
+      ////////////////////////////////////////////
+      // get start time of first block
+      const { speaker, start } = currentBlockNode;
+      // adjust previousTimings
+      const blockParagraphBefore = SlateHelpers.createNewParagraphBlock({
+        speaker,
+        start,
+        text: textBefore,
+        words: wordsBefore,
+      });
+      // adjust start time (start and startTimecode) of second block, which is start time of second lsit of words
       const startTimeSecondParagraph = wordsAfter[0].start;
       const blockParagraphAfter = SlateHelpers.createNewParagraphBlock({
         speaker,
@@ -47,8 +74,14 @@ function handleSplitParagraph(editor) {
         words: wordsAfter,
       });
 
+      //delete original block
       SlateHelpers.removeNodes({ editor });
-      SlateHelpers.insertNodesAtSelection({ editor, blocks: [blockParagraphBefore, blockParagraphAfter], moveSelection: true });
+      // insert these two blocks
+      SlateHelpers.insertNodesAtSelection({
+        editor,
+        blocks: [blockParagraphBefore, blockParagraphAfter],
+        moveSelection: true,
+      });
       return;
     } else {
       console.info('in same block but with wide selection, not handling this use case for now, and collapsing the selection instead');
@@ -60,21 +93,5 @@ function handleSplitParagraph(editor) {
     SlateHelpers.collapseSelectionToAsinglePoint(editor);
     return;
   }
-
-  //////////////////////////////////////////
-  //   return;
-  //   const selection = editor.selection;
-  //   const orderedSelection = [selection.anchor, selection.focus].sort((a, b) => {
-  //     return a.path[0] - b.path[0];
-  //   });
-
-  //   const selectionStart = orderedSelection[0];
-  //   const selectionEnd = orderedSelection[1];
-  //   const currentParagraph = editor.children[selectionStart.path[0]];
-  //   // Editor.insertBreak(editor);
-  //   // Transforms.splitNodes(editor);
-  //   // const element = { type: 'image', url, children: [{ text: '' }] };
-  //   Editor.deleteFragment(editor, selectionStart.path[0]);
-  //   const { startSec, endSec } = SlateHelpers.getSelectionNodes(editor, editor.selection);
 }
 export default handleSplitParagraph;

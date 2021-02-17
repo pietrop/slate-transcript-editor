@@ -9,12 +9,20 @@ function generatePreviousTimingsUpToCurrentOne(start) {
     .join(' ');
 }
 
-function createNewParagraphBlock({ speaker, start, text = '', words = [] }) {
+function createNewParagraphBlock({ speaker, start, text = '', words = [], previousTimings, startTimecode }) {
+  let newPreviousTimings = previousTimings;
+  if (!newPreviousTimings) {
+    newPreviousTimings = generatePreviousTimingsUpToCurrentOne(start);
+  }
+  let newStartTimecode = startTimecode;
+  if (!newStartTimecode) {
+    newStartTimecode = shortTimecode(start);
+  }
   return {
     speaker,
     start,
-    previousTimings: generatePreviousTimingsUpToCurrentOne(start),
-    startTimecode: shortTimecode(start),
+    previousTimings: newPreviousTimings,
+    startTimecode: newStartTimecode,
     type: 'timedText',
     children: [
       {

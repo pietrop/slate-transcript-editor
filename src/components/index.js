@@ -483,19 +483,8 @@ function SlateTranscriptEditor(props) {
       SlateHelpers.handleSplitParagraph(editor);
     }
     if (event.key === 'Backspace') {
-      const selection = editor.selection;
-      // across paragraph
-      if (selection.anchor.path[0] !== selection.focus.path[0]) {
-        console.info('For now cannot merge paragraph via delete across paragraphs, while figuring out the aligment issue');
-        event.preventDefault();
-        return;
-      }
-      // beginning of a paragrraph
-      if (selection.anchor.offset === 0 && selection.focus.offset === 0) {
-        console.info('For now cannot merge paragraph via delete, while figuring out the aligment issue');
-        event.preventDefault();
-        return;
-      }
+      event.preventDefault();
+      SlateHelpers.handleDeleteInParagraph(editor);
     }
     setIsContentIsModified(true);
     if (isPauseWhiletyping) {
@@ -510,11 +499,9 @@ function SlateTranscriptEditor(props) {
       if (mediaRef && mediaRef.current) {
         mediaRef.current.pause();
       }
-
       if (saveTimer !== null) {
         clearTimeout(saveTimer);
       }
-
       const tmpSaveTimer = setTimeout(() => {
         if (mediaRef && mediaRef.current) {
           mediaRef.current.play();

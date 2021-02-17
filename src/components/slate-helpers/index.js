@@ -10,6 +10,9 @@ import breakParagraph from './break-paragraph';
 import collapseSelectionToAsinglePoint from './collapse-selection-to-a-single-point';
 import handleSplitParagraph from './handle-split-paragraph';
 import createNewParagraphBlock from './create-new-paragraph-block';
+import handleDeleteInParagraph from './handle-delete-in-paragraph';
+import setSelection from './set-selection';
+import getNodebyPath from './get-node-by-path';
 const SlateHelpers = {
   getClosestBlock,
   getSelectionNodes,
@@ -23,6 +26,9 @@ const SlateHelpers = {
   collapseSelectionToAsinglePoint,
   handleSplitParagraph,
   createNewParagraphBlock,
+  handleDeleteInParagraph,
+  setSelection,
+  getNodebyPath,
 };
 
 export default SlateHelpers;
