@@ -521,16 +521,6 @@ function SlateTranscriptEditor(props) {
       const tmpSaveTimer = setTimeout(() => {
         if (mediaRef && mediaRef.current) {
           mediaRef.current.play();
-          // updateTimestampsHelperForSpecificParagraph({ editor });
-          // isContentModified(false);
-          /////////////////////////////
-          // (async () => {
-          //   console.log('running alignment + save');
-          //   const alignedSlateData = await updateBloocksTimestamps(value);
-          //   setValue(alignedSlateData);
-          //   setIsContentIsModified(false);
-          // })();
-          /////////////////////////////
         }
       }, PAUSE_WHILTE_TYPING_TIMEOUT_MILLISECONDS);
       setSaveTimer(tmpSaveTimer);
