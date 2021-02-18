@@ -483,6 +483,7 @@ function SlateTranscriptEditor(props) {
   // - merging paragraph via delete
   // - merging paragraphs via deleting across paragraphs
   const handleOnKeyDown = (event) => {
+    //  ArrowRight ArrowLeft ArrowUp ArrowUp
     if (event.key === 'Enter') {
       // intercept Enter, and handle timecodes when splitting a paragraph
       event.preventDefault();
@@ -494,6 +495,13 @@ function SlateTranscriptEditor(props) {
     if (event.key === 'Backspace') {
       SlateHelpers.handleDeleteInParagraph({ editor, event });
     }
+    // TODO: if implmenting this, it should be debounced/use timer to triggr it on stop typing?
+    // if (event.key.match(/[A-z]/)) {
+    //   // marking paragraph as modified/edited, to be able to
+    //   // use this when running alignment whn restoring timecodes
+    //   // to save having to compare transcripts
+    //   SlateHelpers.setNode({ editor, block: { isModified: true } });
+    // }
     setIsContentIsModified(true);
     if (isPauseWhiletyping) {
       // logic for pause while typing
@@ -515,6 +523,14 @@ function SlateTranscriptEditor(props) {
           mediaRef.current.play();
           // updateTimestampsHelperForSpecificParagraph({ editor });
           // isContentModified(false);
+          /////////////////////////////
+          // (async () => {
+          //   console.log('running alignment + save');
+          //   const alignedSlateData = await updateBloocksTimestamps(value);
+          //   setValue(alignedSlateData);
+          //   setIsContentIsModified(false);
+          // })();
+          /////////////////////////////
         }
       }, PAUSE_WHILTE_TYPING_TIMEOUT_MILLISECONDS);
       setSaveTimer(tmpSaveTimer);
