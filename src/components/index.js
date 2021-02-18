@@ -24,6 +24,7 @@ import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
 import MusicNoteOutlinedIcon from '@material-ui/icons/MusicNoteOutlined';
 import ClearOutlinedIcon from '@material-ui/icons/ClearOutlined';
 import HelpOutlineOutlinedIcon from '@material-ui/icons/HelpOutlineOutlined';
+import ImportExportIcon from '@material-ui/icons/ImportExport';
 // import MusicNoteOutlinedIcon from '@material-ui/icons/MusicNoteOutlined';
 
 import CachedOutlinedIcon from '@material-ui/icons/CachedOutlined';
@@ -48,6 +49,7 @@ import insertTimecodesInline from '../util/inline-interval-timecodes';
 import pluck from '../util/pluk';
 import subtitlesExportOptionsList from '../util/export-adapters/subtitles-generator/list.js';
 import updateTimestamps from '../util/export-adapters/slate-to-dpe/update-timestamps';
+import plainTextalignToSlateJs from '../util/export-adapters/slate-to-dpe/update-timestamps/plain-text-align-to-slate';
 import updateBloocksTimestamps from '../util/export-adapters/slate-to-dpe/update-timestamps/update-bloocks-timestamps';
 import { updateTimestampsHelperForSpecificParagraph } from '../util/export-adapters/slate-to-dpe/update-timestamps/update-timestamps-helper';
 import exportAdapter from '../util/export-adapters';
@@ -58,10 +60,11 @@ import countWords from '../util/count-words';
 import './index.css';
 
 const PLAYBACK_RATE_VALUES = [0.2, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 3, 3.5];
+const REPLACE_WHOLE_TEXT_INSTRUCTION =
+  'Replace whole text. \n\nAdvanced feature, if you already have an accurate transcription for the whole text, and you want to restore timecodes for it, you can use this to replace the text in this transcript. \n\nFor now this is an experimental feature. \n\nIt expects plain text, with paragraph breaks as new line breaks but no speakers.';
 const PLAYBACK_RATE_VALUES_O = PLAYBACK_RATE_VALUES.map((o) => {
   return {
     value: o,
-    // label: o,
   };
 });
 const SEEK_BACK_SEC = 10;
@@ -70,17 +73,8 @@ const MAX_DURATION_FOR_PERFORMANCE_OPTIMIZATION_IN_SECONDS = 3600;
 
 const mediaRef = React.createRef();
 
-// const styles = {
-//   root: {
-//     backgroundColor: '', //#f5f5f5
-//   },
-// };
-
-const preventDefault = (event) => event.preventDefault();
-
 function SlateTranscriptEditor(props) {
   const [anchorMenuEl, setAnchorMenuEl] = React.useState(null);
-
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [playbackRate, setPlaybackRate] = useState(1);
@@ -384,6 +378,16 @@ function SlateTranscriptEditor(props) {
           // }
         }
       }
+    }
+  };
+
+  const handleReplaceText = () => {
+    const newText = prompt(`Paste the text to replace here.\n\n${REPLACE_WHOLE_TEXT_INSTRUCTION}`);
+    if (newText) {
+      // console.log('props.transcriptData.words', props.transcriptData.words, newText, value);
+      console.log('props.transcriptData', props.transcriptData);
+      const newValue = plainTextalignToSlateJs(props.transcriptData, newText, value);
+      setValue(newValue);
     }
   };
 
@@ -989,6 +993,12 @@ function SlateTranscriptEditor(props) {
                   color="primary"
                 >
                   <CachedOutlinedIcon color="primary" />
+                </Button>
+              </Tooltip>
+
+              <Tooltip title={REPLACE_WHOLE_TEXT_INSTRUCTION}>
+                <Button onClick={handleReplaceText} color="primary">
+                  <ImportExportIcon color="primary" />
                 </Button>
               </Tooltip>
 
