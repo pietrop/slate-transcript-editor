@@ -48,6 +48,7 @@ import insertTimecodesInline from '../util/inline-interval-timecodes';
 import pluck from '../util/pluk';
 import subtitlesExportOptionsList from '../util/export-adapters/subtitles-generator/list.js';
 import updateTimestamps from '../util/export-adapters/slate-to-dpe/update-timestamps';
+import updateBloocksTimestamps from '../util/export-adapters/slate-to-dpe/update-timestamps/update-bloocks-timestamps';
 import { updateTimestampsHelperForSpecificParagraph } from '../util/export-adapters/slate-to-dpe/update-timestamps/update-timestamps-helper';
 import exportAdapter from '../util/export-adapters';
 import generatePreviousTimingsUpToCurrent from '../util/dpe-to-slate/generate-previous-timings-up-to-current';
@@ -389,17 +390,21 @@ function SlateTranscriptEditor(props) {
   // TODO: refacto this function, to be cleaner and easier to follow.
   const handleRestoreTimecodes = async (inlineTimecodes = false) => {
     console.info('handleRestoreTimecodes');
+    // if nothing as changed and you don't need to modify the data
+    // to get inline timecodes, then just return as is
     if (!isContentModified && !inlineTimecodes) {
       return value;
     }
     if (inlineTimecodes) {
-      const transcriptData = insertTimecodesInline({ transcriptData: JSON.parse(JSON.stringify(props.transcriptData)) });
-      const alignedSlateData = await updateTimestamps(convertDpeToSlate(transcriptData), transcriptData);
-      setValue(alignedSlateData);
-      setIsContentIsModified(false);
-      return alignedSlateData;
+      alert('removing this for now, while figuring out general alignement');
+      // const transcriptData = insertTimecodesInline({ transcriptData: JSON.parse(JSON.stringify(props.transcriptData)) });
+      // const alignedSlateData = await updateTimestamps(convertDpeToSlate(transcriptData), transcriptData);
+      // setValue(alignedSlateData);
+      // setIsContentIsModified(false);
+      // return alignedSlateData;
     } else {
-      const alignedSlateData = await updateTimestamps(value, JSON.parse(JSON.stringify(props.transcriptData)));
+      // const alignedSlateData = await updateTimestamps(value, JSON.parse(JSON.stringify(props.transcriptData)));
+      const alignedSlateData = await updateBloocksTimestamps(value);
       setValue(alignedSlateData);
       setIsContentIsModified(false);
       return alignedSlateData;
@@ -963,7 +968,7 @@ function SlateTranscriptEditor(props) {
                 <Button
                   disabled={isProcessing}
                   onClick={handleSetPauseWhileTyping}
-                  variant={isPauseWhiletyping ? 'outlined' : ''}
+                  variant={isPauseWhiletyping ? 'outlined' : null}
                   color={isPauseWhiletyping ? 'secondary' : 'primary'}
                 >
                   <PauseOutlinedIcon color="primary" />
