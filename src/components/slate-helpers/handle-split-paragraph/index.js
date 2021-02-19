@@ -12,6 +12,7 @@ import splitWordsListAtOffset from './split-words-list-at-offset';
 import countWords from '../../../util/count-words';
 import SlateHelpers from '../index';
 import isTextSameAsWordsList from './is-text-same-as-words-list';
+import { isTextAndWordsListChanged, alignBlock } from '../../../util/export-adapters/slate-to-dpe/update-timestamps/update-bloocks-timestamps';
 
 function handleSplitParagraph(editor) {
   // get char offset
@@ -29,31 +30,27 @@ function handleSplitParagraph(editor) {
       const [blockNode, path] = SlateHelpers.getClosestBlock(editor);
       const currentBlockNode = blockNode;
       // split into two blocks
-      const text = currentBlockNode.children[0].text;
+      let currentBlockWords = currentBlockNode.children[0].words;
+      let text = currentBlockNode.children[0].text;
+      // if the word have changed. then re-align paragraph before splitting.
+      // TODO: this needs re-thinking if there's other re-alignment happening
+      // eg on key down debounce
+      if (isTextAndWordsListChanged({ text, words: currentBlockWords })) {
+        const currentBlockNodeAligned = alignBlock({ block: currentBlockNode, text, words: currentBlockWords });
+        currentBlockWords = currentBlockNodeAligned.children[0].words;
+        text = currentBlockNodeAligned.children[0].text;
+      }
       // split text in
       const [textBefore, textAfter] = splitTextAtOffset(text, anchorOffset);
       // also split words list
-      const currentBlockWords = currentBlockNode.children[0].words;
       // TODO: edge case splitting in the middle of a word eg find a way to prevent that for now? or is not a problem?
       const numberOfWordsBefore = countWords(textBefore);
       const [wordsBefore, wordsAfter] = splitWordsListAtOffset(currentBlockWords, numberOfWordsBefore);
-      ////////////////////////////////////////////
       // if cursor in the middle of a word then move cursor to space just before
       const isCaretInMiddleOfAword = isTextSameAsWordsList(textBefore, wordsBefore);
       if (isCaretInMiddleOfAword) {
-        // TODO: code below doesn't work
-        // TODO: next line has some code repetition, see if can do DRY.
-        // const textBeforeList = textBefore.trim().replace(/\s\s+/g, ' ').split(' ');
-        // textBeforeList.pop();
-        // const nextPointOffset = textBeforeList.join(' ').trim().length;
-        // const nextPoint = {
-        //   path,
-        //   offset: nextPointOffset,
-        // };
-        // SlateHelpers.setSelection({ editor, nextPoint });
         return;
       }
-      ////////////////////////////////////////////
       // get start time of first block
       const { speaker, start } = currentBlockNode;
       // adjust previousTimings

@@ -37,19 +37,10 @@ const getSelectionNodes = (editor, selection) => {
     });
 
     const endWord = selectedLeafWords[targetWordIndex + 1];
-    // console.log('endWord', endWord);
-    // console.log('selection', selection);
-    // console.log('startWord', startWord);
-    // const startSec = startWord.start / 1000;
-    // const endSec = endWord.end / 1000;
-    // console.log('startSec', startSec);
-    // const selObj = window.getSelection();
-    // console.log(selObj.toString());
-    // setSearch(selObj.toString())
-    // createUserClip(startSec, endSec);
-    return { startSec: startWord.start, endSec: endWord.end };
+    // return { startSec: startWord.start, endSec: endWord.end };
+    return { startWord, endWord };
   } catch (error) {
-    console.error('error creating clip', error);
+    console.error('error finding times from selection:: ', error);
   }
 };
 

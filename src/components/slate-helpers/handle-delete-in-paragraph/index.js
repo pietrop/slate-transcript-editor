@@ -1,6 +1,7 @@
 import isSameBlock from '../handle-split-paragraph/is-same-block';
 import isBeginningOftheBlock from '../handle-split-paragraph/is-beginning-of-the-block';
 import isSelectionCollapsed from '../handle-split-paragraph/is-selection-collapsed';
+import { isTextAndWordsListChanged, alignBlock } from '../../../util/export-adapters/slate-to-dpe/update-timestamps/update-bloocks-timestamps';
 import SlateHelpers from '../index';
 
 // TODO: refacto clean up to make more legibl
@@ -20,6 +21,7 @@ function handleDeleteInParagraph({ editor, event }) {
       if (currentBlockNumber === 0) {
         return;
       }
+
       const previousBlockNumber = currentBlockNumber - 1;
       const previousBlock = SlateHelpers.getNodebyPath({
         editor,
@@ -27,11 +29,24 @@ function handleDeleteInParagraph({ editor, event }) {
       });
 
       const previousBlockEndOffset = previousBlock.children[0].text.length;
-      const previousBlocText = previousBlock.children[0].text;
+      const previousBlockText = previousBlock.children[0].text;
       const previousBlockWordsList = previousBlock.children[0].words;
-      const currentBlockText = currentBlockNode.children[0].text;
-      const currentBlockWordsList = currentBlockNode.children[0].words;
-      const newText = previousBlocText + ' ' + currentBlockText;
+      let currentBlockText = currentBlockNode.children[0].text;
+      let currentBlockWordsList = currentBlockNode.children[0].words;
+      // if the word have changed. then re-align paragraph before splitting.
+      // TODO: this needs re-thinking if there's other re-alignment happening
+      // eg on key down debounce
+      if (isTextAndWordsListChanged({ text: currentBlockText, words: currentBlockWordsList })) {
+        const currentBlockNodeAligned = alignBlock({
+          block: currentBlockNode,
+          text: currentBlockText,
+          words: currentBlockWordsList,
+        });
+        currentBlockWordsList = currentBlockNodeAligned.children[0].words;
+        currentBlockText = currentBlockNodeAligned.children[0].text;
+      }
+
+      const newText = previousBlockText + ' ' + currentBlockText;
       const newWords = [...previousBlockWordsList, ...currentBlockWordsList];
 
       const range = {
@@ -74,7 +89,7 @@ function handleDeleteInParagraph({ editor, event }) {
       });
 
       // move the selection to in the "middle" of the new paragraph where the text of the two is joined.s
-      const newOffset = previousBlocText.length;
+      const newOffset = previousBlockText.length;
       const nextPoint = { offset: newOffset, path: [previousBlockNumber, 0] };
       SlateHelpers.setSelection({ editor, nextPoint });
       return;

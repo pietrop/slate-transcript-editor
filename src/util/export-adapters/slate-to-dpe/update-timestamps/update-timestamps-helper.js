@@ -29,8 +29,6 @@ export const updateTimestampsHelperForSpecificParagraph = ({ editor, path }) => 
   newDiffParagraph.children[0].words = alignedWordsTest;
   newDiffParagraph.start = alignedWordsTest[0].start;
   newDiffParagraph.startTimecode = shortTimecode(alignedWordsTest[0].start);
-
-  console.log('newDiffParagraph', newDiffParagraph);
   SlateHelpers.removeNodes({ editor });
   // insert these two blocks
   SlateHelpers.insertNodesAtSelection({

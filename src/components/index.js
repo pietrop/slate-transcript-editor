@@ -3,78 +3,56 @@ import PropTypes, { string } from 'prop-types';
 import path from 'path';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Button from '@material-ui/core/Button';
-import Menu from '@material-ui/core/Menu';
 import Container from '@material-ui/core/Container';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
-import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
-import FormHelperText from '@material-ui/core/FormHelperText';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 import Link from '@material-ui/core/Link';
-import Divider from '@material-ui/core/Divider';
-import Tooltip from '@material-ui/core/Tooltip';
-import Slider from '@material-ui/core/Slider';
-import SaveAltIcon from '@material-ui/icons/SaveAlt';
-import SaveOutlinedIcon from '@material-ui/icons/SaveOutlined';
-import KeyboardReturnOutlinedIcon from '@material-ui/icons/KeyboardReturnOutlined';
-import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
-import MusicNoteOutlinedIcon from '@material-ui/icons/MusicNoteOutlined';
-import ClearOutlinedIcon from '@material-ui/icons/ClearOutlined';
-import HelpOutlineOutlinedIcon from '@material-ui/icons/HelpOutlineOutlined';
-import ImportExportIcon from '@material-ui/icons/ImportExport';
-// import MusicNoteOutlinedIcon from '@material-ui/icons/MusicNoteOutlined';
-
-import CachedOutlinedIcon from '@material-ui/icons/CachedOutlined';
-import InfoOutlined from '@material-ui/icons/InfoOutlined';
-import PauseOutlinedIcon from '@material-ui/icons/PauseOutlined';
-import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import Replay10Icon from '@material-ui/icons/Replay10';
-import { withStyles } from '@material-ui/core/styles';
 import Collapse from '@material-ui/core/Collapse';
-
+import Tooltip from '@material-ui/core/Tooltip';
+import pDebounce from 'p-debounce';
+import debounce from 'lodash/debounce';
 import { createEditor, Editor, Transforms } from 'slate';
 // https://docs.slatejs.org/walkthroughs/01-installing-slate
 // Import the Slate components and React plugin.
 import { Slate, Editable, withReact, ReactEditor } from 'slate-react';
 import { withHistory } from 'slate-history';
 
+import SideBtns from './SideBtns';
 import { shortTimecode } from '../util/timecode-converter';
 import download from '../util/downlaod/index.js';
 import convertDpeToSlate from '../util/dpe-to-slate';
 // TODO: This should be moved in export utils
 import insertTimecodesInline from '../util/inline-interval-timecodes';
 import pluck from '../util/pluk';
-import subtitlesExportOptionsList from '../util/export-adapters/subtitles-generator/list.js';
-import updateTimestamps from '../util/export-adapters/slate-to-dpe/update-timestamps';
 import plainTextalignToSlateJs from '../util/export-adapters/slate-to-dpe/update-timestamps/plain-text-align-to-slate';
 import updateBloocksTimestamps from '../util/export-adapters/slate-to-dpe/update-timestamps/update-bloocks-timestamps';
 import { updateTimestampsHelperForSpecificParagraph } from '../util/export-adapters/slate-to-dpe/update-timestamps/update-timestamps-helper';
 import exportAdapter from '../util/export-adapters';
 import generatePreviousTimingsUpToCurrent from '../util/dpe-to-slate/generate-previous-timings-up-to-current';
 import SlateHelpers from './slate-helpers';
-import countWords from '../util/count-words';
-
 import './index.css';
 
 const PLAYBACK_RATE_VALUES = [0.2, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 3, 3.5];
-const REPLACE_WHOLE_TEXT_INSTRUCTION =
-  'Replace whole text. \n\nAdvanced feature, if you already have an accurate transcription for the whole text, and you want to restore timecodes for it, you can use this to replace the text in this transcript. \n\nFor now this is an experimental feature. \n\nIt expects plain text, with paragraph breaks as new line breaks but no speakers.';
-const PLAYBACK_RATE_VALUES_O = PLAYBACK_RATE_VALUES.map((o) => {
-  return {
-    value: o,
-  };
-});
 const SEEK_BACK_SEC = 10;
 const PAUSE_WHILTE_TYPING_TIMEOUT_MILLISECONDS = 1500;
-const MAX_DURATION_FOR_PERFORMANCE_OPTIMIZATION_IN_SECONDS = 3600;
+// const MAX_DURATION_FOR_PERFORMANCE_OPTIMIZATION_IN_SECONDS = 3600;
+const REPLACE_WHOLE_TEXT_INSTRUCTION =
+  'Replace whole text. \n\nAdvanced feature, if you already have an accurate transcription for the whole text, and you want to restore timecodes for it, you can use this to replace the text in this transcript. \n\nFor now this is an experimental feature. \n\nIt expects plain text, with paragraph breaks as new line breaks but no speakers.';
 
 const mediaRef = React.createRef();
+// const debouncedSave = pDebounce(updateBloocksTimestamps, 3000);
+
+const pauseWhileTypeing = (current) => {
+  current.play();
+};
+const debouncePauseWhileTyping = debounce(pauseWhileTypeing, PAUSE_WHILTE_TYPING_TIMEOUT_MILLISECONDS);
 
 function SlateTranscriptEditor(props) {
-  const [anchorMenuEl, setAnchorMenuEl] = React.useState(null);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [playbackRate, setPlaybackRate] = useState(1);
@@ -156,27 +134,17 @@ function SlateTranscriptEditor(props) {
     };
   }, []);
 
-  useEffect(() => {
-    // Update the document title using the browser API
-    if (mediaRef && mediaRef.current) {
-      // Not working
-      setDuration(mediaRef.current.duration);
-      if (mediaRef.current.duration >= MAX_DURATION_FOR_PERFORMANCE_OPTIMIZATION_IN_SECONDS) {
-        setShowSpeakers(false);
-        showTimecodes(false);
-      }
-    }
-  }, [mediaRef]);
-
-  // used by MUI export menu
-  const handleMenuClick = (event) => {
-    setAnchorMenuEl(event.currentTarget);
-  };
-
-  // used by MUI export menu
-  const handleMenuClose = () => {
-    setAnchorMenuEl(null);
-  };
+  // useEffect(() => {
+  //   // Update the document title using the browser API
+  //   if (mediaRef && mediaRef.current) {
+  //     // Not working
+  //     setDuration(mediaRef.current.duration);
+  //     if (mediaRef.current.duration >= MAX_DURATION_FOR_PERFORMANCE_OPTIMIZATION_IN_SECONDS) {
+  //       setShowSpeakers(false);
+  //       showTimecodes(false);
+  //     }
+  //   }
+  // }, [mediaRef]);
 
   const insertTextInaudible = () => {
     Transforms.insertText(editor, '[INAUDIBLE]');
@@ -198,19 +166,6 @@ function SlateTranscriptEditor(props) {
       return props.title;
     }
     return getFileName();
-  };
-
-  const getMediaType = () => {
-    const clipExt = path.extname(props.mediaUrl);
-    let tmpMediaType = props.mediaType ? props.mediaType : 'video';
-    if (clipExt === '.wav' || clipExt === '.mp3' || clipExt === '.m4a' || clipExt === '.flac' || clipExt === '.aiff') {
-      tmpMediaType = 'audio';
-    }
-    return tmpMediaType;
-  };
-
-  const handleSetShowSpeakersCheatShet = () => {
-    setShowSpeakersCheatShet(!showSpeakersCheatShet);
   };
 
   const handleTimeUpdated = (e) => {
@@ -366,16 +321,18 @@ function SlateTranscriptEditor(props) {
       }
     } else if (e.target.dataset.slateString) {
       if (e.target.parentNode.dataset.start) {
-        const { startSec } = SlateHelpers.getSelectionNodes(editor, editor.selection);
-        if (mediaRef && mediaRef.current && startSec) {
-          mediaRef.current.currentTime = parseFloat(startSec);
+        const { startWord } = SlateHelpers.getSelectionNodes(editor, editor.selection);
+        if (mediaRef && mediaRef.current && startWord && startWord.start) {
+          mediaRef.current.currentTime = parseFloat(startWord.start);
           mediaRef.current.play();
         } else {
-          // const start = e.target.parentNode.dataset.start;
-          // if (mediaRef && mediaRef.current && start) {
-          //   mediaRef.current.currentTime = parseFloat(start);
-          //   mediaRef.current.play();
-          // }
+          // fallback in case there's some misalignment with the words
+          // use the start of paragraph instead
+          const start = parseFloat(e.target.parentNode.dataset.start);
+          if (mediaRef && mediaRef.current && start) {
+            mediaRef.current.currentTime = parseFloat(start);
+            mediaRef.current.play();
+          }
         }
       }
     }
@@ -384,8 +341,6 @@ function SlateTranscriptEditor(props) {
   const handleReplaceText = () => {
     const newText = prompt(`Paste the text to replace here.\n\n${REPLACE_WHOLE_TEXT_INSTRUCTION}`);
     if (newText) {
-      // console.log('props.transcriptData.words', props.transcriptData.words, newText, value);
-      console.log('props.transcriptData', props.transcriptData);
       const newValue = plainTextalignToSlateJs(props.transcriptData, newText, value);
       setValue(newValue);
     }
@@ -478,31 +433,35 @@ function SlateTranscriptEditor(props) {
     setIsPauseWhiletyping(!isPauseWhiletyping);
   };
 
+  const handleSplitParagraph = () => {
+    SlateHelpers.handleSplitParagraph(editor);
+  };
+
+  // const debounced_version = throttle(handleRestoreTimecodes, 3000, { leading: false, trailing: true });
   // TODO: revisit logic for
   // - splitting paragraph via enter key
   // - merging paragraph via delete
   // - merging paragraphs via deleting across paragraphs
-  const handleOnKeyDown = (event) => {
+  const handleOnKeyDown = async (event) => {
+    setIsContentIsModified(true);
     //  ArrowRight ArrowLeft ArrowUp ArrowUp
     if (event.key === 'Enter') {
       // intercept Enter, and handle timecodes when splitting a paragraph
       event.preventDefault();
       // console.info('For now disabling enter key to split a paragraph, while figuring out the aligment issue');
-      handleSetPauseWhileTyping(editor);
+      // handleSetPauseWhileTyping();
       // TODO: Edge case, hit enters after having typed some other words?
       SlateHelpers.handleSplitParagraph(editor);
     }
     if (event.key === 'Backspace') {
       SlateHelpers.handleDeleteInParagraph({ editor, event });
     }
-    // TODO: if implmenting this, it should be debounced/use timer to triggr it on stop typing?
-    // if (event.key.match(/[A-z]/)) {
-    //   // marking paragraph as modified/edited, to be able to
-    //   // use this when running alignment whn restoring timecodes
-    //   // to save having to compare transcripts
-    //   SlateHelpers.setNode({ editor, block: { isModified: true } });
+    // if (event.key.length == 1 && ((event.keyCode >= 65 && event.keyCode <= 90) || (event.keyCode >= 49 && event.keyCode <= 57))) {
+    //   const alignedSlateData = await debouncedSave(value);
+    //   setValue(alignedSlateData);
+    //   setIsContentIsModified(false);
     // }
-    setIsContentIsModified(true);
+
     if (isPauseWhiletyping) {
       // logic for pause while typing
       // https://schier.co/blog/wait-for-user-to-stop-typing-using-javascript
@@ -512,18 +471,10 @@ function SlateTranscriptEditor(props) {
       // also pause while typing might introduce performance issues on longer transcripts
       // if on every keystroke it's creating and destroing a timer.
       // should find a more efficient way to "debounce" or "throttle" this functionality
-      if (mediaRef && mediaRef.current) {
+      if (mediaRef && mediaRef.current && !mediaRef.current.paused) {
         mediaRef.current.pause();
+        debouncePauseWhileTyping(mediaRef.current);
       }
-      if (saveTimer !== null) {
-        clearTimeout(saveTimer);
-      }
-      const tmpSaveTimer = setTimeout(() => {
-        if (mediaRef && mediaRef.current) {
-          mediaRef.current.play();
-        }
-      }, PAUSE_WHILTE_TYPING_TIMEOUT_MILLISECONDS);
-      setSaveTimer(tmpSaveTimer);
     }
     // auto align when not typing
   };
@@ -533,39 +484,11 @@ function SlateTranscriptEditor(props) {
       <Container>
         <Paper elevation={3} />
         <style scoped>
-          {`
-              /* Next words */
+          {`/* Next words */
              .timecode[data-previous-timings*="${generatePreviousTimingsUpToCurrent(parseInt(currentTime), value)}"]{
                   color:  #9E9E9E;
               }
           `}
-        </style>
-        <style scoped>
-          {`.editor-wrapper-container{
-                padding: 8px 16px;
-                height: 90vh;
-                overflow: auto;
-              }
-              /* https://developer.mozilla.org/en-US/docs/Web/CSS/user-select
-              TODO: only working in Chrome, not working in Firefox, and Safari - OSX
-              if selecting text, not showing selection
-              Commented out because it means cannot select speakers and timecode anymore
-              which is the intended default behavior but needs to come with export
-              functionality to export as plain text, word etc.. otherwise user won't be able
-              to get text out of component with timecodes and speaker names in the interim */
-              .unselectable {
-                -moz-user-select: none;
-                -webkit-user-select: none;
-                -ms-user-select: none;
-                user-select: none;
-              }
-              .timecode:hover{
-                text-decoration: underline;
-              }
-              .timecode.text:hover{
-                text-decoration:none;
-              }
-              `}
         </style>
         {props.showTitle && (
           <Tooltip title={props.title}>
@@ -613,49 +536,8 @@ function SlateTranscriptEditor(props) {
                   </Grid>
                 </Grid>
               </Grid>
-              {/* <Grid item>
-                <Grid container direction="row" justify="flex-start" alignItems="flex-start">
-                  <div style={{ width: 120 }}>
-                    <FormHelperText>Speed</FormHelperText>
-                    <Slider
-                      defaultValue={playbackRate}
-                      value={playbackRate}
-                      // getAriaValueText={'test'}
-                      aria-labelledby="discrete-slider"
-                      valueLabelDisplay="auto"
-                      step={0.2}
-                      marks={PLAYBACK_RATE_VALUES_O}
-                      min={0.2}
-                      max={3.5}
-                      track
-                      onChange={(e, n) => {
-                        handleSetPlaybackRate(n);
-                      }}
-                    />
-                  </div>
 
-                  <Tooltip title="reset speed">
-                    <Button
-                      onClick={() => {
-                        handleSetPlaybackRate(1);
-                      }}
-                    >
-                      <ClearOutlinedIcon color="primary" />
-                    </Button>
-                  </Tooltip>
-                </Grid> 
-              </Grid>*/}
               <Grid item>
-                {/* <br />
-                <Typography variant="subtitle2" gutterBottom>
-                  File
-                </Typography>
-                <Typography variant="body2" gutterBottom>
-                  {getFileName()}
-                </Typography>
-                <br />
-                */}
-
                 <Link
                   color="inherit"
                   onClick={() => {
@@ -719,301 +601,20 @@ function SlateTranscriptEditor(props) {
           </Grid>
 
           <Grid item xs={12} sm={1} md={1} lg={1} xl={2}>
-            <Grid container direction="row" justify="flex-start" alignItems="flex-start">
-              <div>
-                <Tooltip title={'Export options'}>
-                  <Button aria-controls="simple-menu" aria-haspopup="true" onClick={handleMenuClick}>
-                    <SaveAltIcon color="primary" /> <KeyboardArrowDownIcon color="primary" />
-                  </Button>
-                </Tooltip>
-                <Menu id="simple-menu" anchorEl={anchorMenuEl} keepMounted open={Boolean(anchorMenuEl)} onClose={handleMenuClose}>
-                  <MenuItem onClick={handleMenuClose} disabled>
-                    <Link style={{ color: 'black' }}>Text Export</Link>
-                  </MenuItem>
-                  <MenuItem
-                    onClick={() => {
-                      handleExport({
-                        type: 'text',
-                        ext: 'txt',
-                        speakers: false,
-                        timecodes: false,
-                        isDownload: true,
-                      });
-                      handleMenuClose();
-                    }}
-                  >
-                    <Link color="primary">
-                      Text (<code>.txt</code>)
-                    </Link>
-                  </MenuItem>
-                  <MenuItem
-                    onClick={() => {
-                      handleExport({
-                        type: 'text',
-                        ext: 'txt',
-                        speakers: true,
-                        timecodes: false,
-                        isDownload: true,
-                      });
-                      handleMenuClose();
-                    }}
-                  >
-                    <Link color="primary">Text (Speakers)</Link>
-                  </MenuItem>
-                  <MenuItem
-                    onClick={() => {
-                      handleExport({
-                        type: 'text',
-                        ext: 'txt',
-                        speakers: false,
-                        timecodes: true,
-                        isDownload: true,
-                      });
-                      handleMenuClose();
-                    }}
-                  >
-                    <Link color="primary">Text (Timecodes)</Link>
-                  </MenuItem>
-                  <MenuItem
-                    onClick={() => {
-                      handleExport({
-                        type: 'text',
-                        ext: 'txt',
-                        speakers: true,
-                        timecodes: true,
-                        isDownload: true,
-                      });
-                      handleMenuClose();
-                    }}
-                  >
-                    <Link color="primary"> Text (Speakers & Timecodes)</Link>
-                  </MenuItem>
-                  <MenuItem
-                    onClick={() => {
-                      handleExport({
-                        type: 'text',
-                        ext: 'txt',
-                        speakers: true,
-                        timecodes: true,
-                        atlasFormat: true,
-                        isDownload: true,
-                      });
-                      handleMenuClose();
-                    }}
-                  >
-                    <Link color="primary"> Text (Atlas format)</Link>
-                  </MenuItem>
-                  <Divider />
-                  <MenuItem
-                    onClick={() => {
-                      handleExport({
-                        type: 'word',
-                        ext: 'docx',
-                        speakers: false,
-                        timecodes: false,
-                        isDownload: true,
-                      });
-                      handleMenuClose();
-                    }}
-                  >
-                    <Link color="primary">
-                      {' '}
-                      Word (<code>.docx</code>)
-                    </Link>
-                  </MenuItem>
-                  <MenuItem
-                    onClick={() => {
-                      handleExport({
-                        type: 'word',
-                        ext: 'docx',
-                        speakers: true,
-                        timecodes: false,
-                        isDownload: true,
-                      });
-                      handleMenuClose();
-                    }}
-                  >
-                    <Link color="primary"> Word (Speakers)</Link>
-                  </MenuItem>
-                  <MenuItem
-                    onClick={() => {
-                      handleExport({
-                        type: 'word',
-                        ext: 'docx',
-                        speakers: false,
-                        timecodes: true,
-                        isDownload: true,
-                      });
-                      handleMenuClose();
-                    }}
-                  >
-                    <Link color="primary"> Word (Timecodes)</Link>
-                  </MenuItem>
-                  <MenuItem
-                    onClick={() => {
-                      handleExport({
-                        type: 'word',
-                        ext: 'docx',
-                        speakers: true,
-                        timecodes: true,
-                        isDownload: true,
-                      });
-                      handleMenuClose();
-                    }}
-                  >
-                    <Link color="primary"> Word (Speakers & Timecodes)</Link>
-                  </MenuItem>
-                  <MenuItem
-                    onClick={() => {
-                      handleExport({
-                        type: 'word',
-                        ext: 'docx',
-                        speakers: false,
-                        timecodes: false,
-                        inlineTimecodes: true,
-                        hideTitle: true,
-                      });
-                      handleMenuClose();
-                    }}
-                  >
-                    <Link color="primary"> Word (OHMS)</Link>
-                  </MenuItem>
-                  <Divider />
-                  <MenuItem onClick={handleMenuClose} disabled>
-                    <Link style={{ color: 'black' }}>Closed Captions Export</Link>
-                  </MenuItem>
-                  {subtitlesExportOptionsList.map(({ type, label, ext }, index) => {
-                    return (
-                      <MenuItem
-                        key={index + label}
-                        onClick={() => {
-                          handleExport({ type, ext, isDownload: true });
-                          handleMenuClose();
-                        }}
-                      >
-                        <Link color="primary">
-                          {label} (<code>.{ext}</code>)
-                        </Link>
-                      </MenuItem>
-                    );
-                  })}
-                  <Divider />
-                  <MenuItem onClick={handleMenuClose} disabled>
-                    <Link style={{ color: 'black' }}>Developer options</Link>
-                  </MenuItem>
-                  <MenuItem
-                    onClick={() => {
-                      handleExport({
-                        type: 'json-slate',
-                        ext: 'json',
-                        speakers: true,
-                        timecodes: true,
-                        isDownload: true,
-                      });
-                      handleMenuClose();
-                    }}
-                  >
-                    <Link color="primary">
-                      SlateJs (<code>.json</code>)
-                    </Link>
-                  </MenuItem>
-                  <MenuItem
-                    onClick={() => {
-                      handleExport({
-                        type: 'json-digitalpaperedit',
-                        ext: 'json',
-                        speakers: true,
-                        timecodes: true,
-                        isDownload: true,
-                      });
-                      handleMenuClose();
-                    }}
-                  >
-                    <Link color="primary">
-                      DPE (<code>.json</code>)
-                    </Link>
-                  </MenuItem>
-                </Menu>
-              </div>
-
-              <Tooltip title={'save'}>
-                <Button disabled={isProcessing} onClick={handleSave} color="primary">
-                  <SaveOutlinedIcon color="primary" />
-                </Button>
-              </Tooltip>
-
-              {/* TODO: Disabiling until find a way to handle timecodes and alignment on paragraph break */}
-              <Tooltip
-                title={`To insert a paragraph break, and split a pargraph in two, put the cursor at a point where you'd want to add a paragraph break in the text and either click this button or hit enter key`}
-              >
-                <Button
-                  disabled={isProcessing}
-                  onClick={() => {
-                    SlateHelpers.handleSplitParagraph(editor);
-                  }}
-                  color="primary"
-                >
-                  <KeyboardReturnOutlinedIcon color="primary" />
-                </Button>
-              </Tooltip>
-
-              <Tooltip title={`Put the cursor at a point where you'd want to add [INAUDIBLE] text, and click this button`}>
-                <Button disabled={isProcessing} onClick={insertTextInaudible} color="primary">
-                  <HelpOutlineOutlinedIcon color="primary" />
-                </Button>
-              </Tooltip>
-
-              <Tooltip title={'Insert a ♫ in the text'}>
-                <Button disabled={isProcessing} onClick={handleInsertMusicNote} color="primary">
-                  <MusicNoteOutlinedIcon color="primary" />
-                </Button>
-              </Tooltip>
-
-              <Tooltip
-                title={` Turn ${
-                  isPauseWhiletyping ? 'off' : 'on'
-                } pause while typing functionality. As you start typing the media while pause playback
-                      until you stop. Not reccomended on longer transcript as it might present performance issues.`}
-              >
-                <Button
-                  disabled={isProcessing}
-                  onClick={handleSetPauseWhileTyping}
-                  variant={isPauseWhiletyping ? 'outlined' : null}
-                  color={isPauseWhiletyping ? 'secondary' : 'primary'}
-                >
-                  <PauseOutlinedIcon color="primary" />
-                </Button>
-              </Tooltip>
-
-              <Tooltip title={' Restore timecodes. At the moment for transcript over 1hour it could temporarily freeze the UI for a few seconds'}>
-                <Button
-                  disabled={isProcessing}
-                  onClick={async () => {
-                    try {
-                      setIsProcessing(true);
-                      await handleRestoreTimecodes();
-                    } finally {
-                      setIsProcessing(false);
-                    }
-                  }}
-                  color="primary"
-                >
-                  <CachedOutlinedIcon color="primary" />
-                </Button>
-              </Tooltip>
-
-              <Tooltip title={REPLACE_WHOLE_TEXT_INSTRUCTION}>
-                <Button onClick={handleReplaceText} color="primary">
-                  <ImportExportIcon color="primary" />
-                </Button>
-              </Tooltip>
-
-              <Tooltip title={' Double click on a word to jump to the corresponding point in the media'}>
-                <Button disabled={isProcessing} color="primary">
-                  <InfoOutlined color="primary" />
-                </Button>
-              </Tooltip>
-            </Grid>
+            <SideBtns
+              handleExport={handleExport}
+              isProcessing={isProcessing}
+              setIsProcessing={setIsProcessing}
+              insertTextInaudible={insertTextInaudible}
+              handleInsertMusicNote={handleInsertMusicNote}
+              handleSplitParagraph={handleSplitParagraph}
+              isPauseWhiletyping={isPauseWhiletyping}
+              handleSetPauseWhileTyping={handleSetPauseWhileTyping}
+              handleRestoreTimecodes={handleRestoreTimecodes}
+              handleReplaceText={handleReplaceText}
+              handleSave={handleSave}
+              REPLACE_WHOLE_TEXT_INSTRUCTION={REPLACE_WHOLE_TEXT_INSTRUCTION}
+            />
           </Grid>
         </Grid>
       </Container>
@@ -1021,7 +622,6 @@ function SlateTranscriptEditor(props) {
   );
 }
 
-// export default withStyles(styles)(SlateTranscriptEditor);
 export default SlateTranscriptEditor;
 
 // SlateTranscriptEditor.propTypes = {

@@ -54,12 +54,8 @@ const createSlateContentFromSlateJsParagraphs = (currentContent, newEntities) =>
 };
 
 function plainTextalignToSlateJs(words, text, slateJsValue) {
-  console.log('plainTextalignToSlateJs inside the function');
-  console.log('words', words);
   const alignedWords = alignSTT(words, text);
-  console.log('alignedWords', alignedWords);
   const updatedBlockArray = createSlateContentFromSlateJsParagraphs(slateJsValue, alignedWords);
-  console.log('updatedBlockArray', updatedBlockArray);
   return updatedBlockArray;
 }
 
