@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Divider from '@material-ui/core/Divider';
 import Tooltip from '@material-ui/core/Tooltip';
 import Button from '@material-ui/core/Button';
@@ -22,6 +22,7 @@ import subtitlesExportOptionsList from '../../util/export-adapters/subtitles-gen
 function SideBtns({
   handleExport,
   isProcessing,
+  isContentModified,
   setIsProcessing,
   insertTextInaudible,
   handleInsertMusicNote,
@@ -34,6 +35,7 @@ function SideBtns({
   REPLACE_WHOLE_TEXT_INSTRUCTION,
 }) {
   const [anchorMenuEl, setAnchorMenuEl] = useState(null);
+
   // used by MUI export menu
   const handleMenuClose = () => {
     setAnchorMenuEl(null);
@@ -264,7 +266,7 @@ function SideBtns({
 
       <Tooltip title={'save'}>
         <Button disabled={isProcessing} onClick={handleSave} color="primary">
-          <SaveOutlinedIcon color="primary" />
+          <SaveOutlinedIcon color={isContentModified ? 'secondary' : 'primary'} />
         </Button>
       </Tooltip>
 

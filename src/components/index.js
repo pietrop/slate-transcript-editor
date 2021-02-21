@@ -418,6 +418,7 @@ function SlateTranscriptEditor(props) {
       if (props.handleSaveEditor) {
         props.handleSaveEditor(editorContnet);
       }
+      setIsContentIsModified(false);
     } finally {
       setIsProcessing(false);
     }
@@ -604,6 +605,7 @@ function SlateTranscriptEditor(props) {
             <SideBtns
               handleExport={handleExport}
               isProcessing={isProcessing}
+              isContentModified={isContentModified}
               setIsProcessing={setIsProcessing}
               insertTextInaudible={insertTextInaudible}
               handleInsertMusicNote={handleInsertMusicNote}
