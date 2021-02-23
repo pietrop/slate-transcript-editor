@@ -33,7 +33,6 @@ import updateBloocksTimestamps from '../util/export-adapters/slate-to-dpe/update
 import exportAdapter, { isCaptionType } from '../util/export-adapters';
 import generatePreviousTimingsUpToCurrent from '../util/dpe-to-slate/generate-previous-timings-up-to-current';
 import SlateHelpers from './slate-helpers';
-import './index.css';
 
 const PLAYBACK_RATE_VALUES = [0.2, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 3, 3.5];
 const SEEK_BACK_SEC = 10;
@@ -492,6 +491,38 @@ function SlateTranscriptEditor(props) {
           {`/* Next words */
              .timecode[data-previous-timings*="${generatePreviousTimingsUpToCurrent(parseInt(currentTime), value)}"]{
                   color:  #9E9E9E;
+              }
+
+              // NOTE: The CSS is here, coz if you put it as a separate index.css the current webpack does not bundle it with the component
+
+              /* TODO: Temporary, need to scope this to the component in a sensible way */
+              .editor-wrapper-container {
+                font-family: Roboto, sans-serif;
+              }
+
+              .editor-wrapper-container {
+                padding: 8px 16px;
+                height: 90vh;
+                overflow: auto;
+              }
+              /* https://developer.mozilla.org/en-US/docs/Web/CSS/user-select
+              TODO: only working in Chrome, not working in Firefox, and Safari - OSX
+              if selecting text, not showing selection
+              Commented out because it means cannot select speakers and timecode anymore
+              which is the intended default behavior but needs to come with export
+              functionality to export as plain text, word etc.. otherwise user won't be able
+              to get text out of component with timecodes and speaker names in the interim */
+              .unselectable {
+                -moz-user-select: none;
+                -webkit-user-select: none;
+                -ms-user-select: none;
+                user-select: none;
+              }
+              .timecode:hover {
+                text-decoration: underline;
+              }
+              .timecode.text:hover {
+                text-decoration: none;
               }
           `}
         </style>

@@ -2,6 +2,7 @@ import React from 'react';
 import { action } from '@storybook/addon-actions';
 import { withKnobs, text, boolean, number, object, select } from '@storybook/addon-knobs';
 import { withInfo } from '@storybook/addon-info';
+import { version } from '../../package.json';
 
 import SlateTranscriptEditor from './index.js';
 import 'fontsource-roboto';
@@ -33,15 +34,20 @@ const DEMO_TITLE_SOLEIO = 'Soleio Interview, PBS Frontline';
 import DEMO_SOLEIO from '../sample-data/soleio-dpe.json';
 export const demo = () => {
   return (
-    <SlateTranscriptEditor
-      mediaUrl={text('mediaUrl', DEMO_MEDIA_URL_SOLEIO)}
-      handleSaveEditor={action('handleSaveEditor')}
-      handleAutoSaveChanges={action('handleAutoSaveChanges')}
-      // https://www.npmjs.com/package/@storybook/addon-knobs#select
-      autoSaveContentType={select('autoSaveContentType', ['digitalpaperedit', 'slate'], 'digitalpaperedit')} // digitalpaperedit or slate - digitalpaperedit, runs alignement before exporting, slate, is just the raw data.
-      // transcriptData={object('transcriptData', DEMO_SOLEIO)}
-      transcriptData={DEMO_SOLEIO}
-    />
+    <>
+      <p>
+        Slate Transcript Editor version: <code>{version}</code>
+      </p>
+      <SlateTranscriptEditor
+        mediaUrl={text('mediaUrl', DEMO_MEDIA_URL_SOLEIO)}
+        handleSaveEditor={action('handleSaveEditor')}
+        handleAutoSaveChanges={action('handleAutoSaveChanges')}
+        // https://www.npmjs.com/package/@storybook/addon-knobs#select
+        autoSaveContentType={select('autoSaveContentType', ['digitalpaperedit', 'slate'], 'digitalpaperedit')} // digitalpaperedit or slate - digitalpaperedit, runs alignement before exporting, slate, is just the raw data.
+        // transcriptData={object('transcriptData', DEMO_SOLEIO)}
+        transcriptData={DEMO_SOLEIO}
+      />
+    </>
   );
 };
 
