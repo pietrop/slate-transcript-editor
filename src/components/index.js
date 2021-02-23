@@ -544,9 +544,9 @@ function SlateTranscriptEditor(props) {
                 <Grid container direction="row" justify="space-between" alignItems="center" spacing={1}>
                   <Grid item>
                     <p>
-                      <code>{shortTimecode(currentTime)}</code>
-                      {` | `}
-                      <code>{duration ? `${shortTimecode(duration)}` : '00:00:00'}</code>
+                      <code style={{ color: 'grey' }}>{shortTimecode(currentTime)}</code>
+                      <span style={{ color: 'grey' }}> {` | `}</span>
+                      <code style={{ color: 'grey' }}>{duration ? `${shortTimecode(duration)}` : '00:00:00'}</code>
                     </p>
                   </Grid>
 
