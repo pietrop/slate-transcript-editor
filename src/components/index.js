@@ -1,57 +1,55 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import PropTypes from 'prop-types';
+import PropTypes, { string } from 'prop-types';
 import path from 'path';
-import Button from 'react-bootstrap/Button';
-import DropdownButton from 'react-bootstrap/DropdownButton';
-import Dropdown from 'react-bootstrap/Dropdown';
-import Container from 'react-bootstrap/Container';
-import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
-import Form from 'react-bootstrap/Form';
-import Badge from 'react-bootstrap/Badge';
-import Tooltip from 'react-bootstrap/Tooltip';
-import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
-import ListGroup from 'react-bootstrap/ListGroup';
-import Accordion from 'react-bootstrap/Accordion';
+import CssBaseline from '@material-ui/core/CssBaseline';
+import Button from '@material-ui/core/Button';
+import Container from '@material-ui/core/Container';
+import Grid from '@material-ui/core/Grid';
+import Paper from '@material-ui/core/Paper';
+import Typography from '@material-ui/core/Typography';
+import MenuItem from '@material-ui/core/MenuItem';
+import FormControl from '@material-ui/core/FormControl';
+import Select from '@material-ui/core/Select';
+import Link from '@material-ui/core/Link';
+import Replay10Icon from '@material-ui/icons/Replay10';
+import Collapse from '@material-ui/core/Collapse';
+import Tooltip from '@material-ui/core/Tooltip';
+import debounce from 'lodash/debounce';
 import { createEditor, Editor, Transforms } from 'slate';
 // https://docs.slatejs.org/walkthroughs/01-installing-slate
 // Import the Slate components and React plugin.
 import { Slate, Editable, withReact, ReactEditor } from 'slate-react';
 import { withHistory } from 'slate-history';
-import {
-  faSave,
-  faFileDownload,
-  faUndo,
-  faSync,
-  faInfoCircle,
-  // faMehBlank,
-  faPause,
-  // faMusic,
-  // faClosedCaptioning,
-} from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+
+import SideBtns from './SideBtns';
 import { shortTimecode } from '../util/timecode-converter';
 import download from '../util/downlaod/index.js';
 import convertDpeToSlate from '../util/dpe-to-slate';
 // TODO: This should be moved in export utils
-import insertTimecodesInline from '../util/inline-interval-timecodes';
+import insertTimecodesInLineInSlateJs from '../util/insert-timecodes-in-line-in-words-list';
 import pluck from '../util/pluk';
-import subtitlesExportOptionsList from '../util/export-adapters/subtitles-generator/list.js';
-// import updateTimestamps from '../util/update-timestamps';
-import updateTimestamps from '../util/export-adapters/slate-to-dpe/update-timestamps';
-import exportAdapter from '../util/export-adapters';
-import isEmpty from '../util/is-empty';
+import plainTextalignToSlateJs from '../util/export-adapters/slate-to-dpe/update-timestamps/plain-text-align-to-slate';
+import updateBloocksTimestamps from '../util/export-adapters/slate-to-dpe/update-timestamps/update-bloocks-timestamps';
+import exportAdapter, { isCaptionType } from '../util/export-adapters';
 import generatePreviousTimingsUpToCurrent from '../util/dpe-to-slate/generate-previous-timings-up-to-current';
+import SlateHelpers from './slate-helpers';
+import './index.css';
+
 const PLAYBACK_RATE_VALUES = [0.2, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 3, 3.5];
-const SEEK_BACK_SEC = 15;
+const SEEK_BACK_SEC = 10;
 const PAUSE_WHILTE_TYPING_TIMEOUT_MILLISECONDS = 1500;
-const MAX_DURATION_FOR_PERFORMANCE_OPTIMIZATION_IN_SECONDS = 3600;
-const TOOTLIP_DELAY = 1000;
-const TOOTLIP_LONGER_DELAY = 2000;
+// const MAX_DURATION_FOR_PERFORMANCE_OPTIMIZATION_IN_SECONDS = 3600;
+const REPLACE_WHOLE_TEXT_INSTRUCTION =
+  'Replace whole text. \n\nAdvanced feature, if you already have an accurate transcription for the whole text, and you want to restore timecodes for it, you can use this to replace the text in this transcript. \n\nFor now this is an experimental feature. \n\nIt expects plain text, with paragraph breaks as new line breaks but no speakers.';
 
 const mediaRef = React.createRef();
 
-export default function SlateTranscriptEditor(props) {
+const pauseWhileTypeing = (current) => {
+  current.play();
+};
+const debouncePauseWhileTyping = debounce(pauseWhileTypeing, PAUSE_WHILTE_TYPING_TIMEOUT_MILLISECONDS);
+
+function SlateTranscriptEditor(props) {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [playbackRate, setPlaybackRate] = useState(1);
@@ -113,7 +111,13 @@ export default function SlateTranscriptEditor(props) {
     const getUniqueSpeakers = pluck('speaker');
     const uniqueSpeakers = getUniqueSpeakers(value);
     setSpeakerOptions(uniqueSpeakers);
-  }, [showSpeakersCheatShet]);
+  }, [value]);
+
+  //  useEffect(() => {
+  //    const getUniqueSpeakers = pluck('speaker');
+  //    const uniqueSpeakers = getUniqueSpeakers(value);
+  //    setSpeakerOptions(uniqueSpeakers);
+  //  }, [showSpeakersCheatShet]);
 
   useEffect(() => {
     // Update the document title using the browser API
@@ -127,41 +131,18 @@ export default function SlateTranscriptEditor(props) {
     };
   }, []);
 
-  useEffect(() => {
-    // Update the document title using the browser API
-    if (mediaRef && mediaRef.current) {
-      // Not working
-      setDuration(mediaRef.current.duration);
-      if (mediaRef.current.duration >= MAX_DURATION_FOR_PERFORMANCE_OPTIMIZATION_IN_SECONDS) {
-        setShowSpeakers(false);
-        showTimecodes(false);
-      }
-    }
-  }, [mediaRef]);
+  // useEffect(() => {
+  //   // Update the document title using the browser API
+  //   if (mediaRef && mediaRef.current) {
+  //     // Not working
+  //     setDuration(mediaRef.current.duration);
+  //     if (mediaRef.current.duration >= MAX_DURATION_FOR_PERFORMANCE_OPTIMIZATION_IN_SECONDS) {
+  //       setShowSpeakers(false);
+  //       showTimecodes(false);
+  //     }
+  //   }
+  // }, [mediaRef]);
 
-  const getSlateContent = () => {
-    return value;
-  };
-
-  const getFileTitle = () => {
-    if (props.title) {
-      return props.title;
-    }
-    return path.basename(props.mediaUrl).trim();
-  };
-
-  const getMediaType = () => {
-    const clipExt = path.extname(props.mediaUrl);
-    let tmpMediaType = props.mediaType ? props.mediaType : 'video';
-    if (clipExt === '.wav' || clipExt === '.mp3' || clipExt === '.m4a' || clipExt === '.flac' || clipExt === '.aiff') {
-      tmpMediaType = 'audio';
-    }
-    return tmpMediaType;
-  };
-
-  const breakParagraph = () => {
-    Editor.insertBreak(editor);
-  };
   const insertTextInaudible = () => {
     Transforms.insertText(editor, '[INAUDIBLE]');
   };
@@ -170,8 +151,18 @@ export default function SlateTranscriptEditor(props) {
     Transforms.insertText(editor, '♫'); // or ♪
   };
 
-  const handleSetShowSpeakersCheatShet = () => {
-    setShowSpeakersCheatShet(!showSpeakersCheatShet);
+  const getSlateContent = () => {
+    return value;
+  };
+
+  const getFileName = () => {
+    return path.basename(props.mediaUrl).trim();
+  };
+  const getFileTitle = () => {
+    if (props.title) {
+      return props.title;
+    }
+    return getFileName();
   };
 
   const handleTimeUpdated = (e) => {
@@ -181,7 +172,8 @@ export default function SlateTranscriptEditor(props) {
   };
 
   const handleSetPlaybackRate = (e) => {
-    const tmpNewPlaybackRateValue = parseFloat(e.target.value);
+    const n = e.target.value;
+    const tmpNewPlaybackRateValue = parseFloat(n);
     if (mediaRef && mediaRef.current) {
       mediaRef.current.playbackRate = tmpNewPlaybackRateValue;
       setPlaybackRate(tmpNewPlaybackRateValue);
@@ -210,7 +202,7 @@ export default function SlateTranscriptEditor(props) {
         className={'timecode text'}
         data-start={children.props.parent.start}
         data-previous-timings={children.props.parent.previousTimings}
-        title={children.props.parent.start}
+        // title={'double click on a word to jump to the corresponding point in the media'}
         {...attributes}
       >
         {children}
@@ -268,24 +260,29 @@ export default function SlateTranscriptEditor(props) {
     }
 
     return (
-      <Row {...props.attributes}>
+      <Grid container direction="row" justify="flex-start" alignItems="flex-start" {...props.attributes}>
         {showTimecodes && (
-          <Col contentEditable={false} xs={4} sm={2} md={4} lg={3} xl={2} className={'p-t-2 text-truncate'}>
+          <Grid item contentEditable={false} xs={4} sm={2} md={4} lg={2} xl={2} className={'p-t-2 text-truncate'}>
             <code
               contentEditable={false}
               style={{ cursor: 'pointer' }}
               className={'timecode text-muted unselectable'}
               onClick={handleTimedTextClick}
+              // onClick={(e) => {
+              //   e.preventDefault();
+              // }}
+              onDoubleClick={handleTimedTextClick}
               title={props.element.startTimecode}
               data-start={props.element.start}
             >
               {props.element.startTimecode}
             </code>
-          </Col>
+          </Grid>
         )}
         {showSpeakers && (
-          <Col contentEditable={false} xs={8} sm={10} md={8} lg={3} xl={3} className={'p-t-2 text-truncate'}>
-            <span
+          <Grid item contentEditable={false} xs={8} sm={10} md={8} lg={3} xl={3} className={'p-t-2 text-truncate'}>
+            <Typography
+              noWrap
               contentEditable={false}
               className={'text-truncate text-muted unselectable'}
               style={{
@@ -297,15 +294,14 @@ export default function SlateTranscriptEditor(props) {
               title={props.element.speaker}
               onClick={handleSetSpeakerName.bind(this, props.element)}
             >
-              {' '}
               {props.element.speaker}
-            </span>
-          </Col>
+            </Typography>
+          </Grid>
         )}
-        <Col xs={12} sm={12} md={12} lg={textLg} xl={textXl} className={'p-b-1 mx-auto'}>
+        <Grid item xs={12} sm={12} md={12} lg={textLg} xl={textXl} className={'p-b-1 mx-auto'}>
           {props.children}
-        </Col>
-      </Row>
+        </Grid>
+      </Grid>
     );
   };
 
@@ -322,34 +318,54 @@ export default function SlateTranscriptEditor(props) {
       }
     } else if (e.target.dataset.slateString) {
       if (e.target.parentNode.dataset.start) {
-        const start = e.target.parentNode.dataset.start;
-        if (mediaRef && mediaRef.current && start) {
-          mediaRef.current.currentTime = parseFloat(start);
+        const { startWord } = SlateHelpers.getSelectionNodes(editor, editor.selection);
+        if (mediaRef && mediaRef.current && startWord && startWord.start) {
+          mediaRef.current.currentTime = parseFloat(startWord.start);
           mediaRef.current.play();
+        } else {
+          // fallback in case there's some misalignment with the words
+          // use the start of paragraph instead
+          const start = parseFloat(e.target.parentNode.dataset.start);
+          if (mediaRef && mediaRef.current && start) {
+            mediaRef.current.currentTime = parseFloat(start);
+            mediaRef.current.play();
+          }
         }
       }
     }
   };
 
-  // TODO: refacto this function, to be cleaner and easier to follow.
-  const handleRestoreTimecodes = async (inlineTimecodes = false) => {
-    if (!isContentModified && !inlineTimecodes) {
-      return value;
-    }
-    if (inlineTimecodes) {
-      const transcriptData = insertTimecodesInline({ transcriptData: props.transcriptData });
-      const alignedSlateData = await updateTimestamps(convertDpeToSlate(transcriptData), transcriptData);
-      setValue(alignedSlateData);
-      setIsContentIsModified(false);
-      return alignedSlateData;
-    } else {
-      const alignedSlateData = await updateTimestamps(value, props.transcriptData);
-      setValue(alignedSlateData);
-      setIsContentIsModified(false);
-      return alignedSlateData;
+  const handleReplaceText = () => {
+    const newText = prompt(`Paste the text to replace here.\n\n${REPLACE_WHOLE_TEXT_INSTRUCTION}`);
+    if (newText) {
+      const newValue = plainTextalignToSlateJs(props.transcriptData, newText, value);
+      setValue(newValue);
     }
   };
 
+  // TODO: refacto this function, to be cleaner and easier to follow.
+  const handleRestoreTimecodes = async (inlineTimecodes = false) => {
+    // if nothing as changed and you don't need to modify the data
+    // to get inline timecodes, then just return as is
+    if (!isContentModified && !inlineTimecodes) {
+      return value;
+    }
+    // only used by Word (OHMS) export
+    const alignedSlateData = await updateBloocksTimestamps(value, inlineTimecodes);
+    setValue(alignedSlateData);
+    setIsContentIsModified(false);
+
+    if (inlineTimecodes) {
+      // we don't want to show the inline timecode in the editor, but we want to return them to export function
+      const alignedSlateDataWithInlineTimecodes = insertTimecodesInLineInSlateJs(alignedSlateData);
+      return alignedSlateDataWithInlineTimecodes;
+    }
+
+    return alignedSlateData;
+  };
+
+  // TODO: this could be refactore, and brought some of this logic inside the exportAdapter (?)
+  // To make this a little cleaner
   const handleExport = async ({ type, ext, speakers, timecodes, inlineTimecodes, hideTitle, atlasFormat, isDownload }) => {
     try {
       setIsProcessing(true);
@@ -366,6 +382,15 @@ export default function SlateTranscriptEditor(props) {
         tmpValue = await handleRestoreTimecodes();
       }
 
+      if (isContentModified && type === 'json-digitalpaperedit') {
+        tmpValue = await handleRestoreTimecodes();
+      }
+
+      if (isContentModified && isCaptionType(type)) {
+        tmpValue = await handleRestoreTimecodes();
+      }
+      // export adapter does not doo any alignment
+      // just converts between formats
       let editorContnet = exportAdapter({
         slateValue: tmpValue,
         type,
@@ -375,7 +400,6 @@ export default function SlateTranscriptEditor(props) {
         inlineTimecodes,
         hideTitle,
         atlasFormat,
-        dpeTranscriptData: props.transcriptData,
       });
 
       if (ext === 'json') {
@@ -398,6 +422,7 @@ export default function SlateTranscriptEditor(props) {
       if (props.handleSaveEditor) {
         props.handleSaveEditor(editorContnet);
       }
+      setIsContentIsModified(false);
     } finally {
       setIsProcessing(false);
     }
@@ -408,26 +433,40 @@ export default function SlateTranscriptEditor(props) {
    * to provide current paragaph's highlight.
    * @param {Number} currentTime - float in seconds
    */
-  // const generatePreviousTimingsUpToCurrent = (currentTime) => {
-  //   // edge case - empty transcription
-  //   if (isEmpty(props.transcriptData)) {
-  //     return '';
-  //   }
-  //   const lastWordStartTime = props.transcriptData.words[props.transcriptData.words.length - 1].start;
-  //   const lastWordStartTimeInt = parseInt(lastWordStartTime);
-  //   const emptyListOfTimes = Array(lastWordStartTimeInt);
-  //   const listOfTimesInt = [...emptyListOfTimes.keys()];
-  //   const listOfTimesUpToCurrentTimeInt = listOfTimesInt.splice(0, currentTime, 0);
-  //   const stringlistOfTimesUpToCurrentTimeInt = listOfTimesUpToCurrentTimeInt.join(' ');
-  //   return stringlistOfTimesUpToCurrentTimeInt;
-  // };
 
   const handleSetPauseWhileTyping = () => {
     setIsPauseWhiletyping(!isPauseWhiletyping);
   };
 
-  const handleOnKeyDown = (event) => {
+  const handleSplitParagraph = () => {
+    SlateHelpers.handleSplitParagraph(editor);
+  };
+
+  // const debounced_version = throttle(handleRestoreTimecodes, 3000, { leading: false, trailing: true });
+  // TODO: revisit logic for
+  // - splitting paragraph via enter key
+  // - merging paragraph via delete
+  // - merging paragraphs via deleting across paragraphs
+  const handleOnKeyDown = async (event) => {
     setIsContentIsModified(true);
+    //  ArrowRight ArrowLeft ArrowUp ArrowUp
+    if (event.key === 'Enter') {
+      // intercept Enter, and handle timecodes when splitting a paragraph
+      event.preventDefault();
+      // console.info('For now disabling enter key to split a paragraph, while figuring out the aligment issue');
+      // handleSetPauseWhileTyping();
+      // TODO: Edge case, hit enters after having typed some other words?
+      SlateHelpers.handleSplitParagraph(editor);
+    }
+    if (event.key === 'Backspace') {
+      SlateHelpers.handleDeleteInParagraph({ editor, event });
+    }
+    // if (event.key.length == 1 && ((event.keyCode >= 65 && event.keyCode <= 90) || (event.keyCode >= 49 && event.keyCode <= 57))) {
+    //   const alignedSlateData = await debouncedSave(value);
+    //   setValue(alignedSlateData);
+    //   setIsContentIsModified(false);
+    // }
+
     if (isPauseWhiletyping) {
       // logic for pause while typing
       // https://schier.co/blog/wait-for-user-to-stop-typing-using-javascript
@@ -437,532 +476,159 @@ export default function SlateTranscriptEditor(props) {
       // also pause while typing might introduce performance issues on longer transcripts
       // if on every keystroke it's creating and destroing a timer.
       // should find a more efficient way to "debounce" or "throttle" this functionality
-      if (mediaRef && mediaRef.current) {
+      if (mediaRef && mediaRef.current && !mediaRef.current.paused) {
         mediaRef.current.pause();
+        debouncePauseWhileTyping(mediaRef.current);
       }
-
-      if (saveTimer !== null) {
-        clearTimeout(saveTimer);
-      }
-
-      const tmpSaveTimer = setTimeout(() => {
-        if (mediaRef && mediaRef.current) {
-          mediaRef.current.play();
-        }
-      }, PAUSE_WHILTE_TYPING_TIMEOUT_MILLISECONDS);
-      setSaveTimer(tmpSaveTimer);
     }
+    // auto align when not typing
   };
   return (
-    <Container fluid style={{ backgroundColor: '#eee', height: '100vh', paddingTop: '1em' }}>
-      <style scoped>
-        {`
-              /* Next words */
+    <div style={{ paddingTop: '1em' }}>
+      <CssBaseline />
+      <Container>
+        <Paper elevation={3} />
+        <style scoped>
+          {`/* Next words */
              .timecode[data-previous-timings*="${generatePreviousTimingsUpToCurrent(parseInt(currentTime), value)}"]{
                   color:  #9E9E9E;
               }
           `}
-      </style>
-      <style scoped>
-        {`.editor-wrapper-container{
-                padding: 8px 16px;
-                background: #f9f9f9;
-                box-shadow: 0 0 10px #ccc;
-                height: 90vh;
-                overflow: auto;
-              }
-              /* https://developer.mozilla.org/en-US/docs/Web/CSS/user-select
-              TODO: only working in Chrome, not working in Firefox, and Safari - OSX
-              if selecting text, not showing selection
-              Commented out because it means cannot select speakers and timecode anymore
-              which is the intended default behavior but needs to come with export
-              functionality to export as plain text, word etc.. otherwise user won't be able
-              to get text out of component with timecodes and speaker names in the interim */
-              .unselectable {
-                -moz-user-select: none;
-                -webkit-user-select: none;
-                -ms-user-select: none;
-                user-select: none;
-              }
-              .timecode:hover{
-                text-decoration: underline;
-              }
-              .timecode.text:hover{
-                text-decoration:none;
-              }
-              `}
-      </style>
-      {props.showTitle ? (
-        <OverlayTrigger delay={TOOTLIP_LONGER_DELAY} placement={'bottom'} overlay={<Tooltip id="tooltip-disabled"> {props.title}</Tooltip>}>
-          <h3 className={'text-truncate text-left'}>
-            <small className="text-muted">{props.title}</small>
-          </h3>
-        </OverlayTrigger>
-      ) : null}
-      <Row>
-        <Col
-          xs={{ span: 12, order: 1 }}
-          sm={getMediaType() === 'audio' ? { span: 10, offset: 1 } : 3}
-          md={getMediaType() === 'audio' ? { span: 10, offset: 1 } : 3}
-          lg={getMediaType() === 'audio' ? { span: 8, offset: 2 } : 3}
-          xl={getMediaType() === 'audio' ? { span: 8, offset: 2 } : 3}
-        >
-          <Row>
-            <video
-              ref={mediaRef}
-              src={props.mediaUrl}
-              width={'100%'}
-              height={getMediaType() === 'audio' ? '60em' : 'auto'}
-              controls
-              playsInline
-            ></video>
-          </Row>
-          <Row>
-            <Col xs={5} sm={4} md={4} lg={4} xl={4} className={'p-1 mx-auto'}>
-              <Badge variant="light" pill>
-                <code className={'text-muted'}>{shortTimecode(currentTime)}</code>
-                <code className={'text-muted'}>{duration ? ` | ${shortTimecode(duration)}` : ''}</code>
-              </Badge>
-            </Col>
-            <Col xs={4} sm={4} md={4} lg={4} xl={4} className={'p-1 mx-auto'}>
-              <Form.Control
-                as="select"
-                defaultValue={playbackRate}
-                onChange={handleSetPlaybackRate}
-                title={'Change the playback speed of the player'}
-              >
-                {PLAYBACK_RATE_VALUES.map((playbackRateValue, index) => {
-                  return (
-                    <option key={index + playbackRateValue} value={playbackRateValue}>
-                      x {playbackRateValue}
-                    </option>
-                  );
-                })}
-              </Form.Control>
-            </Col>
-            <Col xs={3} sm={3} md={3} lg={3} xl={3} className={'p-1 mx-auto'}>
-              <OverlayTrigger
-                delay={TOOTLIP_DELAY}
-                placement={'bottom'}
-                overlay={<Tooltip id="tooltip-disabled">{`Seek back by ${SEEK_BACK_SEC} seconds`}</Tooltip>}
-              >
-                <span className="d-inline-block">
-                  <Button variant="light" onClick={handleSeekBack} block>
-                    {SEEK_BACK_SEC} <FontAwesomeIcon icon={faUndo} />
-                  </Button>
-                </span>
-              </OverlayTrigger>
-            </Col>
-          </Row>
-          <Row>
-            <Col xs={12} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
-              <Accordion onClick={handleSetShowSpeakersCheatShet}>
-                <Accordion.Toggle as={Button} variant="link" eventKey="0">
-                  <Badge variant="light">Speakers</Badge>
-                </Accordion.Toggle>
-                <Accordion.Collapse eventKey="0">
-                  <ListGroup>
-                    {speakerOptions.map((speakerName, index) => {
-                      return (
-                        <ListGroup.Item key={index + speakerName} className={'text-truncate'} title={speakerName.toUpperCase()}>
-                          {speakerName.toUpperCase()}
-                        </ListGroup.Item>
-                      );
-                    })}
-                  </ListGroup>
-                </Accordion.Collapse>
-              </Accordion>
-            </Col>
-          </Row>
-        </Col>
+        </style>
+        {props.showTitle && (
+          <Tooltip title={props.title}>
+            <Typography variant="h5" noWrap>
+              {props.title}
+            </Typography>
+          </Tooltip>
+        )}
 
-        <Col
-          xs={{ span: 12, order: 3 }}
-          sm={getMediaType() === 'audio' ? { span: 10, order: 2, offset: 1 } : { span: 7, order: 2 }}
-          md={getMediaType() === 'audio' ? { span: 10, order: 2, offset: 1 } : { span: 7, order: 2 }}
-          lg={getMediaType() === 'audio' ? { span: 8, order: 2, offset: 2 } : { span: 8, order: 2 }}
-          xl={getMediaType() === 'audio' ? { span: 8, order: 2, offset: 2 } : { span: 7, order: 2 }}
-        >
-          {value.length !== 0 ? (
-            <>
-              <section className="editor-wrapper-container">
-                <Slate
-                  editor={editor}
-                  value={value}
-                  onChange={(value) => {
-                    if (props.handleAutoSaveChanges) {
-                      props.handleAutoSaveChanges(value);
-                    }
-                    return setValue(value);
+        <Grid container direction="row" justify="space-around" alignItems="flex-start" spacing={2}>
+          <Grid item xs={12} sm={3} md={3} lg={3} xl={3}>
+            <Grid container direction="column" justify="space-between" alignItems="flex-start">
+              <Grid item style={{ backgroundColor: 'black' }}>
+                <video ref={mediaRef} src={props.mediaUrl} width={'100%'} height="auto" controls playsInline></video>
+              </Grid>
+              <Grid item>
+                <Grid container direction="row" justify="flex-start" alignItems="flex-start" spacing={0}>
+                  <Grid item>
+                    <Button disabled>{shortTimecode(currentTime)}</Button>
+                    <Button disabled>{duration ? ` | ${shortTimecode(duration)}` : '00:00:00'}</Button>
+                  </Grid>
+                  <Grid item>
+                    <FormControl>
+                      {/* <InputLabel id="demo-simple-select-label">Speed</InputLabel> */}
+                      <Select labelId="demo-simple-select-label" id="demo-simple-select" value={playbackRate} onChange={handleSetPlaybackRate}>
+                        {PLAYBACK_RATE_VALUES.map((playbackRateValue, index) => {
+                          return (
+                            <MenuItem key={index + playbackRateValue} value={playbackRateValue}>
+                              {' '}
+                              x {playbackRateValue}
+                            </MenuItem>
+                          );
+                        })}
+                      </Select>
+                      {/* <FormHelperText>Speed</FormHelperText> */}
+                    </FormControl>
+                  </Grid>
+                  <Grid item>
+                    <Tooltip title={`Seek back by ${SEEK_BACK_SEC} seconds`}>
+                      <Button color="primary" onClick={handleSeekBack} block="true">
+                        <Replay10Icon color="primary" />
+                      </Button>
+                    </Tooltip>
+                    {/* </OverlayTrigger> */}
+                  </Grid>
+                </Grid>
+              </Grid>
+
+              <Grid item>
+                <Link
+                  color="inherit"
+                  onClick={() => {
+                    setShowSpeakersCheatShet(!showSpeakersCheatShet);
                   }}
                 >
-                  <Editable
-                    readOnly={typeof props.isEditable === 'boolean' ? !props.isEditable : false}
-                    renderElement={renderElement}
-                    renderLeaf={renderLeaf}
-                    onKeyDown={handleOnKeyDown}
-                  />
-                </Slate>
-              </section>
-            </>
-          ) : (
-            <section className="text-center">
-              <i className="text-center">Loading...</i>
-            </section>
-          )}
-        </Col>
+                  <Typography variant="subtitle2" gutterBottom>
+                    Speakers
+                  </Typography>
+                </Link>
 
-        <Col xs={{ span: 12, order: 2 }} sm={{ span: 2, order: 3 }} md={{ span: 2, order: 3 }} lg={{ span: 1, order: 3 }} xl={{ span: 2, order: 3 }}>
-          <Row>
-            <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
-              <OverlayTrigger
-                OverlayTrigger
-                delay={TOOTLIP_LONGER_DELAY}
-                placement={'bottom'}
-                overlay={<Tooltip id="tooltip-disabled">Export options</Tooltip>}
-              >
-                <span className="d-inline-block">
-                  <DropdownButton
-                    disabled={isProcessing}
-                    id="dropdown-basic-button"
-                    title={<FontAwesomeIcon icon={faFileDownload} />}
-                    variant="light"
-                  >
-                    {/* TODO: need to run re-alignement if exportin with timecodes true, otherwise they'll be inaccurate */}
-                    <Dropdown.Item style={{ color: 'black' }} disabled>
-                      <b>Text Export</b>
-                    </Dropdown.Item>
-                    <Dropdown.Item
-                      onClick={() => {
-                        handleExport({
-                          type: 'text',
-                          ext: 'txt',
-                          speakers: false,
-                          timecodes: false,
-                          isDownload: true,
-                        });
-                      }}
-                    >
-                      Text (<code>.txt</code>)
-                    </Dropdown.Item>
-                    <Dropdown.Item
-                      onClick={() => {
-                        handleExport({
-                          type: 'text',
-                          ext: 'txt',
-                          speakers: true,
-                          timecodes: false,
-                          isDownload: true,
-                        });
-                      }}
-                    >
-                      Text (Speakers)
-                    </Dropdown.Item>
-                    <Dropdown.Item
-                      onClick={() => {
-                        handleExport({
-                          type: 'text',
-                          ext: 'txt',
-                          speakers: false,
-                          timecodes: true,
-                          isDownload: true,
-                        });
-                      }}
-                    >
-                      Text (Timecodes)
-                    </Dropdown.Item>
-                    <Dropdown.Item
-                      onClick={() => {
-                        handleExport({
-                          type: 'text',
-                          ext: 'txt',
-                          speakers: true,
-                          timecodes: true,
-                          isDownload: true,
-                        });
-                      }}
-                      disable
-                    >
-                      Text (Speakers & Timecodes)
-                    </Dropdown.Item>
-                    <Dropdown.Item
-                      onClick={() => {
-                        handleExport({
-                          type: 'text',
-                          ext: 'txt',
-                          speakers: true,
-                          timecodes: true,
-                          atlasFormat: true,
-                          isDownload: true,
-                        });
-                      }}
-                      disable
-                    >
-                      Text (Atlas format)
-                    </Dropdown.Item>
-                    {/* TODO: need to run re-alignement if exportin with timecodes true */}
-                    <Dropdown.Divider />
-                    <Dropdown.Item
-                      onClick={() => {
-                        handleExport({
-                          type: 'word',
-                          ext: 'docx',
-                          speakers: false,
-                          timecodes: false,
-                          isDownload: true,
-                        });
-                      }}
-                    >
-                      Word (<code>.docx</code>)
-                    </Dropdown.Item>
-                    <Dropdown.Item
-                      onClick={() => {
-                        handleExport({
-                          type: 'word',
-                          ext: 'docx',
-                          speakers: true,
-                          timecodes: false,
-                          isDownload: true,
-                        });
-                      }}
-                    >
-                      Word (Speakers)
-                    </Dropdown.Item>
-                    <Dropdown.Item
-                      onClick={() => {
-                        handleExport({
-                          type: 'word',
-                          ext: 'docx',
-                          speakers: false,
-                          timecodes: true,
-                          isDownload: true,
-                        });
-                      }}
-                    >
-                      Word (Timecodes)
-                    </Dropdown.Item>
-                    <Dropdown.Item
-                      onClick={() => {
-                        handleExport({
-                          type: 'word',
-                          ext: 'docx',
-                          speakers: true,
-                          timecodes: true,
-                          isDownload: true,
-                        });
-                      }}
-                    >
-                      Word (Speakers & Timecodes)
-                    </Dropdown.Item>
-                    <Dropdown.Item
-                      onClick={() => {
-                        handleExport({
-                          type: 'word',
-                          ext: 'docx',
-                          speakers: false,
-                          timecodes: false,
-                          inlineTimecodes: true,
-                          hideTitle: true,
-                        });
-                      }}
-                    >
-                      Word (OHMS)
-                    </Dropdown.Item>
-                    <Dropdown.Divider />
-
-                    <Dropdown.Item style={{ color: 'black' }} disabled>
-                      <b>Closed Captions Export</b>
-                    </Dropdown.Item>
-                    {subtitlesExportOptionsList.map(({ type, label, ext }, index) => {
-                      return (
-                        <Dropdown.Item
-                          key={index + label}
-                          onClick={() => {
-                            handleExport({ type, ext, isDownload: true });
-                          }}
-                        >
-                          {label} (<code>.{ext}</code>)
-                        </Dropdown.Item>
-                      );
-                    })}
-                    <Dropdown.Divider />
-                    <Dropdown.Item style={{ color: 'black' }} disabled>
-                      <b>Developer options</b>
-                    </Dropdown.Item>
-
-                    <Dropdown.Item
-                      onClick={() => {
-                        handleExport({
-                          type: 'json-slate',
-                          ext: 'json',
-                          speakers: true,
-                          timecodes: true,
-                          isDownload: true,
-                        });
-                      }}
-                    >
-                      SlateJs (<code>.json</code>)
-                    </Dropdown.Item>
-                    <Dropdown.Item
-                      onClick={() => {
-                        handleExport({
-                          type: 'json-digitalpaperedit',
-                          ext: 'json',
-                          speakers: true,
-                          timecodes: true,
-                          isDownload: true,
-                        });
-                      }}
-                    >
-                      DPE (<code>.json</code>)
-                    </Dropdown.Item>
-                  </DropdownButton>
-                </span>
-              </OverlayTrigger>
-            </Col>
-            {/* <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
-              <OverlayTrigger
-                OverlayTrigger
-                delay={TOOTLIP_LONGER_DELAY}
-                placement={'bottom'}
-                overlay={<Tooltip id="tooltip-disabled">Export in caption format</Tooltip>}
-              >
-                <DropdownButton
-                  disabled={isProcessing}
-                  id="dropdown-basic-button"
-                  title={<FontAwesomeIcon icon={faClosedCaptioning} />}
-                  variant="light"
-                >
-                  {subtitlesExportOptionsList.map(({ type, label, ext }, index) => {
+                <Collapse in={showSpeakersCheatShet}>
+                  {speakerOptions.map((speakerName, index) => {
                     return (
-                      <Dropdown.Item
-                        key={index + label}
-                        onClick={() => {
-                          handleExport({ type, ext, isDownload: true });
-                        }}
+                      <Typography
+                        variant="body2"
+                        gutterBottom
+                        key={index + speakerName}
+                        className={'text-truncate'}
+                        title={speakerName.toUpperCase()}
                       >
-                        {label} (<code>.{ext}</code>)
-                      </Dropdown.Item>
+                        {speakerName}
+                      </Typography>
                     );
                   })}
-                </DropdownButton>
-              </OverlayTrigger>
-            </Col> */}
-            <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
-              <OverlayTrigger
-                OverlayTrigger
-                delay={TOOTLIP_LONGER_DELAY}
-                placement={'bottom'}
-                overlay={<Tooltip id="tooltip-disabled">Save</Tooltip>}
-              >
-                <Button disabled={isProcessing} onClick={handleSave} variant="light">
-                  <FontAwesomeIcon icon={faSave} />
-                </Button>
-              </OverlayTrigger>
-            </Col>
-            {/* <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
-                <OverlayTrigger
-                  delay={TOOTLIP_DELAY}
-                  placement={'bottom'}
-                  overlay={
-                    <Tooltip id="tooltip-disabled">
-                      To insert a paragraph break, and split a pargraph in two, put the cursor at a point where you'd want to add a paragraph break in
-                      the text and either click this button or hit enter key
-                    </Tooltip>
-                  }
-                >
-                  <Button disabled={isProcessing} onClick={breakParagraph} variant="light">
-                    ↵
-                  </Button>
-                </OverlayTrigger>
-              </Col> */}
-            {/* <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
-              <OverlayTrigger
-                delay={TOOTLIP_DELAY}
-                placement={'bottom'}
-                overlay={
-                  <Tooltip id="tooltip-disabled">Put the cursor at a point where you'd want to add [INAUDIBLE] text, and click this button</Tooltip>
-                }
-              >
-                <Button disabled={isProcessing} onClick={insertTextInaudible} variant="light">
-                  <FontAwesomeIcon icon={faMehBlank} />
-                </Button>
-              </OverlayTrigger>
-            </Col> */}
-            {/* <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
-              <OverlayTrigger delay={TOOTLIP_DELAY} placement={'bottom'} overlay={<Tooltip id="tooltip-disabled">Insert a ♫ in the text</Tooltip>}>
-                <span className="d-inline-block">
-                  <Button onClick={handleInsertMusicNote} variant={'light'}>
-                    <FontAwesomeIcon icon={faMusic} />
-                  </Button>
-                </span>
-              </OverlayTrigger>
-            </Col> */}
-            <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
-              <OverlayTrigger
-                delay={TOOTLIP_DELAY}
-                placement={'bottom'}
-                overlay={
-                  <Tooltip id="tooltip-disabled">
-                    Turn {isPauseWhiletyping ? 'off' : 'on'} pause while typing functionality. As you start typing the media while pause playback
-                    until you stop. Not reccomended on longer transcript as it might present performance issues.
-                  </Tooltip>
-                }
-              >
-                <Button disabled={isProcessing} onClick={handleSetPauseWhileTyping} variant={isPauseWhiletyping ? 'secondary' : 'light'}>
-                  <FontAwesomeIcon icon={faPause} />
-                </Button>
-              </OverlayTrigger>
-            </Col>
-            <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
-              <OverlayTrigger
-                delay={TOOTLIP_DELAY}
-                placement={'bottom'}
-                overlay={
-                  <Tooltip id="tooltip-disabled">
-                    Restore timecodes. At the moment for transcript over 1hour it could temporarily freeze the UI for a few seconds
-                  </Tooltip>
-                }
-              >
-                <Button
-                  disabled={isProcessing}
-                  onClick={async () => {
-                    try {
-                      setIsProcessing(true);
-                      await handleRestoreTimecodes();
-                    } finally {
-                      setIsProcessing(false);
-                    }
-                  }}
-                  variant="light"
-                >
-                  <FontAwesomeIcon icon={faSync} />
-                </Button>
-              </OverlayTrigger>
-            </Col>
-            <Col xs={2} sm={12} md={12} lg={12} xl={12} className={'p-1 mx-auto'}>
-              <OverlayTrigger
-                placement={'bottom'}
-                overlay={
-                  <Tooltip id="tooltip-disabled">
-                    Double click on a paragraph to jump to the corresponding point at the beginning of that paragraph in the media
-                  </Tooltip>
-                }
-              >
-                {/* <span className="d-inline-block"> */}
-                <Button disabled={isProcessing} variant="light">
-                  <FontAwesomeIcon icon={faInfoCircle} />
-                </Button>
-                {/* </span> */}
-              </OverlayTrigger>
-            </Col>
-          </Row>
-          <br />
-        </Col>
-      </Row>
-    </Container>
+                </Collapse>
+              </Grid>
+            </Grid>
+          </Grid>
+
+          <Grid item xs={12} sm={7} md={7} lg={8} xl={7}>
+            {value.length !== 0 ? (
+              <>
+                <Paper elevation={3}>
+                  <section className="editor-wrapper-container">
+                    <Slate
+                      editor={editor}
+                      value={value}
+                      onChange={(value) => {
+                        if (props.handleAutoSaveChanges) {
+                          props.handleAutoSaveChanges(value);
+                        }
+                        return setValue(value);
+                      }}
+                    >
+                      <Editable
+                        readOnly={typeof props.isEditable === 'boolean' ? !props.isEditable : false}
+                        renderElement={renderElement}
+                        renderLeaf={renderLeaf}
+                        onKeyDown={handleOnKeyDown}
+                      />
+                    </Slate>
+                  </section>
+                </Paper>
+              </>
+            ) : (
+              <section className="text-center">
+                <i className="text-center">Loading...</i>
+              </section>
+            )}
+          </Grid>
+
+          <Grid item xs={12} sm={1} md={1} lg={1} xl={2}>
+            <SideBtns
+              handleExport={handleExport}
+              isProcessing={isProcessing}
+              isContentModified={isContentModified}
+              setIsProcessing={setIsProcessing}
+              insertTextInaudible={insertTextInaudible}
+              handleInsertMusicNote={handleInsertMusicNote}
+              handleSplitParagraph={handleSplitParagraph}
+              isPauseWhiletyping={isPauseWhiletyping}
+              handleSetPauseWhileTyping={handleSetPauseWhileTyping}
+              handleRestoreTimecodes={handleRestoreTimecodes}
+              handleReplaceText={handleReplaceText}
+              handleSave={handleSave}
+              REPLACE_WHOLE_TEXT_INSTRUCTION={REPLACE_WHOLE_TEXT_INSTRUCTION}
+            />
+          </Grid>
+        </Grid>
+      </Container>
+    </div>
   );
 }
+
+export default SlateTranscriptEditor;
 
 SlateTranscriptEditor.propTypes = {
   transcriptData: PropTypes.object.isRequired,
@@ -970,11 +636,11 @@ SlateTranscriptEditor.propTypes = {
   handleSaveEditor: PropTypes.func,
   handleAutoSaveChanges: PropTypes.func,
   autoSaveContentType: PropTypes.string,
-  isEditable: PropTypes.boolean,
-  showTimecodes: PropTypes.boolean,
-  showSpeakers: PropTypes.boolean,
+  isEditable: PropTypes.bool,
+  showTimecodes: PropTypes.bool,
+  showSpeakers: PropTypes.bool,
   title: PropTypes.string,
-  showTitle: PropTypes.boolean,
+  showTitle: PropTypes.bool,
   mediaType: PropTypes.string,
   transcriptDataLive: PropTypes.object,
 };

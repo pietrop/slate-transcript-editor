@@ -22,6 +22,8 @@ import { shortTimecode } from '../timecode-converter';
  * @param {Number} time - float, time in seconds
  */
 
+import getWordsForParagraph from '../get-words-for-paragraph';
+
 export const generatePreviousTimings = (time) => {
   // https://stackoverflow.com/questions/3746725/how-to-create-an-array-containing-1-n
   if (time) {
@@ -96,7 +98,7 @@ const convertDpeToSlate = (transcript) => {
       {
         text: generateText(paragraph, words),
         // Adding list of words in slateJs paragraphs
-        words,
+        words: getWordsForParagraph(paragraph, words),
       },
     ],
   }));

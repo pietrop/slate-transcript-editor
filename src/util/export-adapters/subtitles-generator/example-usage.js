@@ -6,7 +6,7 @@ const sampleWords = transcript.words;
 
 function getTextFromWordsList(words) {
   return words
-    .map(word => {
+    .map((word) => {
       return word.text;
     })
     .join(' ');

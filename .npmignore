@@ -21,3 +21,4 @@ src/sample-data/
 *.sample.xml
 *.sample.txt     
 *.stories.js
+*.test.js 

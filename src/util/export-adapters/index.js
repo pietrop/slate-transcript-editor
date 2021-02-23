@@ -4,6 +4,8 @@
  * @param {string} type - the type of file supported by the available adapters
  */
 
+// Note: export adapter does not doo any alignment
+// just converts between formats
 import slateToText from './txt';
 import converSlateToDpe from './slate-to-dpe';
 import slateToDocx from '../export-adapters/docx';
@@ -14,29 +16,18 @@ const captionTypeList = subtitlesExportOptionsList.map((list) => {
   return list.type;
 });
 
-const isCaptionType = (type) => {
+export const isCaptionType = (type) => {
   const res = captionTypeList.includes(type);
   return res;
 };
-const exportAdapter = ({
-  slateValue,
-  type,
-  ext,
-  transcriptTitle,
-  speakers,
-  timecodes,
-  inlineTimecodes,
-  hideTitle,
-  atlasFormat,
-  dpeTranscriptData,
-}) => {
+const exportAdapter = ({ slateValue, type, ext, transcriptTitle, speakers, timecodes, inlineTimecodes, hideTitle, atlasFormat }) => {
   switch (type) {
     case 'text':
       return slateToText({ value: slateValue, speakers, timecodes, atlasFormat });
     case 'json-slate':
       return slateValue;
     case 'json-digitalpaperedit':
-      return converSlateToDpe(slateValue, dpeTranscriptData);
+      return converSlateToDpe(slateValue);
     case 'word':
       //   return { data: draftToDocx(slateValue, transcriptTitle), ext: 'docx' };
       return slateToDocx({
@@ -49,7 +40,7 @@ const exportAdapter = ({
       });
     default:
       if (isCaptionType(type)) {
-        const editorContent = converSlateToDpe(slateValue, dpeTranscriptData);
+        const editorContent = converSlateToDpe(slateValue);
         let subtitlesJson = subtitlesGenerator({
           words: editorContent.words,
           paragraphs: editorContent.paragraphs,

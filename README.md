@@ -137,6 +137,8 @@ There's a [docs](./docs) folder in this repository.
 
 The [docs folder syncs with gitbook](https://docs.gitbook.com/integrations/github/content-configuration#root) to make the documentation more pleasent to browse at [autoedit.gitbook.io/slate-transcript-editor-docs/](https://autoedit.gitbook.io/slate-transcript-editor-docs/) - _Work in progress_
 
+The `doc` folder syncs with gitbook for ease of browsing at [gitbook `slate-transcript-editor-docs`](https://autoedit.gitbook.io/slate-transcript-editor-docs/)
+
 <!-- > An architectural decision record (ADR) is a document that captures an important architectural decision made along with its context and consequences.
 
 We are using [this template for ADR](https://gist.github.com/iaincollins/92923cc2c309c2751aea6f1b34b31d95) -->
