@@ -541,10 +541,13 @@ function SlateTranscriptEditor(props) {
                 <video ref={mediaRef} src={props.mediaUrl} width={'100%'} height="auto" controls playsInline></video>
               </Grid>
               <Grid item>
-                <Grid container direction="row" justify="flex-start" alignItems="flex-start" spacing={0}>
+                <Grid container direction="row" justify="space-between" alignItems="center" spacing={1}>
                   <Grid item>
-                    <Button disabled>{shortTimecode(currentTime)}</Button>
-                    <Button disabled>{duration ? ` | ${shortTimecode(duration)}` : '00:00:00'}</Button>
+                    <p>
+                      <code>{shortTimecode(currentTime)}</code>
+                      {` | `}
+                      <code>{duration ? `${shortTimecode(duration)}` : '00:00:00'}</code>
+                    </p>
                   </Grid>
                   <Grid item>
                     <FormControl>
