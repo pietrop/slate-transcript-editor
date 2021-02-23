@@ -47,6 +47,7 @@ function handleSplitParagraph(editor) {
       const numberOfWordsBefore = countWords(textBefore);
       const [wordsBefore, wordsAfter] = splitWordsListAtOffset(currentBlockWords, numberOfWordsBefore);
       // if cursor in the middle of a word then move cursor to space just before
+
       const isCaretInMiddleOfAword = isTextSameAsWordsList(textBefore, wordsBefore);
       if (isCaretInMiddleOfAword) {
         return;

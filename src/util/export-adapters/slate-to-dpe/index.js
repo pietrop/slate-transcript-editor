@@ -1,10 +1,10 @@
 /**
  * converted from react-transcript-editor draftJS update timestamp helper function
  * https://github.com/pietrop/react-transcript-editor/blob/master/packages/components/timed-text-editor/UpdateTimestamps/index.js
- * similar to updateTimestamps
+ * similar to "update Timestamps" function
  */
 import countWords from '../../count-words';
-import updateTimestampsHelper from './update-timestamps/update-timestamps-helper';
+import updateBloocksTimestamps from './update-timestamps/update-bloocks-timestamps';
 /**
  * Transposes the timecodes from stt json list of words onto
  * dpe transcript with paragraphs and words
@@ -47,9 +47,16 @@ const slateParagraphsToDpeWords = (slateParagraphs) => {
  * @param {*} words - list of stt words
  * @return dpe transcript with paragraphs and words
  */
-const converSlateToDpe = (currentContent, words) => {
-  const alignedSlateParagraphs = updateTimestampsHelper(currentContent, words);
-  const alignedWords = slateParagraphsToDpeWords(alignedSlateParagraphs);
+
+const converSlateToDpe = (currentContent) => {
+  // using updateBloocksTimestamps instead of previous way to align
+  // this should be more computationally efficient for now as it only adjust paragraphs that have changed
+  // keeps source of truth in the blocks as opposed to compare to the dpe transcript
+  // const alignedSlateParagraphs = updateBloocksTimestamps(currentContent);
+  // const alignedWords = slateParagraphsToDpeWords(alignedSlateParagraphs);
+  // assumes that words are already aligned and this is just doing a conversion between formats
+  // the parent component handles keeping the words in sync
+  const alignedWords = slateParagraphsToDpeWords(currentContent);
   const updatedContent = createDpeParagraphsFromSlateJs(currentContent, alignedWords);
   return { words: alignedWords, paragraphs: updatedContent };
 };

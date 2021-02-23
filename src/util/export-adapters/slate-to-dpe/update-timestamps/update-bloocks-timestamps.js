@@ -1,13 +1,6 @@
 import { alignSTT } from 'stt-align-node';
-import countWords, { removeExtraWhiteSpaces, splitOnWhiteSpaces } from '../../../count-words';
-
-function convertWordsToText(words) {
-  return words
-    .map((word) => {
-      return word.text.trim();
-    })
-    .join(' ');
-}
+import countWords, { removeExtraWhiteSpaces, splitOnWhiteSpaces, countChar } from '../../../count-words';
+import convertWordsToText from '../../../convert-words-to-text';
 
 export function isTextAndWordsListChanged({ text, words }) {
   const wordsText = convertWordsToText(words);
@@ -18,8 +11,8 @@ export function isTextAndWordsListChanged({ text, words }) {
 
 function isEqualNumberOfWords({ text, words }) {
   const wordsText = convertWordsToText(words);
-  const textCount = countWords(text);
-  const wordsCount = countWords(wordsText);
+  const textCount = countChar(text);
+  const wordsCount = countChar(wordsText);
   return textCount === wordsCount;
 }
 
@@ -48,10 +41,10 @@ export function updateIndividualBlockTimestamps(block) {
   const text = block.children[0].text;
   const words = block.children[0].words;
   if (isTextAndWordsListChanged({ text, words })) {
-    return alignBlock({ block, text, words });
-  } else {
-    return block;
+    const newBlockAligned = alignBlock({ block, text, words });
+    return newBlockAligned;
   }
+  return block;
 }
 
 // This option, diffs text and words in transcripts

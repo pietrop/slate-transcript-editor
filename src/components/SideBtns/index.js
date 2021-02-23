@@ -298,10 +298,11 @@ function SideBtns({
         <Button
           disabled={isProcessing}
           onClick={handleSetPauseWhileTyping}
-          variant={isPauseWhiletyping ? 'outlined' : null}
-          color={isPauseWhiletyping ? 'secondary' : 'primary'}
+          // variant={isPauseWhiletyping ? 'outlined' : null}
+          // color={isPauseWhiletyping ? 'secondary' : 'primary'}
+          color="primary"
         >
-          <PauseOutlinedIcon color="primary" />
+          <PauseOutlinedIcon color="primary" color={isPauseWhiletyping ? 'secondary' : 'primary'} />
         </Button>
       </Tooltip>
 

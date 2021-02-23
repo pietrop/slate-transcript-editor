@@ -6,6 +6,11 @@ export const splitOnWhiteSpaces = (text) => {
   return removeExtraWhiteSpaces(text).split(' ');
 };
 
+export const countChar = (text) => {
+  // remove white spaces and count chat
+  return splitOnWhiteSpaces(text).join('').length;
+};
+
 const countWords = (text) => {
   // return text.trim().replace(/\n /g, '').replace(/\n/g, ' ').split(' ').length;
   // Don't count multiple spaces as multiple words

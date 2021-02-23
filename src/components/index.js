@@ -14,7 +14,6 @@ import Link from '@material-ui/core/Link';
 import Replay10Icon from '@material-ui/icons/Replay10';
 import Collapse from '@material-ui/core/Collapse';
 import Tooltip from '@material-ui/core/Tooltip';
-import pDebounce from 'p-debounce';
 import debounce from 'lodash/debounce';
 import { createEditor, Editor, Transforms } from 'slate';
 // https://docs.slatejs.org/walkthroughs/01-installing-slate
@@ -27,12 +26,11 @@ import { shortTimecode } from '../util/timecode-converter';
 import download from '../util/downlaod/index.js';
 import convertDpeToSlate from '../util/dpe-to-slate';
 // TODO: This should be moved in export utils
-import insertTimecodesInline from '../util/inline-interval-timecodes';
+import insertTimecodesInLineInSlateJs from '../util/insert-timecodes-in-line-in-words-list';
 import pluck from '../util/pluk';
 import plainTextalignToSlateJs from '../util/export-adapters/slate-to-dpe/update-timestamps/plain-text-align-to-slate';
 import updateBloocksTimestamps from '../util/export-adapters/slate-to-dpe/update-timestamps/update-bloocks-timestamps';
-import { updateTimestampsHelperForSpecificParagraph } from '../util/export-adapters/slate-to-dpe/update-timestamps/update-timestamps-helper';
-import exportAdapter from '../util/export-adapters';
+import exportAdapter, { isCaptionType } from '../util/export-adapters';
 import generatePreviousTimingsUpToCurrent from '../util/dpe-to-slate/generate-previous-timings-up-to-current';
 import SlateHelpers from './slate-helpers';
 import './index.css';
@@ -45,7 +43,6 @@ const REPLACE_WHOLE_TEXT_INSTRUCTION =
   'Replace whole text. \n\nAdvanced feature, if you already have an accurate transcription for the whole text, and you want to restore timecodes for it, you can use this to replace the text in this transcript. \n\nFor now this is an experimental feature. \n\nIt expects plain text, with paragraph breaks as new line breaks but no speakers.';
 
 const mediaRef = React.createRef();
-// const debouncedSave = pDebounce(updateBloocksTimestamps, 3000);
 
 const pauseWhileTypeing = (current) => {
   current.play();
@@ -348,28 +345,27 @@ function SlateTranscriptEditor(props) {
 
   // TODO: refacto this function, to be cleaner and easier to follow.
   const handleRestoreTimecodes = async (inlineTimecodes = false) => {
-    console.info('handleRestoreTimecodes');
     // if nothing as changed and you don't need to modify the data
     // to get inline timecodes, then just return as is
     if (!isContentModified && !inlineTimecodes) {
       return value;
     }
+    // only used by Word (OHMS) export
+    const alignedSlateData = await updateBloocksTimestamps(value, inlineTimecodes);
+    setValue(alignedSlateData);
+    setIsContentIsModified(false);
+
     if (inlineTimecodes) {
-      alert('removing this for now, while figuring out general alignement');
-      // const transcriptData = insertTimecodesInline({ transcriptData: JSON.parse(JSON.stringify(props.transcriptData)) });
-      // const alignedSlateData = await updateTimestamps(convertDpeToSlate(transcriptData), transcriptData);
-      // setValue(alignedSlateData);
-      // setIsContentIsModified(false);
-      // return alignedSlateData;
-    } else {
-      // const alignedSlateData = await updateTimestamps(value, JSON.parse(JSON.stringify(props.transcriptData)));
-      const alignedSlateData = await updateBloocksTimestamps(value);
-      setValue(alignedSlateData);
-      setIsContentIsModified(false);
-      return alignedSlateData;
+      // we don't want to show the inline timecode in the editor, but we want to return them to export function
+      const alignedSlateDataWithInlineTimecodes = insertTimecodesInLineInSlateJs(alignedSlateData);
+      return alignedSlateDataWithInlineTimecodes;
     }
+
+    return alignedSlateData;
   };
 
+  // TODO: this could be refactore, and brought some of this logic inside the exportAdapter (?)
+  // To make this a little cleaner
   const handleExport = async ({ type, ext, speakers, timecodes, inlineTimecodes, hideTitle, atlasFormat, isDownload }) => {
     try {
       setIsProcessing(true);
@@ -386,6 +382,15 @@ function SlateTranscriptEditor(props) {
         tmpValue = await handleRestoreTimecodes();
       }
 
+      if (isContentModified && type === 'json-digitalpaperedit') {
+        tmpValue = await handleRestoreTimecodes();
+      }
+
+      if (isContentModified && isCaptionType(type)) {
+        tmpValue = await handleRestoreTimecodes();
+      }
+      // export adapter does not doo any alignment
+      // just converts between formats
       let editorContnet = exportAdapter({
         slateValue: tmpValue,
         type,
@@ -395,7 +400,6 @@ function SlateTranscriptEditor(props) {
         inlineTimecodes,
         hideTitle,
         atlasFormat,
-        dpeTranscriptData: props.transcriptData,
       });
 
       if (ext === 'json') {
@@ -626,25 +630,25 @@ function SlateTranscriptEditor(props) {
 
 export default SlateTranscriptEditor;
 
-// SlateTranscriptEditor.propTypes = {
-//   transcriptData: PropTypes.object.isRequired,
-//   mediaUrl: PropTypes.string.isRequired,
-//   handleSaveEditor: PropTypes.func,
-//   handleAutoSaveChanges: PropTypes.func,
-//   autoSaveContentType: PropTypes.string,
-//   isEditable: PropTypes.boolean,
-//   showTimecodes: PropTypes.boolean,
-//   showSpeakers: PropTypes.boolean,
-//   title: PropTypes.string,
-//   showTitle: PropTypes.boolean,
-//   mediaType: PropTypes.string,
-//   transcriptDataLive: PropTypes.object,
-// };
+SlateTranscriptEditor.propTypes = {
+  transcriptData: PropTypes.object.isRequired,
+  mediaUrl: PropTypes.string.isRequired,
+  handleSaveEditor: PropTypes.func,
+  handleAutoSaveChanges: PropTypes.func,
+  autoSaveContentType: PropTypes.string,
+  isEditable: PropTypes.bool,
+  showTimecodes: PropTypes.bool,
+  showSpeakers: PropTypes.bool,
+  title: PropTypes.string,
+  showTitle: PropTypes.bool,
+  mediaType: PropTypes.string,
+  transcriptDataLive: PropTypes.object,
+};
 
-// SlateTranscriptEditor.defaultProps = {
-//   showTitle: false,
-//   showTimecodes: true,
-//   showSpeakers: true,
-//   mediaType: 'digitalpaperedit',
-//   isEditable: true,
-// };
+SlateTranscriptEditor.defaultProps = {
+  showTitle: false,
+  showTimecodes: true,
+  showSpeakers: true,
+  mediaType: 'digitalpaperedit',
+  isEditable: true,
+};

@@ -8,10 +8,13 @@ import { shortTimecode } from '../timecode-converter';
  * `slate-transcript-editor` OHMS export option exports the word part.
  * Thi functions organises the words to add timecodes intervals at the required times.
  */
-const insertTimecodesInline = ({ intervalSeconds = 30, transcriptData }) => {
+import convertWordsToText from '../convert-words-to-text';
+
+const insertTimecodesInlineinWordsList = ({ intervalSeconds = 30, words }) => {
+  const tmpWords = JSON.parse(JSON.stringify(words));
   let lastInsertTime = 0;
 
-  const sortedWords = transcriptData.words.sort((a, b) => a.start - b.start);
+  const sortedWords = tmpWords.sort((a, b) => a.start - b.start);
 
   let newWords = [];
   for (const word of sortedWords) {
@@ -23,9 +26,16 @@ const insertTimecodesInline = ({ intervalSeconds = 30, transcriptData }) => {
     }
     newWords.push(word);
   }
-  return {
-    ...transcriptData,
-    words: newWords,
-  };
+  return newWords;
 };
-export default insertTimecodesInline;
+
+const insertTimecodesInLineInSlateJs = (slateValue) => {
+  return slateValue.map((block) => {
+    const newBlock = JSON.parse(JSON.stringify(block));
+    newBlock.children[0].words = insertTimecodesInlineinWordsList({ words: newBlock.children[0].words });
+    newBlock.children[0].text = convertWordsToText(newBlock.children[0].words);
+    return newBlock;
+  });
+};
+
+export default insertTimecodesInLineInSlateJs;
