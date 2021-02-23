@@ -15,4 +15,3 @@ repeat 3000 times
     tell application "System Events" to keystroke (ASCII character 31) --down arrow
 end repeat
 ```
-
