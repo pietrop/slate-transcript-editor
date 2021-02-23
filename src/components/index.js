@@ -549,6 +549,15 @@ function SlateTranscriptEditor(props) {
                       <code>{duration ? `${shortTimecode(duration)}` : '00:00:00'}</code>
                     </p>
                   </Grid>
+
+                  <Grid item>
+                    <Tooltip title={`Seek back by ${SEEK_BACK_SEC} seconds`}>
+                      <Button color="primary" onClick={handleSeekBack} block="true">
+                        <Replay10Icon color="primary" />
+                      </Button>
+                    </Tooltip>
+                    {/* </OverlayTrigger> */}
+                  </Grid>
                   <Grid item>
                     <FormControl>
                       {/* <InputLabel id="demo-simple-select-label">Speed</InputLabel> */}
@@ -564,14 +573,6 @@ function SlateTranscriptEditor(props) {
                       </Select>
                       {/* <FormHelperText>Speed</FormHelperText> */}
                     </FormControl>
-                  </Grid>
-                  <Grid item>
-                    <Tooltip title={`Seek back by ${SEEK_BACK_SEC} seconds`}>
-                      <Button color="primary" onClick={handleSeekBack} block="true">
-                        <Replay10Icon color="primary" />
-                      </Button>
-                    </Tooltip>
-                    {/* </OverlayTrigger> */}
                   </Grid>
                 </Grid>
               </Grid>
