@@ -5,7 +5,7 @@
 function convertWordsToText(words) {
   return words
     .map((word) => {
-      return word.text.trim();
+      return word.text ? word.text.trim() : '';
     })
     .join(' ');
 }

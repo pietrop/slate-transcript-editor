@@ -10,7 +10,11 @@ export function isTextAndWordsListChanged({ text, words }) {
 }
 
 function isEqualNumberOfWords({ text, words }) {
-  const wordsText = convertWordsToText(words);
+  // Quick fix, if there's words with empty string in the block
+  // for some issues further upstream, either in the initial conversion
+  // from STT or in previosu alignments (?)
+  const sanitizedWords = removeEmptyWords(words);
+  const wordsText = convertWordsToText(sanitizedWords);
   const textCount = countChar(text);
   const wordsCount = countChar(wordsText);
   return textCount === wordsCount;
