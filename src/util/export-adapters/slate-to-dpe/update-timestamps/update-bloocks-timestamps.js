@@ -16,6 +16,18 @@ function isEqualNumberOfWords({ text, words }) {
   return textCount === wordsCount;
 }
 
+/**
+ * quick workaround, sometime the alignment in alignSTT
+ * module results in words with either no text attribute or an empty string
+ * This removes those words as thy cause issue with the alignment
+ * TODO: figure out a better fix in the alignSTT repo further upstream
+ */
+function removeEmptyWords(words) {
+  return words.filter((word) => {
+    return word.text;
+  });
+}
+
 export function alignBlock({ block, text, words }) {
   const newBlock = JSON.parse(JSON.stringify(block));
   // if same number of words in words list and text
@@ -33,7 +45,7 @@ export function alignBlock({ block, text, words }) {
     return newBlock;
   }
   const alignedWords = alignSTT({ words }, text);
-  newBlock.children[0].words = alignedWords;
+  newBlock.children[0].words = removeEmptyWords(alignedWords);
   return newBlock;
 }
 
