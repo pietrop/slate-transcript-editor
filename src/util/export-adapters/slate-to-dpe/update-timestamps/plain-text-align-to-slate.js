@@ -1,7 +1,7 @@
 import { alignSTT } from 'stt-align-node';
 import { shortTimecode } from '../../../timecode-converter';
 import countWords from '../../../count-words';
-import { generatePreviousTimingsUpToCurrentOne } from '../../../dpe-to-slate';
+import generatePreviousTimingsUpToCurrent from '../../../dpe-to-slate/generate-previous-timings-up-to-current';
 const createSlateContentFromSlateJsParagraphs = (currentContent, newEntities) => {
   // Update entites to block structure.
   const updatedBlockArray = [];
@@ -29,7 +29,7 @@ const createSlateContentFromSlateJsParagraphs = (currentContent, newEntities) =>
       type: 'timedText',
       speaker: speaker,
       start,
-      previousTimings: generatePreviousTimingsUpToCurrentOne(blockEntites, start),
+      previousTimings: generatePreviousTimingsUpToCurrent(start),
       startTimecode: shortTimecode(start),
       children: [
         {
