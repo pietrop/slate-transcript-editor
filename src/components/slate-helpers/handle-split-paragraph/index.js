@@ -62,7 +62,7 @@ function handleSplitParagraph(editor) {
         words: wordsBefore,
       });
       // adjust start time (start and startTimecode) of second block, which is start time of second lsit of words
-      const startTimeSecondParagraph = wordsAfter[0].start;
+      const startTimeSecondParagraph = wordsAfter.length > 0 ? wordsAfter[0].start : wordsBefore[wordsBefore.length - 1].end;
       const blockParagraphAfter = SlateHelpers.createNewParagraphBlock({
         speaker,
         start: startTimeSecondParagraph,
