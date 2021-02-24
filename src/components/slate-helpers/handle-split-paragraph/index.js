@@ -6,6 +6,7 @@
 // import getClosestBlock from '../get-closest-block';
 import isSameBlock from './is-same-block';
 import isBeginningOftheBlock from './is-beginning-of-the-block.js';
+import isEndOftheBlock from './is-end-of-the-block.js';
 import isSelectionCollapsed from './is-selection-collapsed';
 import splitTextAtOffset from './split-text-at-offset';
 import splitWordsListAtOffset from './split-words-list-at-offset';
@@ -25,6 +26,7 @@ function handleSplitParagraph(editor) {
       console.info('in the same block, but at the beginning of a paragraph for now you are not allowed to create an empty new line');
       return;
     }
+
     if (isSelectionCollapsed(anchorOffset, focusOffset)) {
       // get current block
       const [blockNode, path] = SlateHelpers.getClosestBlock(editor);
@@ -32,6 +34,12 @@ function handleSplitParagraph(editor) {
       // split into two blocks
       let currentBlockWords = currentBlockNode.children[0].words;
       let text = currentBlockNode.children[0].text;
+
+      if (isEndOftheBlock({ anchorOffset, focusOffset, totlaChar: text.split('').length })) {
+        console.info('in the same block, but at the end of a paragraph for now you are not allowed to create an empty new line');
+        return;
+      }
+
       // if the word have changed. then re-align paragraph before splitting.
       // TODO: this needs re-thinking if there's other re-alignment happening
       // eg on key down debounce
