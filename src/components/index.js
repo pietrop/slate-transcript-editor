@@ -130,6 +130,8 @@ function SlateTranscriptEditor(props) {
     };
   }, []);
 
+  useEffect(() => {}, [currentTime]);
+
   // useEffect(() => {
   //   // Update the document title using the browser API
   //   if (mediaRef && mediaRef.current) {
@@ -489,7 +491,7 @@ function SlateTranscriptEditor(props) {
         <Paper elevation={3} />
         <style scoped>
           {`/* Next words */
-             .timecode[data-previous-timings*="${generatePreviousTimingsUpToCurrent(parseInt(currentTime), value)}"]{
+             .timecode[data-previous-timings*="${generatePreviousTimingsUpToCurrent(currentTime)}"]{
                   color:  #9E9E9E;
               }
 

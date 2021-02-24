@@ -1,49 +1,27 @@
-// import { generatePreviousTimingsUpToCurrentOne } from '../dpe-to-slate';
-
 /**
  * See explanation in `src/utils/dpe-to-slate/index.js` for how this function works with css injection
  * to provide current paragaph's highlight.
- * @param {Number} currentTime - float in seconds
  */
-import isEmpty from '../../is-empty';
-/**
- *
- * @param {*} currentTime
- * @param {*} transcriptData - dpe transcript data with timecodes at word level
- */
-// const generatePreviousTimingsUpToCurrent = (currentTime, transcriptData) => {
-//   // edge case - empty transcription
-//   if (isEmpty(transcriptData)) {
-//     return '';
-//   }
-//   const lastWordStartTime = transcriptData.words[transcriptData.words.length - 1].start;
-//   const lastWordStartTimeInt = parseInt(lastWordStartTime);
-//   const emptyListOfTimes = Array(lastWordStartTimeInt);
-//   const listOfTimesInt = [...emptyListOfTimes.keys()];
-//   const listOfTimesUpToCurrentTimeInt = listOfTimesInt.splice(0, currentTime, 0);
-//   const stringlistOfTimesUpToCurrentTimeInt = listOfTimesUpToCurrentTimeInt.join(' ');
-//   return stringlistOfTimesUpToCurrentTimeInt;
-// };
-
-// export default generatePreviousTimingsUpToCurrent;
 
 /**
- *
- * @param {*} currentTime
- * @param {*} transcriptDataSlateValue - slateJS value data with timecodes at paragraph level
+ * Generate a list of times, each rounded up to int.
+ * from zero to the provided `time`.
+ * eg if `time` is 6, the list would be [0, 1, 2, 3, 4, 5]
+ * @param {Number} time - float or int, time in seconds
  */
-const generatePreviousTimingsUpToCurrent = (currentTime, transcriptDataSlateValue) => {
-  // edge case - empty transcription
-  if (isEmpty(transcriptDataSlateValue)) {
+
+function generatePreviousTimingsUpToCurrent(start) {
+  const startTimeInt = parseInt(start);
+  if (start === startTimeInt) {
     return '';
   }
-  const lastWordStartTime = transcriptDataSlateValue[transcriptDataSlateValue.length - 1].start;
-  const lastWordStartTimeInt = parseInt(lastWordStartTime);
-  const emptyListOfTimes = Array(lastWordStartTimeInt);
-  const listOfTimesInt = [...emptyListOfTimes.keys()];
-  const listOfTimesUpToCurrentTimeInt = listOfTimesInt.splice(0, currentTime, 0);
-  const stringlistOfTimesUpToCurrentTimeInt = listOfTimesUpToCurrentTimeInt.join(' ');
-  return stringlistOfTimesUpToCurrentTimeInt;
-};
+  if (start === startTimeInt) {
+    return '0 1';
+  }
+  return new Array(startTimeInt)
+    .fill(1)
+    .map((_, i) => i + 1)
+    .join(' ');
+}
 
 export default generatePreviousTimingsUpToCurrent;

@@ -2,8 +2,8 @@ import { shortTimecode } from '../timecode-converter';
 
 /**
  *
- * `generatePreviousTimings` and `generatePreviousTimingsUpToCurrent`
- * are used to add a `previousTimings` data attribute
+ * `generatePreviousTimingsUpToCurrent` is used to
+ *  add a `previousTimings` data attribute
  * to the paragraph `TimedTextElement` in `renderElement`
  * This makes it possible to do css injection to hilight current timings
  * `.timecode[data-previous-timings*="${listOfPreviousTimingsUpToCurrentOne}"]
@@ -12,26 +12,8 @@ import { shortTimecode } from '../timecode-converter';
  * eg if current time is `3` then `listOfPreviousTimingsUpToCurrentOne` "0 1 2"
  */
 
-//  TODO: should it consolidate generatePreviousTimingsUpToCurrent or are they for different porpuses?
-//  import generatePreviousTimingsUpToCurrent from './generate-previous-timings-up-to-current';
-
-/**
- * Generate a list of times, each rounded up to int.
- * from zero to the provided `time`.
- * eg if `time` is 6, the list would be [0, 1, 2, 3, 4, 5]
- * @param {Number} time - float, time in seconds
- */
-
 import getWordsForParagraph from '../get-words-for-paragraph';
-
-export const generatePreviousTimings = (time) => {
-  // https://stackoverflow.com/questions/3746725/how-to-create-an-array-containing-1-n
-  if (time) {
-    return [...Array(parseInt(time)).keys()];
-  } else {
-    return [0];
-  }
-};
+import generatePreviousTimingsUpToCurrent from './generate-previous-timings-up-to-current';
 
 /**
  * splices a list of times, int, up to a certain, index current time.
@@ -51,18 +33,6 @@ const generateText = (paragraph, words) => {
     .filter((word) => word.start >= paragraph.start && word.end <= paragraph.end)
     .map((w) => w.text)
     .join(' ');
-};
-
-const generatePreviousTimingsUpToCurrent = (totalTimingsInt, time) => {
-  return totalTimingsInt.splice(0, time, 0).join(' ');
-};
-
-const generateTotalTimings = (words) => {
-  return generatePreviousTimings(words[words.length - 1].start);
-};
-
-export const generatePreviousTimingsUpToCurrentOne = (words, start) => {
-  return generatePreviousTimingsUpToCurrent(generateTotalTimings(words), start);
 };
 
 const convertDpeToSlate = (transcript) => {
@@ -90,7 +60,7 @@ const convertDpeToSlate = (transcript) => {
   return paragraphs.map((paragraph) => ({
     speaker: paragraph.speaker,
     start: paragraph.start,
-    previousTimings: generatePreviousTimingsUpToCurrentOne(words, paragraph.start),
+    previousTimings: generatePreviousTimingsUpToCurrent(paragraph.start),
     // pre-computing the display of the formatting here so that it doesn't need to convert it in leaf render
     startTimecode: shortTimecode(paragraph.start),
     type: 'timedText',
