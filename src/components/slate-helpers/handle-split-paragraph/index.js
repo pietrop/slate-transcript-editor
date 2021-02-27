@@ -15,6 +15,11 @@ import SlateHelpers from '../index';
 import isTextSameAsWordsList from './is-text-same-as-words-list';
 import { isTextAndWordsListChanged, alignBlock } from '../../../util/export-adapters/slate-to-dpe/update-timestamps/update-bloocks-timestamps';
 
+/**
+ *
+ * @param {*} editor slate editor
+ * @return {boolean} - to signal if it was suscesfull at splitting to a parent function
+ */
 function handleSplitParagraph(editor) {
   // get char offset
   const { anchor, focus } = editor.selection;
@@ -24,7 +29,7 @@ function handleSplitParagraph(editor) {
   if (isSameBlock(anchorPath, focusPath)) {
     if (isBeginningOftheBlock(anchorOffset, focusOffset)) {
       console.info('in the same block, but at the beginning of a paragraph for now you are not allowed to create an empty new line');
-      return;
+      return false;
     }
 
     if (isSelectionCollapsed(anchorOffset, focusOffset)) {
@@ -37,7 +42,7 @@ function handleSplitParagraph(editor) {
 
       if (isEndOftheBlock({ anchorOffset, focusOffset, totlaChar: text.split('').length })) {
         console.info('in the same block, but at the end of a paragraph for now you are not allowed to create an empty new line');
-        return;
+        return false;
       }
 
       // if the word have changed. then re-align paragraph before splitting.
@@ -58,7 +63,7 @@ function handleSplitParagraph(editor) {
 
       const isCaretInMiddleOfAword = isTextSameAsWordsList(textBefore, wordsBefore);
       if (isCaretInMiddleOfAword) {
-        return;
+        return false;
       }
       // get start time of first block
       const { speaker, start } = currentBlockNode;
@@ -86,16 +91,16 @@ function handleSplitParagraph(editor) {
         blocks: [blockParagraphBefore, blockParagraphAfter],
         moveSelection: true,
       });
-      return;
+      return true;
     } else {
       console.info('in same block but with wide selection, not handling this use case for now, and collapsing the selection instead');
       SlateHelpers.collapseSelectionToAsinglePoint(editor);
-      return;
+      return false;
     }
   } else {
     console.info('in different block, not handling this use case for now, and collapsing the selection instead');
     SlateHelpers.collapseSelectionToAsinglePoint(editor);
-    return;
+    return false;
   }
 }
 export default handleSplitParagraph;
