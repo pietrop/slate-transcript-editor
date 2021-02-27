@@ -41,9 +41,9 @@ export const demo = () => {
       <SlateTranscriptEditor
         mediaUrl={text('mediaUrl', DEMO_MEDIA_URL_SOLEIO)}
         handleSaveEditor={action('handleSaveEditor')}
-        handleAutoSaveChanges={action('handleAutoSaveChanges')}
+        // handleAutoSaveChanges={action('handleAutoSaveChanges')}
         // https://www.npmjs.com/package/@storybook/addon-knobs#select
-        autoSaveContentType={select('autoSaveContentType', ['digitalpaperedit', 'slate'], 'digitalpaperedit')} // digitalpaperedit or slate - digitalpaperedit, runs alignement before exporting, slate, is just the raw data.
+        // autoSaveContentType={select('autoSaveContentType', ['digitalpaperedit', 'slate'], 'digitalpaperedit')} // digitalpaperedit or slate - digitalpaperedit, runs alignement before exporting, slate, is just the raw data.
         // transcriptData={object('transcriptData', DEMO_SOLEIO)}
         transcriptData={DEMO_SOLEIO}
       />

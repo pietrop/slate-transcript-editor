@@ -66,6 +66,7 @@ function SlateTranscriptEditor(props) {
   // used isContentModified to avoid unecessarily run alignment if the slate value contnet has not been modified by the user since
   // last save or alignment
   const [isContentModified, setIsContentIsModified] = useState(false);
+  const [isContentSaved, setIsContentSaved] = useState(true);
 
   useEffect(() => {
     if (isProcessing) {
@@ -424,6 +425,7 @@ function SlateTranscriptEditor(props) {
         props.handleSaveEditor(editorContnet);
       }
       setIsContentIsModified(false);
+      setIsContentSaved(true);
     } finally {
       setIsProcessing(false);
     }
@@ -450,6 +452,7 @@ function SlateTranscriptEditor(props) {
   // - merging paragraphs via deleting across paragraphs
   const handleOnKeyDown = async (event) => {
     setIsContentIsModified(true);
+    setIsContentSaved(false);
     //  ArrowRight ArrowLeft ArrowUp ArrowUp
     if (event.key === 'Enter') {
       // intercept Enter, and handle timecodes when splitting a paragraph
@@ -457,10 +460,20 @@ function SlateTranscriptEditor(props) {
       // console.info('For now disabling enter key to split a paragraph, while figuring out the aligment issue');
       // handleSetPauseWhileTyping();
       // TODO: Edge case, hit enters after having typed some other words?
-      SlateHelpers.handleSplitParagraph(editor);
+      const isSuccess = SlateHelpers.handleSplitParagraph(editor);
+      if (isSuccess) {
+        // as part of splitting paragraphs there's an alignement step
+        // so content is not counted as modified
+        setIsContentIsModified(false);
+      }
     }
     if (event.key === 'Backspace') {
-      SlateHelpers.handleDeleteInParagraph({ editor, event });
+      const isSuccess = SlateHelpers.handleDeleteInParagraph({ editor, event });
+      if (isSuccess) {
+        // as part of splitting paragraphs there's an alignement step
+        // so content is not counted as modified
+        setIsContentIsModified(false);
+      }
     }
     // if (event.key.length == 1 && ((event.keyCode >= 65 && event.keyCode <= 90) || (event.keyCode >= 49 && event.keyCode <= 57))) {
     //   const alignedSlateData = await debouncedSave(value);
@@ -621,6 +634,7 @@ function SlateTranscriptEditor(props) {
                       onChange={(value) => {
                         if (props.handleAutoSaveChanges) {
                           props.handleAutoSaveChanges(value);
+                          setIsContentSaved(true);
                         }
                         return setValue(value);
                       }}
@@ -647,6 +661,7 @@ function SlateTranscriptEditor(props) {
               handleExport={handleExport}
               isProcessing={isProcessing}
               isContentModified={isContentModified}
+              isContentSaved={isContentSaved}
               setIsProcessing={setIsProcessing}
               insertTextInaudible={insertTextInaudible}
               handleInsertMusicNote={handleInsertMusicNote}

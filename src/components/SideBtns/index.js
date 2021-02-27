@@ -23,6 +23,7 @@ function SideBtns({
   handleExport,
   isProcessing,
   isContentModified,
+  isContentSaved,
   setIsProcessing,
   insertTextInaudible,
   handleInsertMusicNote,
@@ -32,6 +33,7 @@ function SideBtns({
   handleRestoreTimecodes,
   handleReplaceText,
   handleSave,
+
   REPLACE_WHOLE_TEXT_INSTRUCTION,
 }) {
   const [anchorMenuEl, setAnchorMenuEl] = useState(null);
@@ -266,7 +268,7 @@ function SideBtns({
 
       <Tooltip title={'save'}>
         <Button disabled={isProcessing} onClick={handleSave} color="primary">
-          <SaveOutlinedIcon color={isContentModified ? 'secondary' : 'primary'} />
+          <SaveOutlinedIcon color={isContentSaved ? 'primary' : 'secondary'} />
         </Button>
       </Tooltip>
 
@@ -295,13 +297,7 @@ function SideBtns({
         title={` Turn ${isPauseWhiletyping ? 'off' : 'on'} pause while typing functionality. As you start typing the media while pause playback
                       until you stop. Not reccomended on longer transcript as it might present performance issues.`}
       >
-        <Button
-          disabled={isProcessing}
-          onClick={handleSetPauseWhileTyping}
-          // variant={isPauseWhiletyping ? 'outlined' : null}
-          // color={isPauseWhiletyping ? 'secondary' : 'primary'}
-          color="primary"
-        >
+        <Button disabled={isProcessing} onClick={handleSetPauseWhileTyping}>
           <PauseOutlinedIcon color="primary" color={isPauseWhiletyping ? 'secondary' : 'primary'} />
         </Button>
       </Tooltip>
@@ -319,7 +315,10 @@ function SideBtns({
           }}
           color="primary"
         >
-          <CachedOutlinedIcon color="primary" />
+          <CachedOutlinedIcon
+            color={'primary'}
+            // color={isContentModified ? 'secondary' : 'primary'}
+          />
         </Button>
       </Tooltip>
 

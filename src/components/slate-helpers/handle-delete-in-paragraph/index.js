@@ -4,6 +4,10 @@ import isSelectionCollapsed from '../handle-split-paragraph/is-selection-collaps
 import { isTextAndWordsListChanged, alignBlock } from '../../../util/export-adapters/slate-to-dpe/update-timestamps/update-bloocks-timestamps';
 import SlateHelpers from '../index';
 
+/**
+ *
+ * @return {boolean} - to signal if it was suscesfull at splitting to a parent function
+ */
 // TODO: refacto clean up to make more legibl
 function handleDeleteInParagraph({ editor, event }) {
   const { anchor, focus } = editor.selection;
@@ -19,7 +23,7 @@ function handleDeleteInParagraph({ editor, event }) {
       const currentBlockNode = blockNode;
       const currentBlockNumber = path[0];
       if (currentBlockNumber === 0) {
-        return;
+        return false;
       }
 
       const previousBlockNumber = currentBlockNumber - 1;
@@ -92,22 +96,22 @@ function handleDeleteInParagraph({ editor, event }) {
       const newOffset = previousBlockText.length;
       const nextPoint = { offset: newOffset, path: [previousBlockNumber, 0] };
       SlateHelpers.setSelection({ editor, nextPoint });
-      return;
+      return true;
     }
     if (isSelectionCollapsed(anchorOffset, focusOffset)) {
       //  In same block but with selection collapsed
       // event.preventDefault();
-      return;
+      return false;
     } else {
       // In same block but with wide selection
       //   event.preventDefault();
-      return;
+      return false;
     }
   } else {
     event.preventDefault();
     console.info('in different block, not handling this use case for now, and collapsing the selection instead');
     SlateHelpers.collapseSelectionToAsinglePoint(editor);
-    return;
+    return false;
   }
 }
 
