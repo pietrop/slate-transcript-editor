@@ -113,7 +113,7 @@ The project uses [material-ui](https://material-ui.com). The style of the compon
 
 #### Theming
 
-You can use [material-ui](https://material-ui.com)'s [Theming](https://material-ui.com/customization/theming/#theming)
+You can use [material-ui](https://material-ui.com)'s [Theming](https://material-ui.com/customization/theming/#theming) and [colors](https://material-ui.com/customization/color/#color)
 
 ##### Examples
 
@@ -171,7 +171,7 @@ import React from 'react';
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 // You can use material UI color design tokens, your own or color hex value
 import { blue, indigo, green, purple } from '@material-ui/core/colors';
-
+// optional fonts
 import 'fontsource-roboto';
 // customize yout theme as much or as little as you want
 const theme = createMuiTheme({
