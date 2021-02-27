@@ -12,10 +12,10 @@
 
 function generatePreviousTimingsUpToCurrent(start) {
   const startTimeInt = parseInt(start);
-  if (start === startTimeInt) {
+  if (start === 0) {
     return '';
   }
-  if (start === startTimeInt) {
+  if (start === 1) {
     return '0 1';
   }
   return new Array(startTimeInt)
