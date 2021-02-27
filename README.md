@@ -65,12 +65,10 @@ npm install slate-transcript-editor
 
 ```js
 import  SlateTranscriptEditor  from 'slate-transcript-editor';
-// you need to import bootstrap separatly
-import 'bootstrap-css-only';
 
 <SlateTranscriptEditor
-  mediaUrl={DEMO_MEDIA_URL_KATE}
-  transcriptData={DEMO_TRANSCRIPT_KATE}
+  mediaUrl={DEMO_MEDIA_URL}
+  transcriptData={DEMO_TRANSCRIPT}
   handleSaveEditor=// optional - function to handle when user clicks save btn in the UI
   />
 ```
@@ -109,23 +107,111 @@ _see storybook for example code_
 - It re-syncs the timecodes when export of formats that require timecodes, eg `dpe` json, or `docx` and `txt` with timecodes. Also for the 'realignement'/sync UI btn.
 - If you export or save as slate json, at the moment it doesn't run alignement. The function to perform the alignement is also exported by the module, so that you can performe this computational intensive alignement elsewhere if needed, eg server side.
 
-### CSS
+### Customizing look and feel
 
-The project uses [bootstrap](https://getbootstrap.com/), and [react-bootstrap](https://react-bootstrap.github.io/). And you'll need to include your own stylesheet in your React app.
+The project uses [material-ui](https://material-ui.com). The style of the components is therefore self contained and does not reequire any additional stylesheet.
 
-```
-npm install bootstrap-css-only
-```
+#### Theming
 
-eg [bootstrap-css-only](https://www.npmjs.com/package/bootstrap-css-only) is convinient because it doesn't ship with JQuery, that is not a dependency of [react-bootstrap](https://react-bootstrap.github.io/)
+You can use [material-ui](https://material-ui.com)'s [Theming](https://material-ui.com/customization/theming/#theming)
 
-and then import in your app
+##### Examples
+
+<details>
+  <summary> Theming a whole CRA app</summary>
 
 ```js
-import 'bootstrap-css-only';
+import React from 'react';
+import ReactDOM from 'react-dom';
+import './index.css';
+import App from './App';
+import { BrowserRouter } from 'react-router-dom';
+// Material UI Theme provider
+import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
+// You can use material UI color design tokens, your own or color hex value
+import { blue, indigo, green, purple } from '@material-ui/core/colors';
+
+import 'fontsource-roboto';
+// customize yout theme as much or as little as you want
+const theme = createMuiTheme({
+  palette: {
+    background: {
+      // paper: '#424242',
+      // default: '#303030',
+    },
+    primary: {
+      main: purple,
+    },
+    secondary: {
+      main: green,
+    },
+  },
+});
+
+ReactDOM.render(
+  <>
+    <ThemeProvider theme={theme}>
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+    </ThemeProvider>
+  </>,
+  document.getElementById('root')
+);
 ```
 
-Alternativly this gives you the extra flexibility to <!-- pick your own styling from [bootswatch](https://bootswatch.com/) ([npm](https://www.npmjs.com/package/bootswatch)) or you can  --> write your own overriding the boostrap classes (see [bootstrap](https://getbootstrap.com/docs/4.0/getting-started/theming/) and [react-bootstrap](https://react-bootstrap.github.io/getting-started/theming/) on themeing) for more info.
+</details>
+
+<details>
+  <summary> Theming only the Slate Transcript Editor, in a parent component</summary>
+
+```js
+import React from 'react';
+// Material UI Theme provider
+import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
+// You can use material UI color design tokens, your own or color hex value
+import { blue, indigo, green, purple } from '@material-ui/core/colors';
+
+import 'fontsource-roboto';
+// customize yout theme as much or as little as you want
+const theme = createMuiTheme({
+  palette: {
+    background: {
+      // paper: '#424242',
+      // default: '#303030',
+    },
+    primary: {
+      main: purple,
+    },
+    secondary: {
+      main: green,
+    },
+  },
+});
+
+function TranscriptPage(props) {
+  // some state and functions handlers for `TranscriptEditor`
+  // eg `handleSave`
+
+  const handleSave = (data) => {
+    // Do something with the data eg save
+  };
+
+  return (
+    <ThemeProvider theme={theme}>
+      <TranscriptEditor
+        transcriptData={transcriptJson} // Transcript json
+        mediaUrl={url} // string url to media file - audio
+        handleSaveEditor={handleSave} // optional - function to handle when user clicks save btn in the UI
+      />
+    </ThemeProvider>
+  );
+}
+
+export default TranscriptPage;
+```
+
+</details>
 
 ## Documentation
 
