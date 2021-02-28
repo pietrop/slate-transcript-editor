@@ -96,6 +96,20 @@ See storybook `*.stories.js` in `src/components`/ for more examples
 
 _see storybook for example code_
 
+#### Adapters
+
+- [`assemblyai-to-dpe`](https://github.com/pietrop/assemblyai-to-dpe)
+- [`gcp-to-dpe`](https://github.com/pietrop/gcp-to-dpe)
+- [`aws-to-dpe`](https://github.com/pietrop/aws-to-dpe)
+- [`deepspeech-node-wrapper`](https://github.com/pietrop/deepspeech-node-wrapper)
+- [`pocketsphinx-stt`](https://github.com/pietrop/pocketsphinx-stt)
+- [`speechmatics-to-dpe`](https://github.com/pietrop/digital-paper-edit-electron/tree/master/src/ElectronWrapper/lib/transcriber/speechmatics/speechmatics-to-dpe)
+- [`ibmwatson-to-dpe`](https://github.com/pietrop/digital-paper-edit-electron/tree/8ee0904951a0074bb1cd3e10e77d78ad7cc2c9d5/src/ElectronWrapper/lib/transcriber/ibmwatson/ibmwatson-to-dpe)
+
+<!-- _If yu want to contribute to the individual adapters, checkout their own individual repos_ -->
+
+<!-- _If you have many a dpe adapter module for another service not listed here, feel free to do a PR to add it to the README_ -->
+
 ## System Architecture
 
 <!-- _High level overview of system architecture_ -->
