@@ -14,7 +14,7 @@ Criterias/Principles
 - Can handle transcript and media over 1 hour without loss in performance
 - Only essential features for correction of timed text
 - adapters to and from other STT services, are external, except for dpe (digital paper edit, adapter).
-- leverages existing libraries, such as [bootstrap](https://getbootstrap.com/), and [react-bootstrap](https://react-bootstrap.github.io/), to focus on the diffuclt problems, and not wasting time re-inventing the wheel or fiddling around with css.
+- leverages existing libraries, such as [Material UI](https://material-ui.com), to focus on the diffuclt problems, and not wasting time re-inventing the wheel or fiddling around with css.
 
 [See project board for more details](https://github.com/pietrop/slate-transcript-editor/projects/1) of ongoing work.
 
