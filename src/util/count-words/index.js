@@ -16,6 +16,9 @@ const countWords = (text) => {
   // Don't count multiple spaces as multiple words
   // https://www.w3schools.com/jsref/jsref_regexp_whitespace.asp
   // Do a global search for whitespace characters in a string
+  if (text.length < 1) {
+    return 0;
+  }
   return splitOnWhiteSpaces(text).length;
 };
 
