@@ -17,14 +17,22 @@ const createSlateContentFromSlateJsParagraphs = (currentContent, newEntities) =>
     const blockEntites = newEntities.slice(totalWords, totalWords + wordsInBlock);
     let speaker = block.speaker;
     const start = parseFloat(blockEntites[0].start);
-    const end = parseFloat(blockEntites[blockEntites.length - 1].end);
-    const currentParagraph = { start, end };
+    // const end = parseFloat(blockEntites[blockEntites.length - 1].end);
+    // const currentParagraph = { start, end };
     // The speakers would also not exist. unles in future iteration
     // ad optin to have a convention for spaker formatting, eg all caps with : at beginning of sentence
     // or somthing like that but out of scope for now.
     if (!speaker) {
       speaker = 'U_UKN';
     }
+
+    const newText = blockEntites
+      .map((w) => {
+        return w.text;
+      })
+      .join(' ')
+      .trim();
+
     const updatedBlock = {
       type: 'timedText',
       speaker: speaker,
@@ -33,12 +41,7 @@ const createSlateContentFromSlateJsParagraphs = (currentContent, newEntities) =>
       startTimecode: shortTimecode(start),
       children: [
         {
-          text: blockEntites
-            .map((w) => {
-              return w.text;
-            })
-            .join(' ')
-            .trim(),
+          text: newText,
           words: blockEntites,
         },
       ],
