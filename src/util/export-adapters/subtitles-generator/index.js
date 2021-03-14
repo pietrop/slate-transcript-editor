@@ -27,70 +27,77 @@ function addTimecodesToLines(wordsList, paragraphs, lines) {
   wordsList = wordsList.filter((w) => w.text.length > 0);
   let startWordCounter = 0;
   let endWordCounter = 0;
-  const results = lines.map((line) => {
-    endWordCounter += countWords(line);
+  console.log('lines', lines);
+  const results = lines
+    .filter((l) => {
+      return l;
+    })
+    .map((line) => {
+      endWordCounter += countWords(line);
+      const jsonLine = { text: line.trim() };
+      jsonLine.start = wordsList[startWordCounter].start;
+      jsonLine.end = wordsList[endWordCounter - 1].end;
+      // #-----------------|------|-----------------#
+      const possibleParagraphs = paragraphs
+        .filter((p) => jsonLine.start >= p.start && jsonLine.start < p.end)
+        .map((p) => {
+          const inParagraphEndTime = Math.min(jsonLine.end, p.end);
+          const inParagraphDuration = inParagraphEndTime - jsonLine.start;
 
-    const jsonLine = { text: line.trim() };
-    jsonLine.start = wordsList[startWordCounter].start;
-    // TODO: there's an issue here and `vtt_speakers_paragraphs` export is broken
-    jsonLine.end = wordsList[endWordCounter - 1].end;
+          const totalDuration = jsonLine.end - jsonLine.start;
+          const pctInParagraph = inParagraphDuration / totalDuration;
 
-    // #-----------------|------|-----------------#
-    const possibleParagraphs = paragraphs
-      .filter((p) => jsonLine.start >= p.start && jsonLine.start < p.end)
-      .map((p) => {
-        const inParagraphEndTime = Math.min(jsonLine.end, p.end);
-        const inParagraphDuration = inParagraphEndTime - jsonLine.start;
+          return {
+            ...p,
+            pctInParagraph,
+          };
+        })
+        .sort((a, b) => b.pctInParagraph - a.pctInParagraph || a.start - b.start); // sort by % in paragraph descending, then start time ascending
+      jsonLine.speaker = possibleParagraphs.length > 0 ? possibleParagraphs[0].speaker : 'UNKNOWN';
+      startWordCounter = endWordCounter;
 
-        const totalDuration = jsonLine.end - jsonLine.start;
-        const pctInParagraph = inParagraphDuration / totalDuration;
-
-        return {
-          ...p,
-          pctInParagraph,
-        };
-      })
-      .sort((a, b) => b.pctInParagraph - a.pctInParagraph || a.start - b.start); // sort by % in paragraph descending, then start time ascending
-    jsonLine.speaker = possibleParagraphs.length > 0 ? possibleParagraphs[0].speaker : 'UNKNOWN';
-    startWordCounter = endWordCounter;
-
-    return jsonLine;
-  });
+      return jsonLine;
+    });
 
   return results;
 }
 
-function segmentTextByParagraph(wordList, paragraphs) {
-  let str = [];
-  let p_id = '0';
-
-  const sorted_paragraphs = paragraphs.sort((a, b) => a.start - b.start);
-  for (const { text, start } of wordList) {
-    const foundParagraph = sorted_paragraphs.filter((p) => p.start <= start && p.end >= start)[0];
-    if (foundParagraph.id !== p_id) {
-      p_id = foundParagraph.id;
-      str.push('\n\n');
-    }
-    str.push(text);
-  }
-  return str.join(' ');
+function convertSlateValueToSubtitleJson(slateValue) {
+  // there shouldn't be empty blocks in the slateJs content value
+  // but adding a filter here to double check just in cases
+  return slateValue
+    .filter((block) => {
+      return block;
+    })
+    .map((block) => {
+      return {
+        start: block.start,
+        end: block.children[0].words[block.children[0].words.length - 1].end,
+        speaker: block.speaker,
+        text: block.children[0].text,
+      };
+    });
 }
 
-function preSegmentTextJson(wordsList, paragraphs, numberOfCharPerLine, paragraphMode = false) {
-  let result;
-  if (paragraphMode) {
-    result = segmentTextByParagraph(wordsList, paragraphs);
-  } else {
-    result = preSegmentText(wordsList, numberOfCharPerLine);
-  }
-
+function preSegmentTextJson({ wordsList, paragraphs, numberOfCharPerLine }) {
+  const result = preSegmentText(wordsList, numberOfCharPerLine);
   const segmentedTextArray = segmentedTextToList(result);
-
   return addTimecodesToLines(wordsList, paragraphs, segmentedTextArray);
 }
 
-function subtitlesComposer({ words, paragraphs, type, numberOfCharPerLine }) {
-  const subtitlesJson = preSegmentTextJson(words, paragraphs, numberOfCharPerLine, type === 'vtt_speakers_paragraphs');
+function subtitlesComposer({ words, paragraphs, type, numberOfCharPerLine, slateValue }) {
+  let subtitlesJson;
+  if (type === 'vtt_speakers_paragraphs') {
+    subtitlesJson = convertSlateValueToSubtitleJson(slateValue);
+  } else {
+    subtitlesJson = preSegmentTextJson({
+      wordsList: words,
+      paragraphs,
+      numberOfCharPerLine,
+    });
+    console.log('subtitlesJson', subtitlesJson);
+  }
+
   if (typeof words === 'string') {
     return preSegmentText(words, numberOfCharPerLine);
   }
@@ -106,6 +113,7 @@ function subtitlesComposer({ words, paragraphs, type, numberOfCharPerLine }) {
     case 'vtt':
       return vttGenerator(subtitlesJson);
     case 'vtt_speakers':
+      return vttGenerator(subtitlesJson, true);
     case 'vtt_speakers_paragraphs':
       return vttGenerator(subtitlesJson, true);
     case 'json':

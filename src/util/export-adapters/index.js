@@ -45,6 +45,7 @@ const exportAdapter = ({ slateValue, type, ext, transcriptTitle, speakers, timec
           words: editorContent.words,
           paragraphs: editorContent.paragraphs,
           type,
+          slateValue,
         });
         return subtitlesJson;
       }
