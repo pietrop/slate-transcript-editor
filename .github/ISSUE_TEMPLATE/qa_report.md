@@ -68,7 +68,7 @@ Make a note of which ENV you are doing this QA in, eg local storybook, storybook
 
 ## 3.Buttons
 
-- [ ] 3.1 Side btns test, inset special symbols etc...
+- [ ] 3.1 Side btns test, insert special symbols etc...
 - [ ] 3.2 Playback speed
 
 ## 4.Other transcript functionalities
