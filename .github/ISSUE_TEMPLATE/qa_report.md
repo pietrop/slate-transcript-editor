@@ -62,9 +62,9 @@ Make a note of which ENV you are doing this QA in, eg local storybook, storybook
     - [ ] CSV (`.csv`)
     - [ ] Pre segmented txt (`.txt`)
     - [ ] Json (`.json`)
-- [ ] **Developer options**
-  - [ ] SlateJs (<code>.json</code>)
-  - [ ] DPE (<code>.json</code>)
+  - [ ] **Developer options**
+    - [ ] SlateJs (<code>.json</code>)
+    - [ ] DPE (<code>.json</code>)
 
 ## 3.Buttons
 
