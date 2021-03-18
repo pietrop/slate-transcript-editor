@@ -10,7 +10,7 @@ assignees:
 
 <!-- See [QA](/docs/QA/index.md) instructions in docs for more info on the process. -->
 
-_If you run into issues with any of the individual items, raise a separate issue for each as a [QA Report - individual issue](https://github.com/newscorp-ghfb/dj-tools-transcribe/issues/new?assignees=&labels=QA%20Issue&template=qa_individual_issue_report.md&title=[QA]%20Issue%20#2.1%20Create%20a%20project). Write a note of the item numnber, and "title" in the issue title and description._
+_If you run into issues with any of the individual items, raise a separate issue for each as a [QA Report - individual issue](https://github.com/newscorp-ghfb/dj-tools-transcribe/issues/new?assignees=&labels=QA%20Issue&template=qa_individual_issue_report.md&title=[QA]%20Issue%20#1.1%20Can%20edit%20the%0text). Write a note of the item numnber, and "title" in the issue title and description._
 
 <!-- Top tip: view the text of this issue in "preview" mode to make it easier to click through the checkboxes -->
 
