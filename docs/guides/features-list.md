@@ -5,7 +5,6 @@
 - [x] play/pause
 - [x] Current time + duration display
 - [x] Adjust Playback rate
-
 - [x] auto pause while typing
 - [x] Roll back button ~15 sec~ 10 sec default, ~customizable amount~
 
