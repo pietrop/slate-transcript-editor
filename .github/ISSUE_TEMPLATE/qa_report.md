@@ -69,7 +69,15 @@ Make a note of which ENV you are doing this QA in, eg local storybook, storybook
 ## 3.Buttons
 
 - [ ] 3.1 Side btns test, insert special symbols etc...
-- [ ] 3.2 Playback speed
+  - [ ] 3.1.1 Save btn
+  - [ ] 3.1.2 Insert paragraph break btn
+  - [ ] 3.1.3 insert `[INAUDIBLE]` in text btn
+  - [ ] 3.1.4 Insert music note 🎵 in text btn
+  - [ ] 3.1.5 Pause while typing ⏸️ btn
+  - [ ] 3.1.6 Restore timecodes ♻ btn
+  - [ ] 3.1.7 Replace whole text ↑↓ btn
+  - [ ] 3.1.8 Info ❓ btn
+- [ ] 3.2 Playback speed `x` btn
 
 ## 4.Other transcript functionalities
 
