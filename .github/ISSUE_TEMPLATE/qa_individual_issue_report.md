@@ -10,7 +10,7 @@ assignees:
 
 **QA Item and step's title**
 
-<!-- eg #2.1 - Do -->
+<!-- eg #1.1 Can edit the text -->
 <!-- If it's an issue not part of the main QA steps leave the number blank, just uncomment line blow -->
 <!-- Not part of the main QA steps -->
 
