@@ -378,7 +378,7 @@ function SlateTranscriptEditor(props) {
           // handles if click cancel and doesn't set speaker name
           props.handleAnalyticsEvents('ste_handle_timed_text_click', {
             fn: 'handleTimedTextClick',
-            origin: 'timecode',
+            clickOrigin: 'timecode',
             timeInSeconds: mediaRef.current.currentTime,
           });
         }
@@ -394,7 +394,7 @@ function SlateTranscriptEditor(props) {
             // handles if click cancel and doesn't set speaker name
             props.handleAnalyticsEvents('ste_handle_timed_text_click', {
               fn: 'handleTimedTextClick',
-              origin: 'word',
+              clickOrigin: 'word',
               timeInSeconds: mediaRef.current.currentTime,
             });
           }
