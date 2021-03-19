@@ -147,10 +147,22 @@ function SlateTranscriptEditor(props) {
 
   const insertTextInaudible = () => {
     Transforms.insertText(editor, '[INAUDIBLE]');
+    if (props.handleAnalyticsEvents) {
+      props.handleAnalyticsEvents('ste_clicked_on_insert', {
+        btn: '[INAUDIBLE]',
+        fn: 'insertTextInaudible',
+      });
+    }
   };
 
   const handleInsertMusicNote = () => {
     Transforms.insertText(editor, '♫'); // or ♪
+    if (props.handleAnalyticsEvents) {
+      props.handleAnalyticsEvents('ste_clicked_on_insert', {
+        btn: '♫',
+        fn: 'handleInsertMusicNote',
+      });
+    }
   };
 
   const getSlateContent = () => {
@@ -171,20 +183,47 @@ function SlateTranscriptEditor(props) {
     setCurrentTime(e.target.currentTime);
     // TODO: setting duration here as a workaround
     setDuration(mediaRef.current.duration);
+    //  TODO: commenting this out for now, not sure if it will fire to often?
+    // if (props.handleAnalyticsEvents) {
+    //   // handles if click cancel and doesn't set speaker name
+    //   props.handleTimeUpdated('ste_handle_time_update', {
+    //     fn: 'handleTimeUpdated',
+    //     duration: mediaRef.current.duration,
+    //     currentTime: e.target.currentTime,
+    //   });
+    // }
   };
 
   const handleSetPlaybackRate = (e) => {
+    const previousPlaybackRate = playbackRate;
     const n = e.target.value;
     const tmpNewPlaybackRateValue = parseFloat(n);
     if (mediaRef && mediaRef.current) {
       mediaRef.current.playbackRate = tmpNewPlaybackRateValue;
       setPlaybackRate(tmpNewPlaybackRateValue);
+
+      if (props.handleAnalyticsEvents) {
+        props.handleAnalyticsEvents('ste_handle_set_playback_rate', {
+          fn: 'handleSetPlaybackRate',
+          previousPlaybackRate,
+          newPlaybackRate: tmpNewPlaybackRateValue,
+        });
+      }
     }
   };
 
   const handleSeekBack = () => {
     if (mediaRef && mediaRef.current) {
-      mediaRef.current.currentTime = mediaRef.current.currentTime - SEEK_BACK_SEC;
+      const newCurrentTime = mediaRef.current.currentTime - SEEK_BACK_SEC;
+      mediaRef.current.currentTime = newCurrentTime;
+
+      if (props.handleAnalyticsEvents) {
+        props.handleAnalyticsEvents('ste_handle_seek_back', {
+          fn: 'handleSeekBack',
+          newCurrentTimeInSeconds: newCurrentTime,
+          seekBackValue: SEEK_BACK_SEC,
+        });
+      }
     }
   };
 
@@ -226,6 +265,14 @@ function SlateTranscriptEditor(props) {
     const newSpeakerName = prompt('Change speaker name', oldSpeakerName);
     if (newSpeakerName) {
       const isUpdateAllSpeakerInstances = confirm(`Would you like to replace all occurrences of ${oldSpeakerName} with ${newSpeakerName}?`);
+      if (props.handleAnalyticsEvents) {
+        // handles if set speaker name, and whether updates one or multiple
+        props.handleAnalyticsEvents('ste_set_speaker_name', {
+          fn: 'handleSetSpeakerName',
+          changeSpeaker: true,
+          updateMultiple: isUpdateAllSpeakerInstances,
+        });
+      }
       if (isUpdateAllSpeakerInstances) {
         const rangeForTheWholeEditor = Editor.range(editor, []);
         // Apply transformation to the whole doc, where speaker matches old spekaer name, and set it to new one
@@ -240,6 +287,15 @@ function SlateTranscriptEditor(props) {
       } else {
         // only apply speaker name transformation to current element
         Transforms.setNodes(editor, { type: 'timedText', speaker: newSpeakerName }, { at: pathToCurrentNode });
+      }
+    } else {
+      if (props.handleAnalyticsEvents) {
+        // handles if click cancel and doesn't set speaker name
+        props.handleAnalyticsEvents('ste_set_speaker_name', {
+          fn: 'handleSetSpeakerName',
+          changeSpeaker: false,
+          updateMultiple: false,
+        });
       }
     }
   };
@@ -317,6 +373,15 @@ function SlateTranscriptEditor(props) {
       if (mediaRef && mediaRef.current) {
         mediaRef.current.currentTime = parseFloat(start);
         mediaRef.current.play();
+
+        if (props.handleAnalyticsEvents) {
+          // handles if click cancel and doesn't set speaker name
+          props.handleAnalyticsEvents('ste_handle_timed_text_click', {
+            fn: 'handleTimedTextClick',
+            origin: 'timecode',
+            timeInSeconds: mediaRef.current.currentTime,
+          });
+        }
       }
     } else if (e.target.dataset.slateString) {
       if (e.target.parentNode.dataset.start) {
@@ -324,6 +389,15 @@ function SlateTranscriptEditor(props) {
         if (mediaRef && mediaRef.current && startWord && startWord.start) {
           mediaRef.current.currentTime = parseFloat(startWord.start);
           mediaRef.current.play();
+
+          if (props.handleAnalyticsEvents) {
+            // handles if click cancel and doesn't set speaker name
+            props.handleAnalyticsEvents('ste_handle_timed_text_click', {
+              fn: 'handleTimedTextClick',
+              origin: 'word',
+              timeInSeconds: mediaRef.current.currentTime,
+            });
+          }
         } else {
           // fallback in case there's some misalignment with the words
           // use the start of paragraph instead
@@ -331,6 +405,15 @@ function SlateTranscriptEditor(props) {
           if (mediaRef && mediaRef.current && start) {
             mediaRef.current.currentTime = parseFloat(start);
             mediaRef.current.play();
+
+            if (props.handleAnalyticsEvents) {
+              // handles if click cancel and doesn't set speaker name
+              props.handleAnalyticsEvents('ste_handle_timed_text_click', {
+                fn: 'handleTimedTextClick',
+                origin: 'paragraph-fallback',
+                timeInSeconds: mediaRef.current.currentTime,
+              });
+            }
           }
         }
       }
@@ -342,6 +425,14 @@ function SlateTranscriptEditor(props) {
     if (newText) {
       const newValue = plainTextalignToSlateJs(props.transcriptData, newText, value);
       setValue(newValue);
+
+      // TODO: consider adding some kind of word count here?
+      if (props.handleAnalyticsEvents) {
+        // handles if click cancel and doesn't set speaker name
+        props.handleAnalyticsEvents('ste_handle_replace_text', {
+          fn: 'handleReplaceText',
+        });
+      }
     }
   };
 
@@ -369,6 +460,21 @@ function SlateTranscriptEditor(props) {
   // TODO: this could be refactore, and brought some of this logic inside the exportAdapter (?)
   // To make this a little cleaner
   const handleExport = async ({ type, ext, speakers, timecodes, inlineTimecodes, hideTitle, atlasFormat, isDownload }) => {
+    if (props.handleAnalyticsEvents) {
+      // handles if click cancel and doesn't set speaker name
+      props.handleAnalyticsEvents('ste_handle_export', {
+        fn: 'handleExport',
+        type,
+        ext,
+        speakers,
+        timecodes,
+        inlineTimecodes,
+        hideTitle,
+        atlasFormat,
+        isDownload,
+      });
+    }
+
     try {
       setIsProcessing(true);
       let tmpValue = getSlateContent();
@@ -421,6 +527,14 @@ function SlateTranscriptEditor(props) {
       setIsProcessing(true);
       const format = props.autoSaveContentType ? props.autoSaveContentType : 'digitalpaperedit';
       const editorContnet = await handleExport({ type: `json-${format}`, isDownload: false });
+      if (props.handleAnalyticsEvents) {
+        // handles if click cancel and doesn't set speaker name
+        props.handleAnalyticsEvents('ste_handle_save', {
+          fn: 'handleSave',
+          format,
+        });
+      }
+
       if (props.handleSaveEditor) {
         props.handleSaveEditor(editorContnet);
       }
@@ -438,6 +552,13 @@ function SlateTranscriptEditor(props) {
    */
 
   const handleSetPauseWhileTyping = () => {
+    if (props.handleAnalyticsEvents) {
+      // handles if click cancel and doesn't set speaker name
+      props.handleAnalyticsEvents('ste_handle_set_pause_while_typing', {
+        fn: 'handleSetPauseWhileTyping',
+        isPauseWhiletyping: !isPauseWhiletyping,
+      });
+    }
     setIsPauseWhiletyping(!isPauseWhiletyping);
   };
 
@@ -461,6 +582,13 @@ function SlateTranscriptEditor(props) {
       // handleSetPauseWhileTyping();
       // TODO: Edge case, hit enters after having typed some other words?
       const isSuccess = SlateHelpers.handleSplitParagraph(editor);
+      if (props.handleAnalyticsEvents) {
+        // handles if click cancel and doesn't set speaker name
+        props.handleAnalyticsEvents('ste_handle_split_paragraph', {
+          fn: 'handleSplitParagraph',
+          isSuccess,
+        });
+      }
       if (isSuccess) {
         // as part of splitting paragraphs there's an alignement step
         // so content is not counted as modified
@@ -469,6 +597,14 @@ function SlateTranscriptEditor(props) {
     }
     if (event.key === 'Backspace') {
       const isSuccess = SlateHelpers.handleDeleteInParagraph({ editor, event });
+      // Commenting that out for now, as it might get called too often
+      // if (props.handleAnalyticsEvents) {
+      //   // handles if click cancel and doesn't set speaker name
+      //   props.handleAnalyticsEvents('ste_handle_delete_paragraph', {
+      //     fn: 'handleDeleteInParagraph',
+      //     isSuccess,
+      //   });
+      // }
       if (isSuccess) {
         // as part of splitting paragraphs there's an alignement step
         // so content is not counted as modified
@@ -672,6 +808,7 @@ function SlateTranscriptEditor(props) {
               handleReplaceText={handleReplaceText}
               handleSave={handleSave}
               REPLACE_WHOLE_TEXT_INSTRUCTION={REPLACE_WHOLE_TEXT_INSTRUCTION}
+              handleAnalyticsEvents={props.handleAnalyticsEvents}
             />
           </Grid>
         </Grid>

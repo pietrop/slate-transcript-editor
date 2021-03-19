@@ -33,7 +33,7 @@ function SideBtns({
   handleRestoreTimecodes,
   handleReplaceText,
   handleSave,
-
+  handleAnalyticsEvents,
   REPLACE_WHOLE_TEXT_INSTRUCTION,
 }) {
   const [anchorMenuEl, setAnchorMenuEl] = useState(null);
@@ -309,6 +309,12 @@ function SideBtns({
             try {
               setIsProcessing(true);
               await handleRestoreTimecodes();
+              if (handleAnalyticsEvents) {
+                // handles if click cancel and doesn't set speaker name
+                handleAnalyticsEvents('ste_handle_restore_timecodes_btn', {
+                  fn: 'handleRestoreTimecodes',
+                });
+              }
             } finally {
               setIsProcessing(false);
             }
