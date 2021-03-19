@@ -830,7 +830,6 @@ SlateTranscriptEditor.propTypes = {
   showSpeakers: PropTypes.bool,
   title: PropTypes.string,
   showTitle: PropTypes.bool,
-  mediaType: PropTypes.string,
   transcriptDataLive: PropTypes.object,
 };
 
@@ -838,6 +837,6 @@ SlateTranscriptEditor.defaultProps = {
   showTitle: false,
   showTimecodes: true,
   showSpeakers: true,
-  mediaType: 'digitalpaperedit',
+  autoSaveContentType: 'digitalpaperedit',
   isEditable: true,
 };
