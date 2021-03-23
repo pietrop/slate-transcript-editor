@@ -90,6 +90,7 @@ See storybook `*.stories.js` in `src/components`/ for more examples
 | `title`                 | defaults to empty String, also used in file names for exported files.                                                                                                                                           |    no    |  String  |
 | `showTitle`             | Whether to display the provided title                                                                                                                                                                           |    no    |  String  |
 | `handleAnalyticsEvents` | optional function to log analytics, returns event name as string, and some data as object associated with that event, see storybook for example                                                                 |    no    | Function |
+| `optionalBtns`          | optional buttons or react components can be passed to the sidebar see storybook for example                                                                                                                     |    no    |   Jsx    |
 
  <!-- TODO: link to storybook here -->
  <!-- for more details on how to use. -->

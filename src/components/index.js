@@ -756,6 +756,7 @@ function SlateTranscriptEditor(props) {
                   })}
                 </Collapse>
               </Grid>
+              <Grid item>{props.children}</Grid>
             </Grid>
           </Grid>
 
@@ -809,6 +810,7 @@ function SlateTranscriptEditor(props) {
               handleSave={handleSave}
               REPLACE_WHOLE_TEXT_INSTRUCTION={REPLACE_WHOLE_TEXT_INSTRUCTION}
               handleAnalyticsEvents={props.handleAnalyticsEvents}
+              optionalBtns={props.optionalBtns}
             />
           </Grid>
         </Grid>

@@ -35,6 +35,7 @@ function SideBtns({
   handleSave,
   handleAnalyticsEvents,
   REPLACE_WHOLE_TEXT_INSTRUCTION,
+  optionalBtns,
 }) {
   const [anchorMenuEl, setAnchorMenuEl] = useState(null);
 
@@ -339,6 +340,8 @@ function SideBtns({
           <InfoOutlined color="primary" />
         </Button>
       </Tooltip>
+
+      {optionalBtns}
     </Grid>
   );
 }
