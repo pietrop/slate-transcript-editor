@@ -172,14 +172,7 @@ export const optionalAnalytics = () => {
         // transcriptData={object('transcriptData', DEMO_SOLEIO)}
         transcriptData={DEMO_SOLEIO}
         handleAnalyticsEvents={action('handleAnalyticsEvents')}
-        optionalBtns={
-          <Button title="optional button" color="primary">
-            B
-          </Button>
-        }
-      >
-        <h1>Optional child component</h1>
-      </SlateTranscriptEditor>
+      />
     </>
   );
 };
@@ -199,7 +192,31 @@ export const optionaChildComponents = () => {
         // transcriptData={object('transcriptData', DEMO_SOLEIO)}
         transcriptData={DEMO_SOLEIO}
         handleAnalyticsEvents={action('handleAnalyticsEvents')}
-      />
+        optionalBtns={
+          <>
+            <Button
+              title="optional button"
+              color="primary"
+              onClick={() => {
+                alert('optional componet added from outside STE');
+              }}
+            >
+              B
+            </Button>
+            <Button
+              title="optional button"
+              color="primary"
+              onClick={() => {
+                alert('and yes you can add more then one optional componet added from outside STE');
+              }}
+            >
+              O
+            </Button>
+          </>
+        }
+      >
+        <h1>Optional child component</h1>
+      </SlateTranscriptEditor>
     </>
   );
 };
