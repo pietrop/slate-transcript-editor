@@ -4,6 +4,7 @@ import { withKnobs, text, boolean, number, object, select } from '@storybook/add
 import { withInfo } from '@storybook/addon-info';
 import { version } from '../../package.json';
 
+import Button from '@material-ui/core/Button';
 import SlateTranscriptEditor from './index.js';
 import 'fontsource-roboto';
 
@@ -157,6 +158,33 @@ export const Audio = () => {
 };
 
 export const optionalAnalytics = () => {
+  return (
+    <>
+      <p>
+        Slate Transcript Editor version: <code>{version}</code>
+      </p>
+      <SlateTranscriptEditor
+        mediaUrl={text('mediaUrl', DEMO_MEDIA_URL_SOLEIO)}
+        handleSaveEditor={action('handleSaveEditor')}
+        // handleAutoSaveChanges={action('handleAutoSaveChanges')}
+        // https://www.npmjs.com/package/@storybook/addon-knobs#select
+        // autoSaveContentType={select('autoSaveContentType', ['digitalpaperedit', 'slate'], 'digitalpaperedit')} // digitalpaperedit or slate - digitalpaperedit, runs alignement before exporting, slate, is just the raw data.
+        // transcriptData={object('transcriptData', DEMO_SOLEIO)}
+        transcriptData={DEMO_SOLEIO}
+        handleAnalyticsEvents={action('handleAnalyticsEvents')}
+        optionalBtns={
+          <Button title="optional button" color="primary">
+            B
+          </Button>
+        }
+      >
+        <h1>Optional child component</h1>
+      </SlateTranscriptEditor>
+    </>
+  );
+};
+
+export const optionaChildComponents = () => {
   return (
     <>
       <p>
