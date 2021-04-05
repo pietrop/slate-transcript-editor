@@ -14,6 +14,8 @@ import countWords from '../../../util/count-words';
 import SlateHelpers from '../index';
 import isTextSameAsWordsList from './is-text-same-as-words-list';
 import { isTextAndWordsListChanged, alignBlock } from '../../../util/export-adapters/slate-to-dpe/update-timestamps/update-bloocks-timestamps';
+import assert from 'assert';
+import { Element } from 'slate';
 
 /**
  *
@@ -37,6 +39,7 @@ function handleSplitParagraph(editor) {
       const [blockNode, path] = SlateHelpers.getClosestBlock(editor);
       const currentBlockNode = blockNode;
       // split into two blocks
+      assert(Element.isElement(currentBlockNode));
       let currentBlockWords = currentBlockNode.children[0].words;
       let text = currentBlockNode.children[0].text;
 

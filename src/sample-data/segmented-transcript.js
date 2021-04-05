@@ -7,14 +7,14 @@ const DEMO_SOLEIO = require('../sample-data/soleio-dpe.json');
 function findWordsRangeForQuoteInTranscript({ paragraph, words }) {
   const paragraphStart = paragraph.start;
   const paragraphEnd = paragraph.end;
-  const wordResults = words.filter(word => {
+  const wordResults = words.filter((word) => {
     return word.start >= paragraphStart && word.end <= paragraphEnd;
   });
   return wordResults;
 }
 
 function segmentedTranscript(transcript) {
-  return transcript.paragraphs.map(paragraph => {
+  return transcript.paragraphs.map((paragraph) => {
     const wordsResult = findWordsRangeForQuoteInTranscript({ paragraph, words: transcript.words });
     return { words: wordsResult, paragraphs: [paragraph] };
   });

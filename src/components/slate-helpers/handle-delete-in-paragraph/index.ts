@@ -3,6 +3,8 @@ import isBeginningOftheBlock from '../handle-split-paragraph/is-beginning-of-the
 import isSelectionCollapsed from '../handle-split-paragraph/is-selection-collapsed';
 import { isTextAndWordsListChanged, alignBlock } from '../../../util/export-adapters/slate-to-dpe/update-timestamps/update-bloocks-timestamps';
 import SlateHelpers from '../index';
+import { Element, Location } from 'slate';
+import assert from 'assert';
 
 /**
  *
@@ -32,6 +34,8 @@ function handleDeleteInParagraph({ editor, event }) {
         path: [previousBlockNumber],
       });
 
+      assert(Element.isElement(currentBlockNode));
+      assert(Element.isElement(previousBlock));
       const previousBlockEndOffset = previousBlock.children[0].text.length;
       const previousBlockText = previousBlock.children[0].text;
       const previousBlockWordsList = previousBlock.children[0].words;
@@ -81,7 +85,7 @@ function handleDeleteInParagraph({ editor, event }) {
 
       SlateHelpers.removeNodes({ editor, options });
 
-      const options2 = {
+      const options2: { at: Location; mode: 'highest' } = {
         at: [previousBlockNumber],
         mode: 'highest',
       };

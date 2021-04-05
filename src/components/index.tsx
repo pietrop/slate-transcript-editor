@@ -1,3 +1,5 @@
+import type { Node } from 'slate';
+import type { GridSize } from '@material-ui/core';
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import PropTypes, { string } from 'prop-types';
 import path from 'path';
@@ -26,7 +28,7 @@ import EditIcon from '@material-ui/icons/Edit';
 import SaveAltIcon from '@material-ui/icons/SaveAlt';
 import SaveIcon from '@material-ui/icons/Save';
 import debounce from 'lodash/debounce';
-import { createEditor, Editor, Transforms } from 'slate';
+import { createEditor, Editor, Transforms, Element } from 'slate';
 // https://docs.slatejs.org/walkthroughs/01-installing-slate
 // Import the Slate components and React plugin.
 import { Slate, Editable, withReact, ReactEditor } from 'slate-react';
@@ -41,7 +43,7 @@ import insertTimecodesInLineInSlateJs from '../util/insert-timecodes-in-line-in-
 import pluck from '../util/pluk';
 import plainTextalignToSlateJs from '../util/export-adapters/slate-to-dpe/update-timestamps/plain-text-align-to-slate';
 import updateBloocksTimestamps from '../util/export-adapters/slate-to-dpe/update-timestamps/update-bloocks-timestamps';
-import exportAdapter, { isCaptionType } from '../util/export-adapters';
+import exportAdapter, { ExportData, isCaptionType } from '../util/export-adapters';
 import generatePreviousTimingsUpToCurrent from '../util/dpe-to-slate/generate-previous-timings-up-to-current';
 import SlateHelpers from './slate-helpers';
 
@@ -52,7 +54,7 @@ const PAUSE_WHILTE_TYPING_TIMEOUT_MILLISECONDS = 1500;
 const REPLACE_WHOLE_TEXT_INSTRUCTION =
   'Replace whole text. \n\nAdvanced feature, if you already have an accurate transcription for the whole text, and you want to restore timecodes for it, you can use this to replace the text in this transcript. \n\nFor now this is an experimental feature. \n\nIt expects plain text, with paragraph breaks as new line breaks but no speakers.';
 
-const mediaRef = React.createRef();
+const mediaRef = React.createRef<HTMLVideoElement>();
 
 const pauseWhileTypeing = (current) => {
   current.play();
@@ -329,8 +331,8 @@ function SlateTranscriptEditor(props) {
   };
 
   const TimedTextElement = (props) => {
-    let textLg = 12;
-    let textXl = 12;
+    let textLg: GridSize = 12;
+    let textXl: GridSize = 12;
     if (!showSpeakers && !showTimecodes) {
       textLg = 12;
       textXl = 12;
@@ -431,7 +433,7 @@ function SlateTranscriptEditor(props) {
           // use the start of paragraph instead
           const start = parseFloat(e.target.parentNode.dataset.start);
           if (mediaRef && mediaRef.current && start) {
-            mediaRef.current.currentTime = parseFloat(start);
+            mediaRef.current.currentTime = start;
             mediaRef.current.play();
 
             if (props.handleAnalyticsEvents) {
@@ -472,7 +474,8 @@ function SlateTranscriptEditor(props) {
       return value;
     }
     // only used by Word (OHMS) export
-    const alignedSlateData = await updateBloocksTimestamps(value, inlineTimecodes);
+    // const alignedSlateData = await updateBloocksTimestamps(value, inlineTimecodes);
+    const alignedSlateData = await updateBloocksTimestamps(value);
     setValue(alignedSlateData);
     setIsContentIsModified(false);
 
@@ -487,7 +490,7 @@ function SlateTranscriptEditor(props) {
 
   // TODO: this could be refactore, and brought some of this logic inside the exportAdapter (?)
   // To make this a little cleaner
-  const handleExport = async ({ type, ext, speakers, timecodes, inlineTimecodes, hideTitle, atlasFormat, isDownload }) => {
+  const handleExport = async ({ type, ext, speakers, timecodes, inlineTimecodes, hideTitle, atlasFormat, isDownload }: ExportData) => {
     if (props.handleAnalyticsEvents) {
       // handles if click cancel and doesn't set speaker name
       props.handleAnalyticsEvents('ste_handle_export', {
@@ -943,6 +946,10 @@ SlateTranscriptEditor.propTypes = {
   title: PropTypes.string,
   showTitle: PropTypes.bool,
   transcriptDataLive: PropTypes.object,
+  children: PropTypes.node,
+  handleAnalyticsEvents: PropTypes.func,
+  optionalBtns: PropTypes.node,
+  mediaType: PropTypes.string,
 };
 
 SlateTranscriptEditor.defaultProps = {

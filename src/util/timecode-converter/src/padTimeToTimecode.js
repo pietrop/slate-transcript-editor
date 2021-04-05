@@ -1,10 +1,10 @@
-const countColon = timecode => timecode.split(':').length;
+const countColon = (timecode) => timecode.split(':').length;
 
-const includesFullStop = timecode => timecode.includes('.');
+const includesFullStop = (timecode) => timecode.includes('.');
 
-const isOneDigit = str => str.length === 1;
+const isOneDigit = (str) => str.length === 1;
 
-const padTimeToTimecode = time => {
+const padTimeToTimecode = (time) => {
   if (typeof time === 'string') {
     switch (countColon(time)) {
       case 4:

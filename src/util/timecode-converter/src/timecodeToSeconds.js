@@ -3,7 +3,7 @@
  * @param {*} tc
  * @param {*} fps
  */
-const timecodeToFrames = function(tc, fps) {
+const timecodeToFrames = function (tc, fps) {
   // TODO make 29.97 fps drop-frame aware - works for 25 only.
 
   const s = tc.split(':');
@@ -20,14 +20,10 @@ const timecodeToFrames = function(tc, fps) {
  * @param {*} tc - `hh:mm:ss:ff`
  * @param {*} framePerSeconds - defaults to 25 if not provided
  */
-const timecodeToSecondsHelper = function(tc, framePerSeconds) {
-  let fps = 25;
-  if (framePerSeconds !== undefined) {
-    fps = framePerSeconds;
-  }
-  const frames = timecodeToFrames(tc, fps);
+const timecodeToSecondsHelper = function (tc, framePerSeconds = 25) {
+  const frames = timecodeToFrames(tc, framePerSeconds);
 
-  return Number(Number(frames / fps).toFixed(2));
+  return Number(Number(frames / framePerSeconds).toFixed(2));
 };
 
 export default timecodeToSecondsHelper;

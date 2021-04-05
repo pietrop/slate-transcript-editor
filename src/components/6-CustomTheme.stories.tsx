@@ -8,7 +8,7 @@ import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 import { lightBlue, red, orange, deepOrange } from '@material-ui/core/colors';
 // import purple from '@material-ui/core/colors/purple';
 
-import SlateTranscriptEditor from './index.js';
+import SlateTranscriptEditor from '.';
 import 'fontsource-roboto';
 
 export default {

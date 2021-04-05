@@ -1,7 +1,22 @@
 import { shortTimecode } from '../../../util/timecode-converter'; //'../../../timecode-converter';
 import generatePreviousTimingsUpToCurrent from '../../../util/dpe-to-slate/generate-previous-timings-up-to-current';
+import { Element } from 'slate';
 
-function createNewParagraphBlock({ speaker, start, text = '', words = [], previousTimings, startTimecode }) {
+function createNewParagraphBlock({
+  speaker,
+  start,
+  text = '',
+  words = [],
+  previousTimings,
+  startTimecode,
+}: {
+  speaker: any;
+  start: any;
+  text: string;
+  words: any;
+  previousTimings?: any;
+  startTimecode?: any;
+}): Element {
   let newPreviousTimings = previousTimings;
   if (!newPreviousTimings) {
     newPreviousTimings = generatePreviousTimingsUpToCurrent(start);

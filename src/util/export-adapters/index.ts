@@ -8,9 +8,22 @@
 // just converts between formats
 import slateToText from './txt';
 import converSlateToDpe from './slate-to-dpe';
-import slateToDocx from '../export-adapters/docx';
+import slateToDocx from './docx';
 import subtitlesExportOptionsList from './subtitles-generator/list';
 import subtitlesGenerator from './subtitles-generator/index';
+
+export type ExportData = {
+  type: string;
+  ext?: any;
+  speakers?: any;
+  timecodes?: any;
+  inlineTimecodes?: any;
+  hideTitle?: any;
+  atlasFormat?: any;
+  isDownload?: boolean;
+  slateValue?: any;
+  transcriptTitle?: any;
+};
 
 const captionTypeList = subtitlesExportOptionsList.map((list) => {
   return list.type;
@@ -20,7 +33,7 @@ export const isCaptionType = (type) => {
   const res = captionTypeList.includes(type);
   return res;
 };
-const exportAdapter = ({ slateValue, type, ext, transcriptTitle, speakers, timecodes, inlineTimecodes, hideTitle, atlasFormat }) => {
+const exportAdapter = ({ slateValue, type, ext, transcriptTitle, speakers, timecodes, inlineTimecodes, hideTitle, atlasFormat }: ExportData) => {
   switch (type) {
     case 'text':
       return slateToText({ value: slateValue, speakers, timecodes, atlasFormat });

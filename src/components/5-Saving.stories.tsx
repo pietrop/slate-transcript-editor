@@ -4,7 +4,7 @@ import { withKnobs, text, boolean, number, object, select } from '@storybook/add
 import { withInfo } from '@storybook/addon-info';
 import { version } from '../../package.json';
 
-import SlateTranscriptEditor from './index.js';
+import SlateTranscriptEditor from '.';
 import 'fontsource-roboto';
 
 export default {

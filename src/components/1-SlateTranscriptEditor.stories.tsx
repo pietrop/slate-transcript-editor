@@ -5,7 +5,7 @@ import { withInfo } from '@storybook/addon-info';
 import { version } from '../../package.json';
 
 import Button from '@material-ui/core/Button';
-import SlateTranscriptEditor from './index.js';
+import SlateTranscriptEditor from '.';
 import 'fontsource-roboto';
 
 export default {

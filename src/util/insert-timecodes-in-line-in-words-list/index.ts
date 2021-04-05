@@ -10,11 +10,20 @@ import { shortTimecode } from '../timecode-converter';
  */
 
 import convertWordsToText from '../convert-words-to-text';
+import * as R from 'ramda';
 
-const insertTimecodesInlineinWordsList = ({ intervalSeconds = 30, words, lastInsertTime = 0 }) => {
-  const tmpWords = JSON.parse(JSON.stringify(words));
+const insertTimecodesInlineinWordsList = ({
+  intervalSeconds = 30,
+  words,
+  lastInsertTime = 0,
+}: {
+  intervalSeconds?: number;
+  words: { start: number; end: number; text: string }[];
+  lastInsertTime?: number;
+}): [{ start: number; end: number; text: string }[], number] => {
+  const tmpWords = R.clone(words);
   const sortedWords = tmpWords.sort((a, b) => a.start - b.start);
-  let newWords = [];
+  let newWords: { start: number; end: number; text: string }[] = [];
 
   for (const word of sortedWords) {
     if (word.start - lastInsertTime > intervalSeconds) {

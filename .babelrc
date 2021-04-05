@@ -1,8 +1,5 @@
 {
-    "plugins": ["transform-react-jsx"],
-    "ignore": [
-      "src/components/*.storiesjs",
-      "src/components/sample-data/**"
-    ],
-    "presets":["@babel/preset-react"]
-  }
+  "plugins": ["transform-react-jsx"],
+  "ignore": [],
+  "presets": ["@babel/preset-react"]
+}

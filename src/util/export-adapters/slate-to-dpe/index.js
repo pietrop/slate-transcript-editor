@@ -44,10 +44,8 @@ const slateParagraphsToDpeWords = (slateParagraphs) => {
 /**
  * Update timestamps usign stt-align module
  * @param {*} currentContent - slate js value
- * @param {*} words - list of stt words
  * @return dpe transcript with paragraphs and words
  */
-
 const converSlateToDpe = (currentContent) => {
   // using updateBloocksTimestamps instead of previous way to align
   // this should be more computationally efficient for now as it only adjust paragraphs that have changed

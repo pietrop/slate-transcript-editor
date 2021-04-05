@@ -16,7 +16,7 @@ import padTimeToTimecode from './src/padTimeToTimecode';
  * - hh:mm:ff
  * @todo could be refactored with some helper functions for clarity
  */
-const timecodeToSeconds = time => {
+const timecodeToSeconds = (time) => {
   if (typeof time === 'string') {
     const resultPadded = padTimeToTimecode(time);
     const resultConverted = timecodeToSecondsHelper(resultPadded);
@@ -28,7 +28,7 @@ const timecodeToSeconds = time => {
   return parseFloat(time);
 };
 
-const shortTimecode = time => {
+const shortTimecode = (time) => {
   // handle edge case if it's zero, then just return shorter timecode
   if (time === 0) {
     return '00:00:00';

@@ -19,9 +19,9 @@ import generatePreviousTimingsUpToCurrent from './generate-previous-timings-up-t
  * splices a list of times, int, up to a certain, index current time.
  * eg  `totalTimingsInt` is [0, 1, 2, 3, 4, 5] and `time` is 3, it retusn "0 1 2"
  * then it returns
- * @param {Array} totalTimingsInt -  list of timings int, generated with `generatePreviousTimings`
- * @param {Number} time - float, time in seconds
- * @returns {String}
+ * param {Array} totalTimingsInt -  list of timings int, generated with `generatePreviousTimings`
+ * param {Number} time - float, time in seconds
+ * returns {String}
  */
 
 function isEmpty(obj) {

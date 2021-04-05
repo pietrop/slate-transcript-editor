@@ -34,9 +34,12 @@ function addTimecodesToLines(wordsList, paragraphs, lines) {
     })
     .map((line) => {
       endWordCounter += countWords(line);
-      const jsonLine = { text: line.trim() };
-      jsonLine.start = wordsList[startWordCounter].start;
-      jsonLine.end = wordsList[endWordCounter - 1].end;
+      const jsonLine = {
+        text: line.trim(),
+        start: wordsList[startWordCounter].start,
+        end: wordsList[endWordCounter - 1].end,
+        speaker: undefined,
+      };
       // #-----------------|------|-----------------#
       const possibleParagraphs = paragraphs
         .filter((p) => jsonLine.start >= p.start && jsonLine.start < p.end)
@@ -85,7 +88,19 @@ function preSegmentTextJson({ wordsList, paragraphs, numberOfCharPerLine }) {
   return addTimecodesToLines(wordsList, paragraphs, segmentedTextArray);
 }
 
-function subtitlesComposer({ words, paragraphs, type, numberOfCharPerLine, slateValue }) {
+function subtitlesComposer({
+  words,
+  paragraphs,
+  type,
+  numberOfCharPerLine,
+  slateValue,
+}: {
+  words: any;
+  paragraphs?: any;
+  type: any;
+  numberOfCharPerLine?: number;
+  slateValue?: any;
+}) {
   let subtitlesJson;
   if (type === 'vtt_speakers_paragraphs') {
     subtitlesJson = convertSlateValueToSubtitleJson(slateValue);

@@ -8,9 +8,9 @@ from https://github.com/ianstormtaylor/slate/blob/228f4fa94f61f42ca41feae2b3029e
  });
  return startBlock;
 */
-import { Editor } from 'slate';
+import { Editor, Path, Ancestor } from 'slate';
 
-function getClosestBlock(editor) {
+function getClosestBlock(editor): [Ancestor, Path] {
   const [blockNode, path] = Editor.above(editor, { match: (n) => Editor.isBlock(editor, n) });
   return [blockNode, path];
 }

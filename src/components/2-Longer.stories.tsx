@@ -1,6 +1,6 @@
 import React from 'react';
 import { action } from '@storybook/addon-actions';
-import SlateTranscriptEditor from './index.js';
+import SlateTranscriptEditor from '.';
 
 export default {
   title: 'Performance for over 1 hour media',

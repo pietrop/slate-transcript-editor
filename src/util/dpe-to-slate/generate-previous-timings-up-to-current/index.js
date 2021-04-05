@@ -7,7 +7,7 @@
  * Generate a list of times, each rounded up to int.
  * from zero to the provided `time`.
  * eg if `time` is 6, the list would be [0, 1, 2, 3, 4, 5]
- * @param {Number} time - float or int, time in seconds
+ * @param {any} start - float or int, time in seconds
  */
 
 function generatePreviousTimingsUpToCurrent(start) {
