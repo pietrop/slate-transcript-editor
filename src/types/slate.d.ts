@@ -2,7 +2,14 @@ import { BaseEditor } from 'slate';
 import { ReactEditor } from 'slate-react';
 import { HistoryEditor } from 'slate-history';
 
-type CustomText = { words: string[]; text: string };
+export interface TranscriptWord {
+  id: number;
+  start: number;
+  end: number;
+  text: string;
+}
+
+type CustomText = { words: TranscriptWord[]; text: string };
 
 declare module 'slate' {
   interface CustomTypes {

@@ -11,6 +11,7 @@ import { shortTimecode } from '../timecode-converter';
 
 import convertWordsToText from '../convert-words-to-text';
 import * as R from 'ramda';
+import { Element } from 'slate';
 
 const insertTimecodesInlineinWordsList = ({
   intervalSeconds = 30,
@@ -43,7 +44,7 @@ const insertTimecodesInlineinWordsList = ({
   return [newWords, lastInsertTime];
 };
 
-const insertTimecodesInLineInSlateJs = (slateValue) => {
+const insertTimecodesInLineInSlateJs = (slateValue: Element[]): Element[] => {
   let lastInsertTime = 0;
   return slateValue.map((block) => {
     const newBlock = JSON.parse(JSON.stringify(block));

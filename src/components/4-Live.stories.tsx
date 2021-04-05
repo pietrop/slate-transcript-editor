@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { action } from '@storybook/addon-actions';
 import { withKnobs, text, boolean, number, object, select } from '@storybook/addon-knobs';
 import { withInfo } from '@storybook/addon-info';
-import SlateTranscriptEditor from '.';
+import SlateTranscriptEditor, { TranscriptData } from '.';
 
 export default {
   title: 'Live',
@@ -26,7 +26,7 @@ import DEMO_SOLEIO_LIVE from '../sample-data/segmented-transcript-soleio-dpe.jso
 // Parent component to simulate results from a live STT stream.
 const Example = (props) => {
   // Declare a new state variable, which we'll call "count"
-  const [jsonData, setJsonData] = useState({});
+  const [jsonData] = useState<TranscriptData>({ words: [], paragraphs: [] });
   const [interimResults, setInterimResults] = useState({});
 
   useEffect(() => {

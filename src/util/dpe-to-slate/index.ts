@@ -14,6 +14,8 @@ import { shortTimecode } from '../timecode-converter';
 
 import getWordsForParagraph from '../get-words-for-paragraph';
 import generatePreviousTimingsUpToCurrent from './generate-previous-timings-up-to-current';
+import { TranscriptData } from 'components';
+import { Descendant } from 'slate';
 
 /**
  * splices a list of times, int, up to a certain, index current time.
@@ -35,7 +37,7 @@ const generateText = (paragraph, words) => {
     .join(' ');
 };
 
-const convertDpeToSlate = (transcript) => {
+const convertDpeToSlate = (transcript: TranscriptData): Descendant[] => {
   if (isEmpty(transcript)) {
     return [
       {

@@ -1,6 +1,7 @@
-import type { Node } from 'slate';
+import * as R from 'ramda';
+import type { Descendant, Node } from 'slate';
 import type { GridSize } from '@material-ui/core';
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, PropsWithChildren } from 'react';
 import PropTypes, { string } from 'prop-types';
 import path from 'path';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -31,7 +32,7 @@ import debounce from 'lodash/debounce';
 import { createEditor, Editor, Transforms, Element } from 'slate';
 // https://docs.slatejs.org/walkthroughs/01-installing-slate
 // Import the Slate components and React plugin.
-import { Slate, Editable, withReact, ReactEditor } from 'slate-react';
+import { Slate, Editable, withReact, ReactEditor, RenderElementProps, RenderLeafProps } from 'slate-react';
 import { withHistory } from 'slate-history';
 
 import SideBtns from './SideBtns';
@@ -46,6 +47,8 @@ import updateBloocksTimestamps from '../util/export-adapters/slate-to-dpe/update
 import exportAdapter, { ExportData, isCaptionType } from '../util/export-adapters';
 import generatePreviousTimingsUpToCurrent from '../util/dpe-to-slate/generate-previous-timings-up-to-current';
 import SlateHelpers from './slate-helpers';
+import { GridProps } from '@material-ui/core';
+import { TranscriptWord } from 'types/slate';
 
 const PLAYBACK_RATE_VALUES = [0.2, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 3, 3.5];
 const SEEK_BACK_SEC = 10;
@@ -61,17 +64,46 @@ const pauseWhileTypeing = (current) => {
 };
 const debouncePauseWhileTyping = debounce(pauseWhileTypeing, PAUSE_WHILTE_TYPING_TIMEOUT_MILLISECONDS);
 
-function SlateTranscriptEditor(props) {
+export interface TranscriptData {
+  words?: TranscriptWord[];
+  paragraphs?: TranscriptParagraph[];
+}
+
+interface TranscriptParagraph {
+  id: number;
+  start: number;
+  end: number;
+  speaker: string;
+}
+
+interface Props {
+  transcriptData: TranscriptData;
+  mediaUrl: string;
+  handleSaveEditor: (value: string) => void;
+  handleAutoSaveChanges?: Function;
+  autoSaveContentType: string;
+  isEditable?: boolean;
+  showTimecodes?: boolean;
+  showSpeakers?: boolean;
+  title?: string;
+  showTitle?: boolean;
+  transcriptDataLive?: TranscriptData;
+  handleAnalyticsEvents?: (eventName: string, properties: { fn: string; [key: string]: any }) => void;
+  optionalBtns?: React.ReactNode | React.ReactNodeArray;
+  mediaType?: string;
+}
+
+function SlateTranscriptEditor(props: PropsWithChildren<Props>) {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [playbackRate, setPlaybackRate] = useState(1);
   const editor = useMemo(() => withReact(withHistory(createEditor())), []);
-  const [value, setValue] = useState([]);
+  const [value, setValue] = useState<Descendant[]>([]);
   const defaultShowSpeakersPreference = typeof props.showSpeakers === 'boolean' ? props.showSpeakers : true;
   const defaultShowTimecodesPreference = typeof props.showTimecodes === 'boolean' ? props.showTimecodes : true;
   const [showSpeakers, setShowSpeakers] = useState(defaultShowSpeakersPreference);
   const [showTimecodes, setShowTimecodes] = useState(defaultShowTimecodesPreference);
-  const [speakerOptions, setSpeakerOptions] = useState([]);
+  const [speakerOptions, setSpeakerOptions] = useState<string[]>([]);
   const [showSpeakersCheatShet, setShowSpeakersCheatShet] = useState(true);
   const [saveTimer, setSaveTimer] = useState(null);
   const [isPauseWhiletyping, setIsPauseWhiletyping] = useState(false);
@@ -121,7 +153,8 @@ function SlateTranscriptEditor(props) {
   }, [props.transcriptDataLive]);
 
   useEffect(() => {
-    const getUniqueSpeakers = pluck('speaker');
+    const getUniqueSpeakers = R.pipe(R.pluck('speaker'), R.uniq);
+    // @ts-ignore
     const uniqueSpeakers = getUniqueSpeakers(value);
     setSpeakerOptions(uniqueSpeakers);
   }, [value]);
@@ -143,8 +176,6 @@ function SlateTranscriptEditor(props) {
       mediaRef.current.removeEventListener('timeupdate', handleTimeUpdated);
     };
   }, []);
-
-  useEffect(() => {}, [currentTime]);
 
   // useEffect(() => {
   //   // Update the document title using the browser API
@@ -264,7 +295,7 @@ function SlateTranscriptEditor(props) {
     }
   }, []);
 
-  const renderLeaf = useCallback(({ attributes, children, leaf }) => {
+  const renderLeaf = useCallback(({ attributes, children }: RenderLeafProps): JSX.Element => {
     return (
       <span
         onDoubleClick={handleTimedTextClick}
@@ -330,7 +361,7 @@ function SlateTranscriptEditor(props) {
     }
   };
 
-  const TimedTextElement = (props) => {
+  const TimedTextElement = (props: { element: Element; attributes: GridProps; children: React.ReactNode }) => {
     let textLg: GridSize = 12;
     let textXl: GridSize = 12;
     if (!showSpeakers && !showTimecodes) {
@@ -348,7 +379,7 @@ function SlateTranscriptEditor(props) {
     }
 
     return (
-      <Grid container direction="row" justify="flex-start" alignItems="flex-start" {...props.attributes}>
+      <Grid container direction="row" justifyContent="flex-start" alignItems="flex-start" {...props.attributes}>
         {showTimecodes && (
           <Grid item contentEditable={false} xs={4} sm={3} md={3} lg={2} xl={2} className={'p-t-2 text-truncate'}>
             <code
@@ -393,11 +424,14 @@ function SlateTranscriptEditor(props) {
     );
   };
 
-  const DefaultElement = (props) => {
+  const DefaultElement = (props: {
+    attributes: React.DetailedHTMLProps<React.HTMLAttributes<HTMLParagraphElement>, HTMLParagraphElement>;
+    children: React.ReactNode;
+  }) => {
     return <p {...props.attributes}>{props.children}</p>;
   };
 
-  const handleTimedTextClick = (e) => {
+  const handleTimedTextClick = (e: any) => {
     if (e.target.classList.contains('timecode')) {
       const start = e.target.dataset.start;
       if (mediaRef && mediaRef.current) {
@@ -490,7 +524,16 @@ function SlateTranscriptEditor(props) {
 
   // TODO: this could be refactore, and brought some of this logic inside the exportAdapter (?)
   // To make this a little cleaner
-  const handleExport = async ({ type, ext, speakers, timecodes, inlineTimecodes, hideTitle, atlasFormat, isDownload }: ExportData) => {
+  const handleExport = async ({
+    type,
+    ext,
+    speakers,
+    timecodes,
+    inlineTimecodes,
+    hideTitle,
+    atlasFormat,
+    isDownload,
+  }: ExportData): Promise<string> => {
     if (props.handleAnalyticsEvents) {
       // handles if click cancel and doesn't set speaker name
       props.handleAnalyticsEvents('ste_handle_export', {
@@ -933,24 +976,6 @@ function SlateTranscriptEditor(props) {
 }
 
 export default SlateTranscriptEditor;
-
-SlateTranscriptEditor.propTypes = {
-  transcriptData: PropTypes.object.isRequired,
-  mediaUrl: PropTypes.string.isRequired,
-  handleSaveEditor: PropTypes.func,
-  handleAutoSaveChanges: PropTypes.func,
-  autoSaveContentType: PropTypes.string,
-  isEditable: PropTypes.bool,
-  showTimecodes: PropTypes.bool,
-  showSpeakers: PropTypes.bool,
-  title: PropTypes.string,
-  showTitle: PropTypes.bool,
-  transcriptDataLive: PropTypes.object,
-  children: PropTypes.node,
-  handleAnalyticsEvents: PropTypes.func,
-  optionalBtns: PropTypes.node,
-  mediaType: PropTypes.string,
-};
 
 SlateTranscriptEditor.defaultProps = {
   showTitle: false,

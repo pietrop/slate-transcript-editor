@@ -1,6 +1,10 @@
 import { alignSTT } from 'stt-align-node';
 import countWords, { removeExtraWhiteSpaces, splitOnWhiteSpaces, countChar } from '../../../count-words';
 import convertWordsToText from '../../../convert-words-to-text';
+import { Descendant, Element } from 'slate';
+import assert from 'assert';
+import * as R from 'ramda';
+import { TranscriptWord } from 'types/slate';
 
 export function isTextAndWordsListChanged({ text, words }) {
   const wordsText = convertWordsToText(words);
@@ -9,7 +13,7 @@ export function isTextAndWordsListChanged({ text, words }) {
   return !(removeExtraWhiteSpaces(text) === wordsText);
 }
 
-function isEqualNumberOfWords({ text, words }) {
+function isEqualNumberOfWords({ text, words }: { text: string; words: TranscriptWord[] }) {
   // Quick fix, if there's words with empty string in the block
   // for some issues further upstream, either in the initial conversion
   // from STT or in previosu alignments (?)
@@ -26,14 +30,15 @@ function isEqualNumberOfWords({ text, words }) {
  * This removes those words as thy cause issue with the alignment
  * TODO: figure out a better fix in the alignSTT repo further upstream
  */
-function removeEmptyWords(words) {
+function removeEmptyWords(words: TranscriptWord[]): TranscriptWord[] {
   return words.filter((word) => {
     return word.text;
   });
 }
 
-export function alignBlock({ block, text, words }) {
-  const newBlock = JSON.parse(JSON.stringify(block));
+export function alignBlock({ block, text, words }: { block: Descendant; text: any; words: TranscriptWord[] }) {
+  const newBlock = R.clone(block);
+  assert(Element.isElement(newBlock));
   // if same number of words in words list and text
   // then can do an optimization where you don't need to run diff
   // just transpose words onto the timecodes.
@@ -53,7 +58,8 @@ export function alignBlock({ block, text, words }) {
   return newBlock;
 }
 
-export function updateIndividualBlockTimestamps(block) {
+export function updateIndividualBlockTimestamps(block: Descendant): Element {
+  assert(Element.isElement(block));
   const text = block.children[0].text;
   const words = block.children[0].words;
   if (isTextAndWordsListChanged({ text, words })) {
@@ -64,7 +70,7 @@ export function updateIndividualBlockTimestamps(block) {
 }
 
 // This option, diffs text and words in transcripts
-function updateBloocksTimestamps(slateJsValue) {
+function updateBloocksTimestamps(slateJsValue: Descendant[]): Element[] {
   return slateJsValue.map((block) => {
     return updateIndividualBlockTimestamps(block);
   });

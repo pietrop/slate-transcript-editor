@@ -2,13 +2,19 @@ import { alignSTT } from 'stt-align-node';
 import { shortTimecode } from '../../../timecode-converter';
 import countWords from '../../../count-words';
 import generatePreviousTimingsUpToCurrent from '../../../dpe-to-slate/generate-previous-timings-up-to-current';
-const createSlateContentFromSlateJsParagraphs = (currentContent, newEntities) => {
+import { Descendant, Element } from 'slate';
+import { TranscriptWord } from 'types/slate';
+import assert from 'assert';
+import { TranscriptData } from 'components';
+
+const createSlateContentFromSlateJsParagraphs = (currentContent: Descendant[], newEntities: TranscriptWord[]): Descendant[] => {
   // Update entites to block structure.
   const updatedBlockArray = [];
   let totalWords = 0;
 
   for (const blockIndex in currentContent) {
     const block = currentContent[blockIndex];
+    assert(Element.isElement(block));
     const text = block.children[0].text;
     // if copy and pasting large chunk of text
     // currentContentBlock, would not have speaker and start/end time info
@@ -16,7 +22,7 @@ const createSlateContentFromSlateJsParagraphs = (currentContent, newEntities) =>
     const wordsInBlock = countWords(text);
     const blockEntites = newEntities.slice(totalWords, totalWords + wordsInBlock);
     let speaker = block.speaker;
-    const start = parseFloat(blockEntites[0].start);
+    const start = parseFloat((blockEntites[0].start as unknown) as string);
     // const end = parseFloat(blockEntites[blockEntites.length - 1].end);
     // const currentParagraph = { start, end };
     // The speakers would also not exist. unles in future iteration
@@ -53,7 +59,7 @@ const createSlateContentFromSlateJsParagraphs = (currentContent, newEntities) =>
   return updatedBlockArray;
 };
 
-function plainTextalignToSlateJs(words, text, slateJsValue) {
+function plainTextalignToSlateJs(words: TranscriptData, text: string, slateJsValue: Descendant[]): Descendant[] {
   // TODO: maybe there's a more performant way to do this?
   // As on larger over 1 hour transcript it might freeze the UI 🤷‍♂️
   const alignedWords = alignSTT(words, text);
