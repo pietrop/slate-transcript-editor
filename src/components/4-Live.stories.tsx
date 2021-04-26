@@ -1,22 +1,12 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { action } from '@storybook/addon-actions';
 import { withKnobs, text, boolean, number, object, select } from '@storybook/addon-knobs';
-import { withInfo } from '@storybook/addon-info';
 import SlateTranscriptEditor, { TranscriptData } from '.';
 
 export default {
   title: 'Live',
   component: SlateTranscriptEditor,
-  decorators: [withKnobs, withInfo],
-  parameters: {
-    info: {
-      maxPropArrayLength: 3,
-      maxPropsIntoLine: 3,
-      maxPropObjectKeys: 1,
-      excludedPropTypes: ['transcriptData'],
-      source: false,
-    },
-  },
+  decorators: [withKnobs],
 };
 
 const DEMO_MEDIA_URL_SOLEIO =

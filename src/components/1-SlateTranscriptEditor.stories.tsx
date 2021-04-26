@@ -1,7 +1,6 @@
 import React from 'react';
 import { action } from '@storybook/addon-actions';
 import { withKnobs, text, boolean, number, object, select } from '@storybook/addon-knobs';
-import { withInfo } from '@storybook/addon-info';
 import { version } from '../../package.json';
 
 import Button from '@material-ui/core/Button';
@@ -11,16 +10,7 @@ import 'fontsource-roboto';
 export default {
   title: 'SlateTranscriptEditor',
   component: SlateTranscriptEditor,
-  decorators: [withKnobs, withInfo],
-  parameters: {
-    info: {
-      maxPropArrayLength: 3,
-      maxPropsIntoLine: 3,
-      maxPropObjectKeys: 1,
-      excludedPropTypes: ['transcriptData'],
-      source: false,
-    },
-  },
+  decorators: [withKnobs],
 };
 
 const AUDIO_URL = 'https://www.w3schools.com/tags/horse.ogg';
