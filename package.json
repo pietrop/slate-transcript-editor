@@ -11,8 +11,8 @@
     "deploy:ghpages": "npm run build-storybook  && cp .nojekyll .out/.nojekyll && gh-pages -d .out",
     "build:component": "tsc -p tsconfig.json",
     "build:dev": "tsc -p tsconfig.json --watch",
-    "publish:public": "npm run build:component && npm publish dist --access public",
-    "publish:dry:run": "npm run build:component && npm publish  dist --dry-run",
+    "publish:public": "npm run build:component && npm publish ./dist --access public",
+    "publish:dry:run": "npm run build:component && npm publish ./dist --dry-run",
     "lint": "prettier --write \"src/**/*.(js|ts|jsx|tsx)\"",
     "clean": "rimraf dist"
   },
