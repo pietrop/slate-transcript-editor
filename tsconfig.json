@@ -70,7 +70,11 @@
     "resolveJsonModule": true
   },
   "include": [
-    "./src"
+    "./src",
+    "package.json"
   ],
-  "exclude": []
+  "exclude": [
+    "./src/sample-data",
+    "./src/**/*.stories.tsx",
+  ]
 }
