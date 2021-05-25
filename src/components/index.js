@@ -705,12 +705,21 @@ function SlateTranscriptEditor(props) {
           </Tooltip>
         )}
 
-        <Grid container direction="row" justify="space-around" alignItems="flex-start" spacing={1}>
+        <Grid container direction="row" justify="center" alignItems="stretch" spacing={1}>
           <Grid item xs={12} sm={4} md={4} lg={4} xl={4}>
-            <Grid container direction="column" justify="space-between" alignItems="stretch">
+            <Grid container direction="column" justify="space-around" alignItems="stretch">
               <Grid item style={{ backgroundColor: 'black' }}>
-                <video ref={mediaRef} src={props.mediaUrl} width={'100%'} height="auto" controls playsInline></video>
+                <video
+                  ref={mediaRef}
+                  src={props.mediaUrl}
+                  width={'100%'}
+                  // height="auto"
+                  controls
+                  playsInline
+                ></video>
               </Grid>
+              {/* Br as Temporary patch for alignement fix */}
+              <br /> <br /> <br />
               <Grid item>
                 <Grid container direction="row" justify="space-between" alignItems="flex-start" spacing={1}>
                   <Grid item>
@@ -768,6 +777,30 @@ function SlateTranscriptEditor(props) {
                 </Tooltip>
               </Grid>
               <Grid item>
+                <Tooltip
+                  enterDelay={100}
+                  title={
+                    <Typography variant="body1">
+                      Double click on a word or time stamp to jump to the corresponding point in the media. Start typing to edit text. You can add and
+                      change names of speakers in your transcript. Remember to save regularly. And you can export to get a copy.
+                    </Typography>
+                  }
+                >
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      flexWrap: 'wrap',
+                    }}
+                  >
+                    <InfoOutlinedIcon fontSize="small" color="primary" />
+                    <Typography color="primary" variant="body1">
+                      How Does this work?
+                    </Typography>
+                  </div>
+                </Tooltip>
+              </Grid>
+              <Grid item>
                 <Link
                   color="inherit"
                   onClick={() => {
@@ -794,30 +827,6 @@ function SlateTranscriptEditor(props) {
                     );
                   })}
                 </Collapse>
-              </Grid>
-              <Grid item>
-                <Tooltip
-                  enterDelay={100}
-                  title={
-                    <Typography variant="body1">
-                      Double click on a word or time stamp to jump to the corresponding point in the media. Start typing to edit text. You can add and
-                      change names of speakers in your transcript. Remember to save regularly. And you can export to get a copy.
-                    </Typography>
-                  }
-                >
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      flexWrap: 'wrap',
-                    }}
-                  >
-                    <InfoOutlinedIcon fontSize="small" color="primary" />
-                    <Typography color="primary" variant="body1">
-                      How Does this work?
-                    </Typography>
-                  </div>
-                </Tooltip>
               </Grid>
               <Grid item>{props.children}</Grid>
             </Grid>
