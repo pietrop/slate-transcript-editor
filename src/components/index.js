@@ -707,12 +707,12 @@ function SlateTranscriptEditor(props) {
 
         <Grid container direction="row" justify="space-around" alignItems="flex-start" spacing={1}>
           <Grid item xs={12} sm={4} md={4} lg={4} xl={4}>
-            <Grid container direction="column" justify="space-between" alignItems="flex-start">
+            <Grid container direction="column" justify="space-between" alignItems="stretch">
               <Grid item style={{ backgroundColor: 'black' }}>
                 <video ref={mediaRef} src={props.mediaUrl} width={'100%'} height="auto" controls playsInline></video>
               </Grid>
               <Grid item>
-                <Grid container direction="row" justify="flex-start" alignItems="flex-start" spacing={1}>
+                <Grid container direction="row" justify="space-between" alignItems="flex-start" spacing={1}>
                   <Grid item>
                     <p>
                       <code style={{ color: 'grey' }}>{shortTimecode(currentTime)}</code>
@@ -736,7 +736,6 @@ function SlateTranscriptEditor(props) {
                       <FormHelperText>Speed</FormHelperText>
                     </FormControl>
                   </Grid>
-
                   <Grid item>
                     <Tooltip title={<Typography variant="body1">{` Seek back by ${SEEK_BACK_SEC} seconds`}</Typography>}>
                       <Button color="primary" onClick={handleSeekBack} block="true">
