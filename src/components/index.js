@@ -15,10 +15,16 @@ import Replay10Icon from '@material-ui/icons/Replay10';
 import Forward10Icon from '@material-ui/icons/Forward10';
 import Collapse from '@material-ui/core/Collapse';
 import Tooltip from '@material-ui/core/Tooltip';
+import KeyboardReturnOutlinedIcon from '@material-ui/icons/KeyboardReturnOutlined';
+import KeyboardIcon from '@material-ui/icons/Keyboard';
+import PeopleIcon from '@material-ui/icons/People';
 import FormLabel from '@material-ui/core/FormLabel';
 import Switch from '@material-ui/core/Switch';
 import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 import FormHelperText from '@material-ui/core/FormHelperText';
+import EditIcon from '@material-ui/icons/Edit';
+import SaveAltIcon from '@material-ui/icons/SaveAlt';
+import SaveIcon from '@material-ui/icons/Save';
 import debounce from 'lodash/debounce';
 import { createEditor, Editor, Transforms } from 'slate';
 // https://docs.slatejs.org/walkthroughs/01-installing-slate
@@ -161,7 +167,7 @@ function SlateTranscriptEditor(props) {
   };
 
   const handleInsertMusicNote = () => {
-    Transforms.insertText(editor, '♫'); // or ♪
+    Transforms.insertText(editor, '♪'); // or ♫
     if (props.handleAnalyticsEvents) {
       props.handleAnalyticsEvents('ste_clicked_on_insert', {
         btn: '♫',
@@ -586,6 +592,14 @@ function SlateTranscriptEditor(props) {
     SlateHelpers.handleSplitParagraph(editor);
   };
 
+  const handleUndo = () => {
+    editor.undo();
+  };
+
+  const handleRedo = () => {
+    editor.redo();
+  };
+
   // const debounced_version = throttle(handleRestoreTimecodes, 3000, { leading: false, trailing: true });
   // TODO: revisit logic for
   // - splitting paragraph via enter key
@@ -705,11 +719,12 @@ function SlateTranscriptEditor(props) {
           </Tooltip>
         )}
 
-        <Grid container direction="row" justify="center" alignItems="stretch" spacing={1}>
-          <Grid item xs={12} sm={4} md={4} lg={4} xl={4}>
-            <Grid container direction="column" justify="space-around" alignItems="stretch">
-              <Grid item style={{ backgroundColor: 'black' }}>
+        <Grid container direction="row" justify="center" alignItems="stretch" spacing={2}>
+          <Grid item xs={12} sm={3} md={3} lg={3} xl={3}>
+            <Grid container direction="column" justify="flex-start" alignItems="stretch" spacing={2}>
+              <Grid item>
                 <video
+                  style={{ backgroundColor: 'black' }}
                   ref={mediaRef}
                   src={props.mediaUrl}
                   width={'100%'}
@@ -718,8 +733,6 @@ function SlateTranscriptEditor(props) {
                   playsInline
                 ></video>
               </Grid>
-              {/* Br as Temporary patch for alignement fix */}
-              <br /> <br /> <br />
               <Grid item>
                 <Grid container direction="row" justify="space-between" alignItems="flex-start" spacing={1}>
                   <Grid item>
@@ -729,7 +742,18 @@ function SlateTranscriptEditor(props) {
                       <code style={{ color: 'grey' }}>{duration ? `${shortTimecode(duration)}` : '00:00:00'}</code>
                     </p>
                   </Grid>
-
+                  <Grid item>
+                    <Tooltip title={<Typography variant="body1">{` Seek back by ${SEEK_BACK_SEC} seconds`}</Typography>}>
+                      <Button color="primary" onClick={handleSeekBack} block="true">
+                        <Replay10Icon color="primary" fontSize="large" />
+                      </Button>
+                    </Tooltip>
+                    <Tooltip title={<Typography variant="body1">{` Fast forward by ${SEEK_BACK_SEC} seconds`}</Typography>}>
+                      <Button color="primary" onClick={handleFastForward} block="true">
+                        <Forward10Icon color="primary" fontSize="large" />
+                      </Button>
+                    </Tooltip>
+                  </Grid>
                   <Grid item>
                     <FormControl>
                       <Select labelId="demo-simple-select-label" id="demo-simple-select" value={playbackRate} onChange={handleSetPlaybackRate}>
@@ -746,43 +770,40 @@ function SlateTranscriptEditor(props) {
                     </FormControl>
                   </Grid>
                   <Grid item>
-                    <Tooltip title={<Typography variant="body1">{` Seek back by ${SEEK_BACK_SEC} seconds`}</Typography>}>
-                      <Button color="primary" onClick={handleSeekBack} block="true">
-                        <Replay10Icon color="primary" fontSize="large" />
-                      </Button>
-                    </Tooltip>
-                    <Tooltip title={<Typography variant="body1">{` Fast forward by ${SEEK_BACK_SEC} seconds`}</Typography>}>
-                      <Button color="primary" onClick={handleFastForward} block="true">
-                        <Forward10Icon color="primary" fontSize="large" />
-                      </Button>
+                    <Tooltip
+                      enterDelay={3000}
+                      title={
+                        <Typography variant="body1">
+                          {`Turn ${isPauseWhiletyping ? 'off' : 'on'} pause while typing functionality. As
+                      you start typing the media while pause playback until you stop. Not
+                      reccomended on longer transcript as it might present performance issues.`}
+                        </Typography>
+                      }
+                    >
+                      <Typography variant="subtitle2" gutterBottom>
+                        <Switch color="primary" checked={isPauseWhiletyping} onChange={handleSetPauseWhileTyping} />
+                        Pause media while typing
+                      </Typography>
                     </Tooltip>
                   </Grid>
                 </Grid>
               </Grid>
               <Grid item>
                 <Tooltip
-                  enterDelay={3000}
-                  title={
-                    <Typography variant="body1">
-                      {`Turn ${isPauseWhiletyping ? 'off' : 'on'} pause while typing functionality. As
-                      you start typing the media while pause playback until you stop. Not
-                      reccomended on longer transcript as it might present performance issues.`}
-                    </Typography>
-                  }
-                >
-                  <Typography variant="subtitle2" gutterBottom>
-                    <Switch color="primary" checked={isPauseWhiletyping} onChange={handleSetPauseWhileTyping} />
-                    Pause media while typing
-                  </Typography>
-                </Tooltip>
-              </Grid>
-              <Grid item>
-                <Tooltip
                   enterDelay={100}
                   title={
                     <Typography variant="body1">
-                      Double click on a word or time stamp to jump to the corresponding point in the media. Start typing to edit text. You can add and
-                      change names of speakers in your transcript. Remember to save regularly. And you can export to get a copy.
+                      Double click on a word or time stamp to jump to the corresponding point in the media. <br />
+                      <KeyboardIcon /> Start typing to edit text.
+                      <br />
+                      <PeopleIcon /> You can add and change names of speakers in your transcript.
+                      <br />
+                      <KeyboardReturnOutlinedIcon /> Hit enter in between words to split a paragraph.
+                      <br />
+                      <SaveIcon />
+                      Remember to save regularly.
+                      <br />
+                      <SaveAltIcon /> Export to get a copy.
                     </Typography>
                   }
                 >
@@ -832,7 +853,7 @@ function SlateTranscriptEditor(props) {
             </Grid>
           </Grid>
 
-          <Grid item xs={12} sm={7} md={7} lg={7} xl={7}>
+          <Grid item xs={12} sm={8} md={8} lg={8} xl={8}>
             {value.length !== 0 ? (
               <>
                 <Paper elevation={3}>
@@ -883,6 +904,8 @@ function SlateTranscriptEditor(props) {
               REPLACE_WHOLE_TEXT_INSTRUCTION={REPLACE_WHOLE_TEXT_INSTRUCTION}
               handleAnalyticsEvents={props.handleAnalyticsEvents}
               optionalBtns={props.optionalBtns}
+              handleUndo={handleUndo}
+              handleRedo={handleRedo}
             />
           </Grid>
         </Grid>

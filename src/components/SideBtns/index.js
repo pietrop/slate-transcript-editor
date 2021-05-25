@@ -16,6 +16,9 @@ import ImportExportIcon from '@material-ui/icons/ImportExport';
 import CachedOutlinedIcon from '@material-ui/icons/CachedOutlined';
 import InfoOutlined from '@material-ui/icons/InfoOutlined';
 import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
+import RedoIcon from '@material-ui/icons/Redo';
+import UndoOutlinedIcon from '@material-ui/icons/UndoOutlined';
+import EmojiSymbolsOutlinedIcon from '@material-ui/icons/EmojiSymbolsOutlined';
 import subtitlesExportOptionsList from '../../util/export-adapters/subtitles-generator/list.js';
 
 function SideBtns({
@@ -33,6 +36,8 @@ function SideBtns({
   handleAnalyticsEvents,
   REPLACE_WHOLE_TEXT_INSTRUCTION,
   optionalBtns,
+  handleUndo,
+  handleRedo,
 }) {
   const [anchorMenuEl, setAnchorMenuEl] = useState(null);
 
@@ -263,15 +268,12 @@ function SideBtns({
           </MenuItem>
         </Menu>
       </div>
-
       <Tooltip title={<Typography variant="body1">save</Typography>}>
         <Button disabled={isProcessing} onClick={handleSave} color="primary">
           <SaveOutlinedIcon color={isContentSaved ? 'primary' : 'secondary'} />
         </Button>
       </Tooltip>
-
       {/* TODO: Disabiling until find a way to handle timecodes and alignment on paragraph break */}
-
       {/* <Tooltip
         title={`To insert a paragraph break, and split a pargraph in two, put the cursor at a point where you'd want to add a paragraph break in the text and either click this button or hit enter key`}
       >
@@ -279,21 +281,30 @@ function SideBtns({
           <KeyboardReturnOutlinedIcon color="primary" />
         </Button>
       </Tooltip> */}
-
       <Tooltip
         title={<Typography variant="body1">Put the cursor at a point where you'd want to add [INAUDIBLE] text, and click this button</Typography>}
       >
         <Button disabled={isProcessing} onClick={insertTextInaudible} color="primary">
-          <HelpOutlineOutlinedIcon color="primary" />
+          <EmojiSymbolsOutlinedIcon color="primary" />
         </Button>
       </Tooltip>
-
-      <Tooltip title={<Typography variant="body1">Insert a ♫ in the text</Typography>}>
+      <Tooltip title={<Typography variant="body1">Insert a ♪ in the text</Typography>}>
         <Button disabled={isProcessing} onClick={handleInsertMusicNote} color="primary">
           <MusicNoteOutlinedIcon color="primary" />
         </Button>
       </Tooltip>
 
+      <Tooltip title={<Typography variant="body1">Undo</Typography>}>
+        <Button onClick={handleUndo} color="primary">
+          <UndoOutlinedIcon color="primary" />
+        </Button>
+      </Tooltip>
+
+      <Tooltip title={<Typography variant="body1">Redo</Typography>}>
+        <Button onClick={handleRedo} color="primary">
+          <RedoIcon color="primary" />
+        </Button>
+      </Tooltip>
       {/* <Tooltip
         title={
           ' Restore timecodes. At the moment for transcript over 1hour it could temporarily freeze the UI for a few seconds'
@@ -323,19 +334,16 @@ function SideBtns({
           />
         </Button>
       </Tooltip> */}
-
       <Tooltip title={<Typography variant="body1">{REPLACE_WHOLE_TEXT_INSTRUCTION}</Typography>}>
         <Button onClick={handleReplaceText} color="primary">
           <ImportExportIcon color="primary" />
         </Button>
       </Tooltip>
-
       {/* <Tooltip title={' Double click on a word to jump to the corresponding point in the media'}>
         <Button disabled={isProcessing} color="primary">
           <InfoOutlined color="primary" />
         </Button>
       </Tooltip> */}
-
       {optionalBtns}
     </Grid>
   );
