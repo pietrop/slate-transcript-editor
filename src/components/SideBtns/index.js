@@ -281,6 +281,7 @@ function SideBtns({
           <KeyboardReturnOutlinedIcon color="primary" />
         </Button>
       </Tooltip> */}
+      {/*  */}
       <Tooltip
         title={<Typography variant="body1">Put the cursor at a point where you'd want to add [INAUDIBLE] text, and click this button</Typography>}
       >
@@ -293,14 +294,27 @@ function SideBtns({
           <MusicNoteOutlinedIcon color="primary" />
         </Button>
       </Tooltip>
-
-      <Tooltip title={<Typography variant="body1">Undo</Typography>}>
+      {/*  */}
+      <Tooltip
+        title={
+          <Typography variant="body1">
+            Undo <br />
+            <code>cmd</code> <code>z</code>
+          </Typography>
+        }
+      >
         <Button onClick={handleUndo} color="primary">
           <UndoOutlinedIcon color="primary" />
         </Button>
       </Tooltip>
 
-      <Tooltip title={<Typography variant="body1">Redo</Typography>}>
+      <Tooltip
+        title={
+          <Typography variant="body1">
+            Redo <br /> <code>cmd</code> <code>shift</code> <code>z</code>
+          </Typography>
+        }
+      >
         <Button onClick={handleRedo} color="primary">
           <RedoIcon color="primary" />
         </Button>
@@ -334,6 +348,7 @@ function SideBtns({
           />
         </Button>
       </Tooltip> */}
+      {/*  */}
       <Tooltip title={<Typography variant="body1">{REPLACE_WHOLE_TEXT_INSTRUCTION}</Typography>}>
         <Button onClick={handleReplaceText} color="primary">
           <ImportExportIcon color="primary" />
