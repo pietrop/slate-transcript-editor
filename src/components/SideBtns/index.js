@@ -14,9 +14,7 @@ import HelpOutlineOutlinedIcon from '@material-ui/icons/HelpOutlineOutlined';
 import ImportExportIcon from '@material-ui/icons/ImportExport';
 import CachedOutlinedIcon from '@material-ui/icons/CachedOutlined';
 import InfoOutlined from '@material-ui/icons/InfoOutlined';
-import PauseOutlinedIcon from '@material-ui/icons/PauseOutlined';
 import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
-import SlateHelpers from '../slate-helpers';
 import subtitlesExportOptionsList from '../../util/export-adapters/subtitles-generator/list.js';
 
 function SideBtns({
@@ -28,8 +26,6 @@ function SideBtns({
   insertTextInaudible,
   handleInsertMusicNote,
   handleSplitParagraph,
-  isPauseWhiletyping,
-  handleSetPauseWhileTyping,
   handleRestoreTimecodes,
   handleReplaceText,
   handleSave,
@@ -291,15 +287,6 @@ function SideBtns({
       <Tooltip title={'Insert a ♫ in the text'}>
         <Button disabled={isProcessing} onClick={handleInsertMusicNote} color="primary">
           <MusicNoteOutlinedIcon color="primary" />
-        </Button>
-      </Tooltip>
-
-      <Tooltip
-        title={` Turn ${isPauseWhiletyping ? 'off' : 'on'} pause while typing functionality. As you start typing the media while pause playback
-                      until you stop. Not reccomended on longer transcript as it might present performance issues.`}
-      >
-        <Button disabled={isProcessing} onClick={handleSetPauseWhileTyping}>
-          <PauseOutlinedIcon color="primary" color={isPauseWhiletyping ? 'secondary' : 'primary'} />
         </Button>
       </Tooltip>
 

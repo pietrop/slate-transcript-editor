@@ -14,6 +14,8 @@ import Link from '@material-ui/core/Link';
 import Replay10Icon from '@material-ui/icons/Replay10';
 import Collapse from '@material-ui/core/Collapse';
 import Tooltip from '@material-ui/core/Tooltip';
+import FormLabel from '@material-ui/core/FormLabel';
+import Switch from '@material-ui/core/Switch';
 import debounce from 'lodash/debounce';
 import { createEditor, Editor, Transforms } from 'slate';
 // https://docs.slatejs.org/walkthroughs/01-installing-slate
@@ -692,7 +694,7 @@ function SlateTranscriptEditor(props) {
                 <video ref={mediaRef} src={props.mediaUrl} width={'100%'} height="auto" controls playsInline></video>
               </Grid>
               <Grid item>
-                <Grid container direction="row" justify="space-between" alignItems="center" spacing={1}>
+                <Grid container direction="row" justify="flex-start" alignItems="flex-start" spacing={1}>
                   <Grid item>
                     <p>
                       <code style={{ color: 'grey' }}>{shortTimecode(currentTime)}</code>
@@ -727,7 +729,20 @@ function SlateTranscriptEditor(props) {
                   </Grid>
                 </Grid>
               </Grid>
-
+              <Grid item>
+                <Tooltip
+                  enterDelay={3000}
+                  title={` Turn ${
+                    isPauseWhiletyping ? 'off' : 'on'
+                  } pause while typing functionality. As you start typing the media while pause playback
+                      until you stop. Not reccomended on longer transcript as it might present performance issues.`}
+                >
+                  <Typography variant="subtitle2" gutterBottom>
+                    <Switch color="primary" checked={isPauseWhiletyping} onChange={handleSetPauseWhileTyping} />
+                    Pause video while typing
+                  </Typography>
+                </Tooltip>
+              </Grid>
               <Grid item>
                 <Link
                   color="inherit"
