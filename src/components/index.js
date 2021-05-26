@@ -720,7 +720,7 @@ function SlateTranscriptEditor(props) {
         )}
 
         <Grid container direction="row" justify="center" alignItems="stretch" spacing={2}>
-          <Grid item xs={12} sm={5} md={5} lg={5} xl={5} container direction="column" justify="flex-start" alignItems="stretch" spacing={2}>
+          <Grid item xs={12} sm={5} md={5} lg={5} xl={5} container direction="column" justify="space-betwee" alignItems="stretch" spacing={2}>
             <Grid item container>
               <video
                 style={{ backgroundColor: 'black' }}
@@ -741,18 +741,6 @@ function SlateTranscriptEditor(props) {
                 </p>
               </Grid>
               <Grid item>
-                <Tooltip title={<Typography variant="body1">{` Seek back by ${SEEK_BACK_SEC} seconds`}</Typography>}>
-                  <Button color="primary" onClick={handleSeekBack} block="true">
-                    <Replay10Icon color="primary" fontSize="large" />
-                  </Button>
-                </Tooltip>
-                <Tooltip title={<Typography variant="body1">{` Fast forward by ${SEEK_BACK_SEC} seconds`}</Typography>}>
-                  <Button color="primary" onClick={handleFastForward} block="true">
-                    <Forward10Icon color="primary" fontSize="large" />
-                  </Button>
-                </Tooltip>
-              </Grid>
-              <Grid item>
                 <FormControl>
                   <Select labelId="demo-simple-select-label" id="demo-simple-select" value={playbackRate} onChange={handleSetPlaybackRate}>
                     {PLAYBACK_RATE_VALUES.map((playbackRateValue, index) => {
@@ -767,6 +755,19 @@ function SlateTranscriptEditor(props) {
                   <FormHelperText>Speed</FormHelperText>
                 </FormControl>
               </Grid>
+              <Grid item>
+                <Tooltip title={<Typography variant="body1">{` Seek back by ${SEEK_BACK_SEC} seconds`}</Typography>}>
+                  <Button color="primary" onClick={handleSeekBack} block="true">
+                    <Replay10Icon color="primary" fontSize="large" />
+                  </Button>
+                </Tooltip>
+                <Tooltip title={<Typography variant="body1">{` Fast forward by ${SEEK_BACK_SEC} seconds`}</Typography>}>
+                  <Button color="primary" onClick={handleFastForward} block="true">
+                    <Forward10Icon color="primary" fontSize="large" />
+                  </Button>
+                </Tooltip>
+              </Grid>
+
               <Grid item>
                 <Tooltip
                   enterDelay={3000}
