@@ -720,140 +720,131 @@ function SlateTranscriptEditor(props) {
         )}
 
         <Grid container direction="row" justify="center" alignItems="stretch" spacing={2}>
-          <Grid item xs={12} sm={3} md={3} lg={3} xl={3}>
-            <Grid container direction="column" justify="flex-start" alignItems="stretch" spacing={2}>
+          <Grid item xs={12} sm={5} md={5} lg={5} xl={5} container direction="column" justify="flex-start" alignItems="stretch" spacing={2}>
+            <Grid item container>
+              <video
+                style={{ backgroundColor: 'black' }}
+                ref={mediaRef}
+                src={props.mediaUrl}
+                width={'100%'}
+                // height="auto"
+                controls
+                playsInline
+              ></video>
+            </Grid>
+            <Grid container direction="row" justify="space-between" alignItems="flex-start" spacing={1} item>
               <Grid item>
-                <video
-                  style={{ backgroundColor: 'black' }}
-                  ref={mediaRef}
-                  src={props.mediaUrl}
-                  width={'100%'}
-                  // height="auto"
-                  controls
-                  playsInline
-                ></video>
+                <p>
+                  <code style={{ color: 'grey' }}>{shortTimecode(currentTime)}</code>
+                  <span style={{ color: 'grey' }}> {` | `}</span>
+                  <code style={{ color: 'grey' }}>{duration ? `${shortTimecode(duration)}` : '00:00:00'}</code>
+                </p>
               </Grid>
               <Grid item>
-                <Grid container direction="row" justify="space-between" alignItems="flex-start" spacing={1}>
-                  <Grid item>
-                    <p>
-                      <code style={{ color: 'grey' }}>{shortTimecode(currentTime)}</code>
-                      <span style={{ color: 'grey' }}> {` | `}</span>
-                      <code style={{ color: 'grey' }}>{duration ? `${shortTimecode(duration)}` : '00:00:00'}</code>
-                    </p>
-                  </Grid>
-                  <Grid item>
-                    <Tooltip title={<Typography variant="body1">{` Seek back by ${SEEK_BACK_SEC} seconds`}</Typography>}>
-                      <Button color="primary" onClick={handleSeekBack} block="true">
-                        <Replay10Icon color="primary" fontSize="large" />
-                      </Button>
-                    </Tooltip>
-                    <Tooltip title={<Typography variant="body1">{` Fast forward by ${SEEK_BACK_SEC} seconds`}</Typography>}>
-                      <Button color="primary" onClick={handleFastForward} block="true">
-                        <Forward10Icon color="primary" fontSize="large" />
-                      </Button>
-                    </Tooltip>
-                  </Grid>
-                  <Grid item>
-                    <FormControl>
-                      <Select labelId="demo-simple-select-label" id="demo-simple-select" value={playbackRate} onChange={handleSetPlaybackRate}>
-                        {PLAYBACK_RATE_VALUES.map((playbackRateValue, index) => {
-                          return (
-                            <MenuItem key={index + playbackRateValue} value={playbackRateValue}>
-                              {' '}
-                              x {playbackRateValue}
-                            </MenuItem>
-                          );
-                        })}
-                      </Select>
-                      <FormHelperText>Speed</FormHelperText>
-                    </FormControl>
-                  </Grid>
-                  <Grid item>
-                    <Tooltip
-                      enterDelay={3000}
-                      title={
-                        <Typography variant="body1">
-                          {`Turn ${isPauseWhiletyping ? 'off' : 'on'} pause while typing functionality. As
-                      you start typing the media while pause playback until you stop. Not
-                      reccomended on longer transcript as it might present performance issues.`}
-                        </Typography>
-                      }
-                    >
-                      <Typography variant="subtitle2" gutterBottom>
-                        <Switch color="primary" checked={isPauseWhiletyping} onChange={handleSetPauseWhileTyping} />
-                        Pause media while typing
-                      </Typography>
-                    </Tooltip>
-                  </Grid>
-                </Grid>
-              </Grid>
-              <Grid item>
-                <Tooltip
-                  enterDelay={100}
-                  title={
-                    <Typography variant="body1">
-                      Double click on a word or time stamp to jump to the corresponding point in the media. <br />
-                      <KeyboardIcon /> Start typing to edit text.
-                      <br />
-                      <PeopleIcon /> You can add and change names of speakers in your transcript.
-                      <br />
-                      <KeyboardReturnOutlinedIcon /> Hit enter in between words to split a paragraph.
-                      <br />
-                      <SaveIcon />
-                      Remember to save regularly.
-                      <br />
-                      <SaveAltIcon /> Export to get a copy.
-                    </Typography>
-                  }
-                >
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      flexWrap: 'wrap',
-                    }}
-                  >
-                    <InfoOutlinedIcon fontSize="small" color="primary" />
-                    <Typography color="primary" variant="body1">
-                      How Does this work?
-                    </Typography>
-                  </div>
+                <Tooltip title={<Typography variant="body1">{` Seek back by ${SEEK_BACK_SEC} seconds`}</Typography>}>
+                  <Button color="primary" onClick={handleSeekBack} block="true">
+                    <Replay10Icon color="primary" fontSize="large" />
+                  </Button>
+                </Tooltip>
+                <Tooltip title={<Typography variant="body1">{` Fast forward by ${SEEK_BACK_SEC} seconds`}</Typography>}>
+                  <Button color="primary" onClick={handleFastForward} block="true">
+                    <Forward10Icon color="primary" fontSize="large" />
+                  </Button>
                 </Tooltip>
               </Grid>
               <Grid item>
-                <Link
-                  color="inherit"
-                  onClick={() => {
-                    setShowSpeakersCheatShet(!showSpeakersCheatShet);
-                  }}
+                <FormControl>
+                  <Select labelId="demo-simple-select-label" id="demo-simple-select" value={playbackRate} onChange={handleSetPlaybackRate}>
+                    {PLAYBACK_RATE_VALUES.map((playbackRateValue, index) => {
+                      return (
+                        <MenuItem key={index + playbackRateValue} value={playbackRateValue}>
+                          {' '}
+                          x {playbackRateValue}
+                        </MenuItem>
+                      );
+                    })}
+                  </Select>
+                  <FormHelperText>Speed</FormHelperText>
+                </FormControl>
+              </Grid>
+              <Grid item>
+                <Tooltip
+                  enterDelay={3000}
+                  title={
+                    <Typography variant="body1">
+                      {`Turn ${isPauseWhiletyping ? 'off' : 'on'} pause while typing functionality. As
+                      you start typing the media while pause playback until you stop. Not
+                      reccomended on longer transcript as it might present performance issues.`}
+                    </Typography>
+                  }
                 >
                   <Typography variant="subtitle2" gutterBottom>
-                    Speakers
+                    <Switch color="primary" checked={isPauseWhiletyping} onChange={handleSetPauseWhileTyping} />
+                    Pause media while typing
                   </Typography>
-                </Link>
-
-                <Collapse in={showSpeakersCheatShet}>
-                  {speakerOptions.map((speakerName, index) => {
-                    return (
-                      <Typography
-                        variant="body2"
-                        gutterBottom
-                        key={index + speakerName}
-                        className={'text-truncate'}
-                        title={speakerName.toUpperCase()}
-                      >
-                        {speakerName}
-                      </Typography>
-                    );
-                  })}
-                </Collapse>
+                </Tooltip>
               </Grid>
-              <Grid item>{props.children}</Grid>
             </Grid>
+
+            <Grid item>
+              <Tooltip
+                enterDelay={100}
+                title={
+                  <Typography variant="body1">
+                    Double click on a word or time stamp to jump to the corresponding point in the media. <br />
+                    <KeyboardIcon /> Start typing to edit text.
+                    <br />
+                    <PeopleIcon /> You can add and change names of speakers in your transcript.
+                    <br />
+                    <KeyboardReturnOutlinedIcon /> Hit enter in between words to split a paragraph.
+                    <br />
+                    <SaveIcon />
+                    Remember to save regularly.
+                    <br />
+                    <SaveAltIcon /> Export to get a copy.
+                  </Typography>
+                }
+              >
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    flexWrap: 'wrap',
+                  }}
+                >
+                  <InfoOutlinedIcon fontSize="small" color="primary" />
+                  <Typography color="primary" variant="body1">
+                    How Does this work?
+                  </Typography>
+                </div>
+              </Tooltip>
+            </Grid>
+            <Grid item>
+              <Link
+                color="inherit"
+                onClick={() => {
+                  setShowSpeakersCheatShet(!showSpeakersCheatShet);
+                }}
+              >
+                <Typography variant="subtitle2" gutterBottom>
+                  Speakers
+                </Typography>
+              </Link>
+
+              <Collapse in={showSpeakersCheatShet}>
+                {speakerOptions.map((speakerName, index) => {
+                  return (
+                    <Typography variant="body2" gutterBottom key={index + speakerName} className={'text-truncate'} title={speakerName.toUpperCase()}>
+                      {speakerName}
+                    </Typography>
+                  );
+                })}
+              </Collapse>
+            </Grid>
+            <Grid item>{props.children}</Grid>
           </Grid>
 
-          <Grid item xs={12} sm={8} md={8} lg={8} xl={8}>
+          <Grid item xs={12} sm={6} md={6} lg={6} xl={6}>
             {value.length !== 0 ? (
               <>
                 <Paper elevation={3}>
@@ -886,7 +877,7 @@ function SlateTranscriptEditor(props) {
             )}
           </Grid>
 
-          <Grid item xs={12} sm={1} md={1} lg={1} xl={1}>
+          <Grid container item xs={12} sm={1} md={1} lg={1} xl={1}>
             <SideBtns
               handleExport={handleExport}
               isProcessing={isProcessing}
