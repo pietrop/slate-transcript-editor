@@ -286,42 +286,44 @@ function SlateTranscriptEditor(props) {
    * @param {*} element - props.element, from `renderElement` function
    */
   const handleSetSpeakerName = (element) => {
-    const pathToCurrentNode = ReactEditor.findPath(editor, element);
-    const oldSpeakerName = element.speaker;
-    const newSpeakerName = prompt('Change speaker name', oldSpeakerName);
-    if (newSpeakerName) {
-      const isUpdateAllSpeakerInstances = confirm(`Would you like to replace all occurrences of ${oldSpeakerName} with ${newSpeakerName}?`);
-      if (props.handleAnalyticsEvents) {
-        // handles if set speaker name, and whether updates one or multiple
-        props.handleAnalyticsEvents('ste_set_speaker_name', {
-          fn: 'handleSetSpeakerName',
-          changeSpeaker: true,
-          updateMultiple: isUpdateAllSpeakerInstances,
-        });
-      }
-      if (isUpdateAllSpeakerInstances) {
-        const rangeForTheWholeEditor = Editor.range(editor, []);
-        // Apply transformation to the whole doc, where speaker matches old spekaer name, and set it to new one
-        Transforms.setNodes(
-          editor,
-          { type: 'timedText', speaker: newSpeakerName },
-          {
-            at: rangeForTheWholeEditor,
-            match: (node) => node.type === 'timedText' && node.speaker.toLowerCase() === oldSpeakerName.toLowerCase(),
-          }
-        );
+    if (props.isEditable) {
+      const pathToCurrentNode = ReactEditor.findPath(editor, element);
+      const oldSpeakerName = element.speaker;
+      const newSpeakerName = prompt('Change speaker name', oldSpeakerName);
+      if (newSpeakerName) {
+        const isUpdateAllSpeakerInstances = confirm(`Would you like to replace all occurrences of ${oldSpeakerName} with ${newSpeakerName}?`);
+        if (props.handleAnalyticsEvents) {
+          // handles if set speaker name, and whether updates one or multiple
+          props.handleAnalyticsEvents('ste_set_speaker_name', {
+            fn: 'handleSetSpeakerName',
+            changeSpeaker: true,
+            updateMultiple: isUpdateAllSpeakerInstances,
+          });
+        }
+        if (isUpdateAllSpeakerInstances) {
+          const rangeForTheWholeEditor = Editor.range(editor, []);
+          // Apply transformation to the whole doc, where speaker matches old spekaer name, and set it to new one
+          Transforms.setNodes(
+            editor,
+            { type: 'timedText', speaker: newSpeakerName },
+            {
+              at: rangeForTheWholeEditor,
+              match: (node) => node.type === 'timedText' && node.speaker.toLowerCase() === oldSpeakerName.toLowerCase(),
+            }
+          );
+        } else {
+          // only apply speaker name transformation to current element
+          Transforms.setNodes(editor, { type: 'timedText', speaker: newSpeakerName }, { at: pathToCurrentNode });
+        }
       } else {
-        // only apply speaker name transformation to current element
-        Transforms.setNodes(editor, { type: 'timedText', speaker: newSpeakerName }, { at: pathToCurrentNode });
-      }
-    } else {
-      if (props.handleAnalyticsEvents) {
-        // handles if click cancel and doesn't set speaker name
-        props.handleAnalyticsEvents('ste_set_speaker_name', {
-          fn: 'handleSetSpeakerName',
-          changeSpeaker: false,
-          updateMultiple: false,
-        });
+        if (props.handleAnalyticsEvents) {
+          // handles if click cancel and doesn't set speaker name
+          props.handleAnalyticsEvents('ste_set_speaker_name', {
+            fn: 'handleSetSpeakerName',
+            changeSpeaker: false,
+            updateMultiple: false,
+          });
+        }
       }
     }
   };
@@ -561,7 +563,7 @@ function SlateTranscriptEditor(props) {
         });
       }
 
-      if (props.handleSaveEditor) {
+      if (props.handleSaveEditor && props.isEditable) {
         props.handleSaveEditor(editorContnet);
       }
       setIsContentIsModified(false);
