@@ -52,8 +52,8 @@ function SideBtns({
   };
 
   return (
-    <Grid container direction="row" justify="space-between" alignItems="stretch">
-      <Grid inlineTimecodes>
+    <Grid container direction="column" justify="flex-start" alignItems="stretch">
+      <Grid item>
         <Tooltip title={<Typography variant="body1">Export options</Typography>}>
           <Button aria-controls="simple-menu" aria-haspopup="true" onClick={handleMenuClick}>
             <SaveAltIcon color="primary" /> <KeyboardArrowDownIcon color="primary" />
@@ -284,6 +284,9 @@ function SideBtns({
       </Tooltip> */}
       {/*  */}
       <Grid item>
+        <br />
+      </Grid>
+      <Grid item>
         <Tooltip
           title={<Typography variant="body1">Put the cursor at a point where you'd want to add [INAUDIBLE] text, and click this button</Typography>}
         >
@@ -300,6 +303,9 @@ function SideBtns({
       </Grid>
 
       {/*  */}
+      <Grid item>
+        <br />
+      </Grid>
       <Grid item>
         <Tooltip
           title={
@@ -357,6 +363,9 @@ function SideBtns({
       </Tooltip> */}
       {/*  */}
       <Grid item>
+        <br />
+      </Grid>
+      <Grid item>
         <Tooltip title={<Typography variant="body1">{REPLACE_WHOLE_TEXT_INSTRUCTION}</Typography>}>
           <Button onClick={handleReplaceText} color="primary">
             <ImportExportIcon color="primary" />
@@ -368,6 +377,9 @@ function SideBtns({
           <InfoOutlined color="primary" />
         </Button>
       </Tooltip> */}
+      <Grid item>
+        <br />
+      </Grid>
       <Grid item>{optionalBtns}</Grid>
     </Grid>
   );
