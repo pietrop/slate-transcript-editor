@@ -687,7 +687,7 @@ function SlateTranscriptEditor(props) {
 
               .editor-wrapper-container {
                 padding: 8px 16px;
-                height: 90vh;
+                height: 85vh;
                 overflow: auto;
               }
               /* https://developer.mozilla.org/en-US/docs/Web/CSS/user-select
