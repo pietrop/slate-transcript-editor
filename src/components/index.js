@@ -772,21 +772,23 @@ function SlateTranscriptEditor(props) {
                 </Grid>
 
                 <Grid item>
-                  <Tooltip
-                    enterDelay={3000}
-                    title={
-                      <Typography variant="body1">
-                        {`Turn ${isPauseWhiletyping ? 'off' : 'on'} pause while typing functionality. As
+                  {props.isEditable && (
+                    <Tooltip
+                      enterDelay={3000}
+                      title={
+                        <Typography variant="body1">
+                          {`Turn ${isPauseWhiletyping ? 'off' : 'on'} pause while typing functionality. As
                       you start typing the media while pause playback until you stop. Not
                       reccomended on longer transcript as it might present performance issues.`}
+                        </Typography>
+                      }
+                    >
+                      <Typography variant="subtitle2" gutterBottom>
+                        <Switch color="primary" checked={isPauseWhiletyping} onChange={handleSetPauseWhileTyping} />
+                        Pause media while typing
                       </Typography>
-                    }
-                  >
-                    <Typography variant="subtitle2" gutterBottom>
-                      <Switch color="primary" checked={isPauseWhiletyping} onChange={handleSetPauseWhileTyping} />
-                      Pause media while typing
-                    </Typography>
-                  </Tooltip>
+                    </Tooltip>
+                  )}
                 </Grid>
               </Grid>
 
@@ -795,16 +797,25 @@ function SlateTranscriptEditor(props) {
                   enterDelay={100}
                   title={
                     <Typography variant="body1">
+                      {!props.isEditable && (
+                        <>
+                          You are in read only mode. <br />
+                        </>
+                      )}
                       Double click on a word or time stamp to jump to the corresponding point in the media. <br />
-                      <KeyboardIcon /> Start typing to edit text.
-                      <br />
-                      <PeopleIcon /> You can add and change names of speakers in your transcript.
-                      <br />
-                      <KeyboardReturnOutlinedIcon /> Hit enter in between words to split a paragraph.
-                      <br />
-                      <SaveIcon />
-                      Remember to save regularly.
-                      <br />
+                      {props.isEditable && (
+                        <>
+                          <KeyboardIcon /> Start typing to edit text.
+                          <br />
+                          <PeopleIcon /> You can add and change names of speakers in your transcript.
+                          <br />
+                          <KeyboardReturnOutlinedIcon /> Hit enter in between words to split a paragraph.
+                          <br />
+                          <SaveIcon />
+                          Remember to save regularly.
+                          <br />
+                        </>
+                      )}
                       <SaveAltIcon /> Export to get a copy.
                     </Typography>
                   }
@@ -909,6 +920,7 @@ function SlateTranscriptEditor(props) {
               optionalBtns={props.optionalBtns}
               handleUndo={handleUndo}
               handleRedo={handleRedo}
+              isEditable={props.isEditable}
             />
           </Grid>
         </Grid>

@@ -38,6 +38,7 @@ function SideBtns({
   optionalBtns,
   handleUndo,
   handleRedo,
+  isEditable,
 }) {
   const [anchorMenuEl, setAnchorMenuEl] = useState(null);
 
@@ -268,71 +269,77 @@ function SideBtns({
           </MenuItem>
         </Menu>
 
-        <Tooltip title={<Typography variant="body1">save</Typography>}>
-          <Button disabled={isProcessing} onClick={handleSave} color="primary">
-            <SaveOutlinedIcon color={isContentSaved ? 'primary' : 'secondary'} />
-          </Button>
-        </Tooltip>
+        {isEditable && (
+          <Tooltip title={<Typography variant="body1">save</Typography>}>
+            <Button disabled={isProcessing} onClick={handleSave} color="primary">
+              <SaveOutlinedIcon color={isContentSaved ? 'primary' : 'secondary'} />
+            </Button>
+          </Tooltip>
+        )}
       </Grid>
-      {/* TODO: Disabiling until find a way to handle timecodes and alignment on paragraph break */}
-      {/* <Tooltip
+      {isEditable && (
+        <>
+          {/* TODO: Disabiling until find a way to handle timecodes and alignment on paragraph break */}
+          {/* <Tooltip
         title={`To insert a paragraph break, and split a pargraph in two, put the cursor at a point where you'd want to add a paragraph break in the text and either click this button or hit enter key`}
       >
         <Button disabled={isProcessing} onClick={handleSplitParagraph} color="primary">
           <KeyboardReturnOutlinedIcon color="primary" />
         </Button>
       </Tooltip> */}
-      {/*  */}
-      <Grid item>
-        <br />
-      </Grid>
-      <Grid item>
-        <Tooltip
-          title={<Typography variant="body1">Put the cursor at a point where you'd want to add [INAUDIBLE] text, and click this button</Typography>}
-        >
-          <Button disabled={isProcessing} onClick={insertTextInaudible} color="primary">
-            <EmojiSymbolsOutlinedIcon color="primary" />
-          </Button>
-        </Tooltip>
+          {/*  */}
+          <Grid item>
+            <br />
+          </Grid>
+          <Grid item>
+            <Tooltip
+              title={
+                <Typography variant="body1">Put the cursor at a point where you'd want to add [INAUDIBLE] text, and click this button</Typography>
+              }
+            >
+              <Button disabled={isProcessing} onClick={insertTextInaudible} color="primary">
+                <EmojiSymbolsOutlinedIcon color="primary" />
+              </Button>
+            </Tooltip>
 
-        <Tooltip title={<Typography variant="body1">Insert a ♪ in the text</Typography>}>
-          <Button disabled={isProcessing} onClick={handleInsertMusicNote} color="primary">
-            <MusicNoteOutlinedIcon color="primary" />
-          </Button>
-        </Tooltip>
-      </Grid>
+            <Tooltip title={<Typography variant="body1">Insert a ♪ in the text</Typography>}>
+              <Button disabled={isProcessing} onClick={handleInsertMusicNote} color="primary">
+                <MusicNoteOutlinedIcon color="primary" />
+              </Button>
+            </Tooltip>
+          </Grid>
 
-      {/*  */}
-      <Grid item>
-        <br />
-      </Grid>
-      <Grid item>
-        <Tooltip
-          title={
-            <Typography variant="body1">
-              Undo <br />
-              <code>cmd</code> <code>z</code>
-            </Typography>
-          }
-        >
-          <Button onClick={handleUndo} color="primary">
-            <UndoOutlinedIcon color="primary" />
-          </Button>
-        </Tooltip>
+          {/*  */}
+          <Grid item>
+            <br />
+          </Grid>
+          <Grid item>
+            <Tooltip
+              title={
+                <Typography variant="body1">
+                  Undo <br />
+                  <code>cmd</code> <code>z</code>
+                </Typography>
+              }
+            >
+              <Button onClick={handleUndo} color="primary">
+                <UndoOutlinedIcon color="primary" />
+              </Button>
+            </Tooltip>
 
-        <Tooltip
-          title={
-            <Typography variant="body1">
-              Redo <br /> <code>cmd</code> <code>shift</code> <code>z</code>
-            </Typography>
-          }
-        >
-          <Button onClick={handleRedo} color="primary">
-            <RedoIcon color="primary" />
-          </Button>
-        </Tooltip>
-      </Grid>
-      {/* <Tooltip
+            <Tooltip
+              title={
+                <Typography variant="body1">
+                  Redo <br /> <code>cmd</code> <code>shift</code> <code>z</code>
+                </Typography>
+              }
+            >
+              <Button onClick={handleRedo} color="primary">
+                <RedoIcon color="primary" />
+              </Button>
+            </Tooltip>
+          </Grid>
+          {/* <Tooltip
         title={
           ' Restore timecodes. At the moment for transcript over 1hour it could temporarily freeze the UI for a few seconds'
         }
@@ -361,22 +368,24 @@ function SideBtns({
           />
         </Button>
       </Tooltip> */}
-      {/*  */}
-      <Grid item>
-        <br />
-      </Grid>
-      <Grid item>
-        <Tooltip title={<Typography variant="body1">{REPLACE_WHOLE_TEXT_INSTRUCTION}</Typography>}>
-          <Button onClick={handleReplaceText} color="primary">
-            <ImportExportIcon color="primary" />
-          </Button>
-        </Tooltip>
-      </Grid>
-      {/* <Tooltip title={' Double click on a word to jump to the corresponding point in the media'}>
+          {/*  */}
+          <Grid item>
+            <br />
+          </Grid>
+          <Grid item>
+            <Tooltip title={<Typography variant="body1">{REPLACE_WHOLE_TEXT_INSTRUCTION}</Typography>}>
+              <Button onClick={handleReplaceText} color="primary">
+                <ImportExportIcon color="primary" />
+              </Button>
+            </Tooltip>
+          </Grid>
+          {/* <Tooltip title={' Double click on a word to jump to the corresponding point in the media'}>
         <Button disabled={isProcessing} color="primary">
           <InfoOutlined color="primary" />
         </Button>
       </Tooltip> */}
+        </>
+      )}
       <Grid item>
         <br />
       </Grid>
