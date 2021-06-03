@@ -53,7 +53,7 @@ function SideBtns({
   };
 
   return (
-    <Grid container direction="column" justify="flex-start" alignItems="stretch">
+    <Grid container direction="column" justifyContent="flex-start" alignItems="stretch">
       <Grid item>
         <Tooltip title={<Typography variant="body1">Export options</Typography>}>
           <Button aria-controls="simple-menu" aria-haspopup="true" onClick={handleMenuClick}>

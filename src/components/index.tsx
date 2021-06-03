@@ -341,7 +341,7 @@ function SlateTranscriptEditor(props: PropsWithChildren<Props>) {
             { type: 'timedText', speaker: newSpeakerName },
             {
               at: rangeForTheWholeEditor,
-              match: (node) => node.type === 'timedText' && node.speaker.toLowerCase() === oldSpeakerName.toLowerCase(),
+              match: (node: Element) => node.type === 'timedText' && node.speaker.toLowerCase() === oldSpeakerName.toLowerCase(),
             }
           );
         } else {
@@ -767,9 +767,9 @@ function SlateTranscriptEditor(props: PropsWithChildren<Props>) {
           </Tooltip>
         )}
 
-        <Grid container direction="row" justify="center" alignItems="stretch" spacing={2}>
-          <Grid item xs={12} sm={4} md={4} lg={4} xl={4} container direction="column" justify="space-between" alignItems="stretch">
-            <Grid container direction="column" justify="flex-start" alignItems="stretch" spacing={2}>
+        <Grid container direction="row" justifyContent="center" alignItems="stretch" spacing={2}>
+          <Grid item xs={12} sm={4} md={4} lg={4} xl={4} container direction="column" justifyContent="space-between" alignItems="stretch">
+            <Grid container direction="column" justifyContent="flex-start" alignItems="stretch" spacing={2}>
               <Grid item container>
                 <video
                   style={{ backgroundColor: 'black' }}
@@ -781,7 +781,7 @@ function SlateTranscriptEditor(props: PropsWithChildren<Props>) {
                   playsInline
                 ></video>
               </Grid>
-              <Grid container direction="row" justify="space-between" alignItems="flex-start" spacing={1} item>
+              <Grid container direction="row" justifyContent="space-between" alignItems="flex-start" spacing={1} item>
                 <Grid item>
                   <p>
                     <code style={{ color: 'grey' }}>{shortTimecode(currentTime)}</code>
@@ -806,12 +806,12 @@ function SlateTranscriptEditor(props: PropsWithChildren<Props>) {
                 </Grid>
                 <Grid item>
                   <Tooltip title={<Typography variant="body1">{` Seek back by ${SEEK_BACK_SEC} seconds`}</Typography>}>
-                    <Button color="primary" onClick={handleSeekBack} block="true">
+                    <Button color="primary" onClick={handleSeekBack}>
                       <Replay10Icon color="primary" fontSize="large" />
                     </Button>
                   </Tooltip>
                   <Tooltip title={<Typography variant="body1">{` Fast forward by ${SEEK_BACK_SEC} seconds`}</Typography>}>
-                    <Button color="primary" onClick={handleFastForward} block="true">
+                    <Button color="primary" onClick={handleFastForward}>
                       <Forward10Icon color="primary" fontSize="large" />
                     </Button>
                   </Tooltip>
@@ -956,8 +956,6 @@ function SlateTranscriptEditor(props: PropsWithChildren<Props>) {
               insertTextInaudible={insertTextInaudible}
               handleInsertMusicNote={handleInsertMusicNote}
               handleSplitParagraph={handleSplitParagraph}
-              isPauseWhiletyping={isPauseWhiletyping}
-              handleSetPauseWhileTyping={handleSetPauseWhileTyping}
               handleRestoreTimecodes={handleRestoreTimecodes}
               handleReplaceText={handleReplaceText}
               handleSave={handleSave}
