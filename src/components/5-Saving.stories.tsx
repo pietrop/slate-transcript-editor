@@ -1,6 +1,5 @@
 import React from 'react';
 import { action } from '@storybook/addon-actions';
-import { withKnobs, text, boolean, number, object, select } from '@storybook/addon-knobs';
 import { version } from '../../package.json';
 
 import SlateTranscriptEditor from '.';
@@ -9,7 +8,6 @@ import 'fontsource-roboto';
 export default {
   title: 'Saving indicator',
   component: SlateTranscriptEditor,
-  decorators: [withKnobs],
 };
 
 const DEMO_MEDIA_URL_SOLEIO =
