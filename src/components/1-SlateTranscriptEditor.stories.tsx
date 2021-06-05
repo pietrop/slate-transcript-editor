@@ -1,10 +1,9 @@
-import React, { ComponentProps } from 'react';
+import React, { ComponentProps, PropsWithChildren } from 'react';
 import { action } from '@storybook/addon-actions';
 import { Story } from '@storybook/react';
-import { version } from '../../package.json';
 
 import Button from '@material-ui/core/Button';
-import SlateTranscriptEditor from '.';
+import SlateTranscriptEditor, { Props as SlateTranscriptEditorProps } from '.';
 import 'fontsource-roboto';
 
 export default {
@@ -26,9 +25,9 @@ const Template: Story<ComponentProps<typeof SlateTranscriptEditor>> = (args) => 
 
 const AUDIO_URL = 'https://www.w3schools.com/tags/horse.ogg';
 
-const DEMO_MEDIA_URL_KATE = 'https://download.ted.com/talks/KateDarling_2018S-950k.mp4';
-const DEMO_TITLE_KATE = 'TED Talk | Kate Darling - Why we have an emotional connection to robots';
-import DEMO_TRANSCRIPT_KATE from '../sample-data/KateDarling-dpe.json';
+// const DEMO_MEDIA_URL_KATE = 'https://download.ted.com/talks/KateDarling_2018S-950k.mp4';
+// const DEMO_TITLE_KATE = 'TED Talk | Kate Darling - Why we have an emotional connection to robots';
+// import DEMO_TRANSCRIPT_KATE from '../sample-data/KateDarling-dpe.json';
 
 const DEMO_MEDIA_URL_SOLEIO =
   'https://digital-paper-edit-demo.s3.eu-west-2.amazonaws.com/PBS-Frontline/The+Facebook+Dilemma+-+interviews/The+Facebook+Dilemma+-+Soleio+Cuervo-OIAUfZBd_7w.mp4';
@@ -136,10 +135,10 @@ OptionalChildComponents.args = {
   mediaUrl: DEMO_MEDIA_URL_SOLEIO,
   handleSaveEditor: action('handleSaveEditor'),
   handleAutoSaveChanges: action('handleAutoSaveChanges'),
-  autoSaveContenttype: 'digitalpaperedit',
+  autoSaveContentType: 'digitalpaperedit',
   transcriptData: DEMO_SOLEIO,
   handleAnalyticsEvents: action('handleAnalyticsEvents'),
-  optionalBts: (
+  optionalBtns: (
     <>
       <Button
         title="optional button"

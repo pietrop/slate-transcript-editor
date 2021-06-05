@@ -42,11 +42,11 @@ export const CustomTheme = () => {
       <ThemeProvider theme={theme}>
         <SlateTranscriptEditor
           title={DEMO_TITLE_SOLEIO}
-          mediaUrl={text('mediaUrl', DEMO_MEDIA_URL_SOLEIO)}
+          mediaUrl={DEMO_MEDIA_URL_SOLEIO}
           handleSaveEditor={action('handleSaveEditor')}
           // handleAutoSaveChanges={action('handleAutoSaveChanges')}
           // https://www.npmjs.com/package/@storybook/addon-knobs#select
-          autoSaveContentType={select('autoSaveContentType', ['digitalpaperedit', 'slate'], 'digitalpaperedit')} // digitalpaperedit or slate - digitalpaperedit, runs alignement before exporting, slate, is just the raw data.
+          autoSaveContentType={'digitalpaperedit'} // digitalpaperedit or slate - digitalpaperedit, runs alignement before exporting, slate, is just the raw data.
           // transcriptData={object('transcriptData', DEMO_SOLEIO)}
           transcriptData={DEMO_SOLEIO}
         />
@@ -78,11 +78,11 @@ export const CustomThemeExampleTwo = () => {
       <ThemeProvider theme={theme}>
         <SlateTranscriptEditor
           title={DEMO_TITLE_SOLEIO}
-          mediaUrl={text('mediaUrl', DEMO_MEDIA_URL_SOLEIO)}
+          mediaUrl={DEMO_MEDIA_URL_SOLEIO}
           handleSaveEditor={action('handleSaveEditor')}
           // handleAutoSaveChanges={action('handleAutoSaveChanges')}
           // https://www.npmjs.com/package/@storybook/addon-knobs#select
-          autoSaveContentType={select('autoSaveContentType', ['digitalpaperedit', 'slate'], 'digitalpaperedit')} // digitalpaperedit or slate - digitalpaperedit, runs alignement before exporting, slate, is just the raw data.
+          autoSaveContentType={'digitalpaperedit'} // digitalpaperedit or slate - digitalpaperedit, runs alignement before exporting, slate, is just the raw data.
           // transcriptData={object('transcriptData', DEMO_SOLEIO)}
           transcriptData={DEMO_SOLEIO}
         />

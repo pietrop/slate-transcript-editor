@@ -76,7 +76,7 @@ interface TranscriptParagraph {
   speaker: string;
 }
 
-interface Props {
+export interface Props {
   transcriptData: TranscriptData;
   mediaUrl: string;
   handleSaveEditor: (value: string) => void;

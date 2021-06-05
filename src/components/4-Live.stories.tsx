@@ -4,7 +4,7 @@ import SlateTranscriptEditor, { TranscriptData } from '.';
 
 export default {
   title: 'Live',
-  component: SlateTranscriptEditor,
+  component: Example,
 };
 
 const DEMO_MEDIA_URL_SOLEIO =
@@ -38,11 +38,11 @@ const Example = (props) => {
   return (
     <>
       <SlateTranscriptEditor
-        mediaUrl={text('mediaUrl', DEMO_MEDIA_URL_SOLEIO)}
+        mediaUrl={DEMO_MEDIA_URL_SOLEIO}
         handleSaveEditor={action('handleSaveEditor')}
         handleAutoSaveChanges={action('handleAutoSaveChanges')}
         // https://www.npmjs.com/package/@storybook/addon-knobs#select
-        autoSaveContentType={select('autoSaveContentType', ['digitalpaperedit', 'slate'], 'digitalpaperedit')} // digitalpaperedit or slate - digitalpaperedit, runs alignement before exporting, slate, is just the raw data.
+        autoSaveContentType={'digitalpaperedit'} // digitalpaperedit or slate - digitalpaperedit, runs alignement before exporting, slate, is just the raw data.
         transcriptData={jsonData}
         transcriptDataLive={interimResults}
         isEditable={props.isEditable}
