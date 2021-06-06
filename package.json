@@ -4,7 +4,7 @@
   "description": "A React component to make correcting automated transcriptions of audio and video easier and faster. Using the Slate Editor",
   "main": "src/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "echo \"No test specified\"",
     "start": "npm run storybook",
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook -o .out",
@@ -14,7 +14,8 @@
     "publish:public": "npm run build:component && npm publish ./dist --access public",
     "publish:dry:run": "npm run build:component && npm publish ./dist --dry-run",
     "lint": "prettier --write \"src/**/*.(js|ts|jsx|tsx)\"",
-    "clean": "rimraf dist"
+    "clean": "rimraf dist",
+    "prepare": "husky install"
   },
   "keywords": [],
   "author": "Pietro Passarelli",
@@ -40,7 +41,7 @@
     "@material-ui/icons": "^5.0.0-alpha.35",
     "@types/ramda": "^0.27.40",
     "@types/react": "^17.0.9",
-    "docx": "4.7.1",
+    "docx": "^6.0.3",
     "fontsource-roboto": "^4.0.0",
     "lodash": "^4.17.21",
     "prop-types": "^15.7.2",
@@ -55,24 +56,19 @@
     "stt-align-node": "^1.1.10-alpha.1"
   },
   "devDependencies": {
-    "@storybook/addon-actions": "^6.3.0-beta.10",
-    "@storybook/addon-essentials": "^6.3.0-beta.10",
-    "@storybook/addon-links": "^6.3.0-beta.10",
-    "@storybook/addon-storysource": "^6.3.0-beta.10",
-    "@storybook/addons": "^6.3.0-beta.10",
-    "@storybook/react": "^6.3.0-beta.10",
+    "@storybook/addon-actions": "^6.3.0-beta.13",
+    "@storybook/addon-essentials": "^6.3.0-beta.13",
+    "@storybook/addon-links": "^6.3.0-beta.13",
+    "@storybook/addon-storysource": "^6.3.0-beta.13",
+    "@storybook/addons": "^6.3.0-beta.13",
+    "@storybook/react": "^6.3.0-beta.13",
     "@types/jest": "^26.0.23",
     "cross-env": "^7.0.3",
     "gh-pages": "^2.2.0",
-    "husky": "^4.2.5",
-    "prettier": "2.0.5",
-    "pretty-quick": "^2.0.1",
+    "husky": "^6.0.0",
+    "prettier": "^2.3.1",
+    "pretty-quick": "^3.1.0",
     "rimraf": "^3.0.2",
     "typescript": "^4.3.2"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "pretty-quick --staged"
-    }
   }
 }
