@@ -15,7 +15,8 @@
     "publish:dry:run": "npm run build:component && npm publish ./dist --dry-run",
     "lint": "prettier --write \"src/**/*.(js|ts|jsx|tsx)\"",
     "clean": "rimraf dist",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "commit-lint": "pretty-quick --staged"
   },
   "keywords": [],
   "author": "Pietro Passarelli",
