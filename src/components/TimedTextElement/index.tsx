@@ -1,5 +1,5 @@
 import { Grid, GridProps, GridSize, Typography } from '@material-ui/core';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Editor, Element, Transforms } from 'slate';
 import { ReactEditor } from 'slate-react';
 import { useTranscriptEditorContext } from '../TranscriptEditorContext';
@@ -15,7 +15,7 @@ export function TimedTextElement({
   showSpeakers: boolean;
   showTimecodes: boolean;
 }): JSX.Element {
-  const context = useTranscriptEditorContext();
+  const { editor, isEditable, handleAnalyticsEvents, handleTimedTextClick } = useTranscriptEditorContext();
 
   /**
    * `handleSetSpeakerName` is outside of TimedTextElement
@@ -23,46 +23,49 @@ export function TimedTextElement({
    * especially on long transcripts
    * @param {*} element - props.element, from `renderElement` function
    */
-  const handleSetSpeakerName = (element) => {
-    if (context.isEditable) {
-      const pathToCurrentNode = ReactEditor.findPath(context.editor, element);
-      const oldSpeakerName = element.speaker;
-      const newSpeakerName = prompt('Change speaker name', oldSpeakerName);
-      if (newSpeakerName) {
-        const isUpdateAllSpeakerInstances = confirm(`Would you like to replace all occurrences of ${oldSpeakerName} with ${newSpeakerName}?`);
+  const handleSetSpeakerName = useCallback(
+    (element) => {
+      if (isEditable) {
+        const pathToCurrentNode = ReactEditor.findPath(editor, element);
+        const oldSpeakerName = element.speaker;
+        const newSpeakerName = prompt('Change speaker name', oldSpeakerName);
+        if (newSpeakerName) {
+          const isUpdateAllSpeakerInstances = confirm(`Would you like to replace all occurrences of ${oldSpeakerName} with ${newSpeakerName}?`);
 
-        // handles if set speaker name, and whether updates one or multiple
-        context.handleAnalyticsEvents?.('ste_set_speaker_name', {
-          fn: 'handleSetSpeakerName',
-          changeSpeaker: true,
-          updateMultiple: isUpdateAllSpeakerInstances,
-        });
+          // handles if set speaker name, and whether updates one or multiple
+          handleAnalyticsEvents?.('ste_set_speaker_name', {
+            fn: 'handleSetSpeakerName',
+            changeSpeaker: true,
+            updateMultiple: isUpdateAllSpeakerInstances,
+          });
 
-        if (isUpdateAllSpeakerInstances) {
-          const rangeForTheWholeEditor = Editor.range(context.editor, []);
-          // Apply transformation to the whole doc, where speaker matches old speaker name, and set it to new one
-          Transforms.setNodes(
-            context.editor,
-            { type: 'timedText', speaker: newSpeakerName },
-            {
-              at: rangeForTheWholeEditor,
-              match: (node: Element) => node.type === 'timedText' && node.speaker.toLowerCase() === oldSpeakerName.toLowerCase(),
-            }
-          );
+          if (isUpdateAllSpeakerInstances) {
+            const rangeForTheWholeEditor = Editor.range(editor, []);
+            // Apply transformation to the whole doc, where speaker matches old speaker name, and set it to new one
+            Transforms.setNodes(
+              editor,
+              { type: 'timedText', speaker: newSpeakerName },
+              {
+                at: rangeForTheWholeEditor,
+                match: (node: Element) => node.type === 'timedText' && node.speaker.toLowerCase() === oldSpeakerName.toLowerCase(),
+              }
+            );
+          } else {
+            // only apply speaker name transformation to current element
+            Transforms.setNodes(editor, { type: 'timedText', speaker: newSpeakerName }, { at: pathToCurrentNode });
+          }
         } else {
-          // only apply speaker name transformation to current element
-          Transforms.setNodes(context.editor, { type: 'timedText', speaker: newSpeakerName }, { at: pathToCurrentNode });
+          // handles if click cancel and doesn't set speaker name
+          handleAnalyticsEvents?.('ste_set_speaker_name', {
+            fn: 'handleSetSpeakerName',
+            changeSpeaker: false,
+            updateMultiple: false,
+          });
         }
-      } else {
-        // handles if click cancel and doesn't set speaker name
-        context.handleAnalyticsEvents?.('ste_set_speaker_name', {
-          fn: 'handleSetSpeakerName',
-          changeSpeaker: false,
-          updateMultiple: false,
-        });
       }
-    }
-  };
+    },
+    [editor, handleAnalyticsEvents, isEditable]
+  );
 
   let textLg: GridSize = 12;
   let textXl: GridSize = 12;
@@ -88,11 +91,11 @@ export function TimedTextElement({
             contentEditable={false}
             style={{ cursor: 'pointer' }}
             className={'timecode text-muted unselectable'}
-            onClick={context.handleTimedTextClick}
+            onClick={handleTimedTextClick}
             // onClick={(e) => {
             //   e.preventDefault();
             // }}
-            onDoubleClick={context.handleTimedTextClick}
+            onDoubleClick={handleTimedTextClick}
             title={props.element.startTimecode}
             data-start={props.element.start}
           >

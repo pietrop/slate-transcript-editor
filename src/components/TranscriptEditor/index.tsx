@@ -84,6 +84,7 @@ export function SlateTranscriptEditor(props: PropsWithChildren<Props>): JSX.Elem
       mediaRef={mediaRef}
       defaultShowTimecodes={props.showTimecodes}
       handleAnalyticsEvents={props.handleAnalyticsEvents}
+      isEditable={props.isEditable}
     >
       <SlateTranscriptEditorInner {...props} />
     </TranscriptEditorContextProvider>
@@ -91,22 +92,38 @@ export function SlateTranscriptEditor(props: PropsWithChildren<Props>): JSX.Elem
 }
 
 function SlateTranscriptEditorInner(props: PropsWithChildren<Props>) {
-  const context = useTranscriptEditorContext();
+  const {
+    setValue,
+    value,
+    setPlaybackRate,
+    playbackRate,
+    setIsContentModified,
+    isContentModified,
+    setIsContentSaved,
+    setIsProcessing,
+    isProcessing,
+    setIsPauseWhileTyping,
+    isPauseWhileTyping,
+    editor,
+    handleTimedTextClick,
+    currentTime,
+    ...context
+  } = useTranscriptEditorContext();
 
   useEffect(() => {
-    if (context.isProcessing) {
+    if (isProcessing) {
       document.body.style.cursor = 'wait';
     } else {
       document.body.style.cursor = 'default';
     }
-  }, [context.isProcessing]);
+  }, [isProcessing]);
 
   useEffect(() => {
     if (props.transcriptData) {
       const res = convertDpeToSlate(props.transcriptData);
-      context.setValue(res);
+      setValue(res);
     }
-  }, [context, props.transcriptData]);
+  }, [props.transcriptData, setValue]);
 
   // handles interim results for working with a Live STT
   useEffect(() => {
@@ -115,11 +132,11 @@ function SlateTranscriptEditorInner(props: PropsWithChildren<Props>) {
       // if the user is selecting the / typing the text
       // Transforms.insertNodes would insert the node at selection point
       // instead we check if they are in the editor
-      if (context.editor.selection) {
+      if (editor.selection) {
         // get the position of the last node
-        const positionLastNode = [context.editor.children.length];
+        const positionLastNode = [editor.children.length];
         // insert the new nodes at the end of the document
-        Transforms.insertNodes(context.editor, nodes, {
+        Transforms.insertNodes(editor, nodes, {
           at: positionLastNode,
         });
       }
@@ -127,15 +144,15 @@ function SlateTranscriptEditorInner(props: PropsWithChildren<Props>) {
       // where the might be no initial results
       else {
         // if there is no selection the default for insertNodes is to add the nodes at the end
-        Transforms.insertNodes(context.editor, nodes);
+        Transforms.insertNodes(editor, nodes);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.transcriptDataLive]);
 
   const getSlateContent = useCallback(() => {
-    return context.value;
-  }, [context.value]);
+    return value;
+  }, [value]);
 
   const getFileName = useCallback(() => {
     return path.basename(props.mediaUrl).trim();
@@ -150,12 +167,12 @@ function SlateTranscriptEditorInner(props: PropsWithChildren<Props>) {
 
   const handleSetPlaybackRate = useCallback(
     (e) => {
-      const previousPlaybackRate = context.playbackRate;
+      const previousPlaybackRate = playbackRate;
       const n = e.target.value;
       const tmpNewPlaybackRateValue = parseFloat(n);
       if (mediaRef && mediaRef.current) {
         mediaRef.current.playbackRate = tmpNewPlaybackRateValue;
-        context.setPlaybackRate(tmpNewPlaybackRateValue);
+        setPlaybackRate(tmpNewPlaybackRateValue);
 
         props.handleAnalyticsEvents?.('ste_handle_set_playback_rate', {
           fn: 'handleSetPlaybackRate',
@@ -164,7 +181,7 @@ function SlateTranscriptEditorInner(props: PropsWithChildren<Props>) {
         });
       }
     },
-    [context, props]
+    [playbackRate, setPlaybackRate, props]
   );
 
   const handleSeekBack = () => {
@@ -206,7 +223,7 @@ function SlateTranscriptEditorInner(props: PropsWithChildren<Props>) {
     ({ attributes, children }: RenderLeafProps): JSX.Element => {
       return (
         <span
-          onDoubleClick={context.handleTimedTextClick}
+          onDoubleClick={handleTimedTextClick}
           className={'timecode text'}
           data-start={children.props.parent.start}
           data-previous-timings={children.props.parent.previousTimings}
@@ -217,7 +234,7 @@ function SlateTranscriptEditorInner(props: PropsWithChildren<Props>) {
         </span>
       );
     },
-    [context.handleTimedTextClick]
+    [handleTimedTextClick]
   );
 
   //
@@ -232,8 +249,8 @@ function SlateTranscriptEditorInner(props: PropsWithChildren<Props>) {
   const handleReplaceText = useCallback(() => {
     const newText = prompt(`Paste the text to replace here.\n\n${REPLACE_WHOLE_TEXT_INSTRUCTION}`);
     if (newText) {
-      const newValue = plainTextalignToSlateJs(props.transcriptData, newText, context.value);
-      context.setValue(newValue);
+      const newValue = plainTextalignToSlateJs(props.transcriptData, newText, value);
+      setValue(newValue);
 
       // TODO: consider adding some kind of word count here?
 
@@ -242,21 +259,21 @@ function SlateTranscriptEditorInner(props: PropsWithChildren<Props>) {
         fn: 'handleReplaceText',
       });
     }
-  }, [context, props]);
+  }, [props, setValue, value]);
 
   // TODO: refactor this function, to be cleaner and easier to follow.
   const handleRestoreTimecodes = useCallback(
     async (inlineTimecodes = false) => {
       // if nothing as changed and you don't need to modify the data
       // to get inline timecodes, then just return as is
-      if (!context.isContentModified && !inlineTimecodes) {
-        return context.value;
+      if (!isContentModified && !inlineTimecodes) {
+        return value;
       }
       // only used by Word (OHMS) export
-      // const alignedSlateData = await updateBloocksTimestamps(value, inlineTimecodes);
-      const alignedSlateData = await updateBlocksTimestamps(context.value);
-      context.setValue(alignedSlateData);
-      context.setIsContentModified(false);
+      // const alignedSlateData = await updateBlocksTimestamps(value, inlineTimecodes);
+      const alignedSlateData = await updateBlocksTimestamps(value);
+      setValue(alignedSlateData);
+      setIsContentModified(false);
 
       if (inlineTimecodes) {
         // we don't want to show the inline timecode in the editor, but we want to return them to export function
@@ -266,7 +283,7 @@ function SlateTranscriptEditorInner(props: PropsWithChildren<Props>) {
 
       return alignedSlateData;
     },
-    [context]
+    [isContentModified, setIsContentModified, setValue, value]
   );
 
   // TODO: this could be refactored, and brought some of this logic inside the exportAdapter (?)
@@ -289,7 +306,7 @@ function SlateTranscriptEditorInner(props: PropsWithChildren<Props>) {
       }
 
       try {
-        context.setIsProcessing(true);
+        setIsProcessing(true);
         let tmpValue = getSlateContent();
         if (timecodes) {
           tmpValue = await handleRestoreTimecodes();
@@ -299,15 +316,15 @@ function SlateTranscriptEditorInner(props: PropsWithChildren<Props>) {
           tmpValue = await handleRestoreTimecodes(inlineTimecodes);
         }
 
-        if (context.isContentModified && type === 'json-slate') {
+        if (isContentModified && type === 'json-slate') {
           tmpValue = await handleRestoreTimecodes();
         }
 
-        if (context.isContentModified && type === 'json-digitalpaperedit') {
+        if (isContentModified && type === 'json-digitalpaperedit') {
           tmpValue = await handleRestoreTimecodes();
         }
 
-        if (context.isContentModified && isCaptionType(type)) {
+        if (isContentModified && isCaptionType(type)) {
           tmpValue = await handleRestoreTimecodes();
         }
         // export adapter does not doo any alignment
@@ -331,15 +348,15 @@ function SlateTranscriptEditorInner(props: PropsWithChildren<Props>) {
         }
         return editorContent;
       } finally {
-        context.setIsProcessing(false);
+        setIsProcessing(false);
       }
     },
-    [context, getFileTitle, getSlateContent, handleRestoreTimecodes, props]
+    [getFileTitle, getSlateContent, handleRestoreTimecodes, isContentModified, props, setIsProcessing]
   );
 
   const handleSave = useCallback(async () => {
     try {
-      context.setIsProcessing(true);
+      setIsProcessing(true);
       const format = props.autoSaveContentType ? props.autoSaveContentType : 'digitalpaperedit';
       const editorContent = await handleExport({ type: `json-${format}`, isDownload: false });
 
@@ -352,12 +369,12 @@ function SlateTranscriptEditorInner(props: PropsWithChildren<Props>) {
       if (props.handleSaveEditor && props.isEditable) {
         props.handleSaveEditor(editorContent);
       }
-      context.setIsContentModified(false);
-      context.setIsContentSaved(true);
+      setIsContentModified(false);
+      setIsContentSaved(true);
     } finally {
-      context.setIsProcessing(false);
+      setIsProcessing(false);
     }
-  }, [context, handleExport, props]);
+  }, [handleExport, props, setIsContentModified, setIsContentSaved, setIsProcessing]);
 
   /**
    * See explanation in `src/utils/dpe-to-slate/index.js` for how this function works with css injection
@@ -370,10 +387,10 @@ function SlateTranscriptEditorInner(props: PropsWithChildren<Props>) {
       // handles if click cancel and doesn't set speaker name
       props.handleAnalyticsEvents('ste_handle_set_pause_while_typing', {
         fn: 'handleSetPauseWhileTyping',
-        isPauseWhileTyping: !context.isPauseWhileTyping,
+        isPauseWhileTyping: !isPauseWhileTyping,
       });
     }
-    context.setIsPauseWhileTyping(!context.isPauseWhileTyping);
+    setIsPauseWhileTyping(!isPauseWhileTyping);
   };
 
   // const debounced_version = throttle(handleRestoreTimecodes, 3000, { leading: false, trailing: true });
@@ -382,8 +399,8 @@ function SlateTranscriptEditorInner(props: PropsWithChildren<Props>) {
   // - merging paragraph via delete
   // - merging paragraphs via deleting across paragraphs
   const handleOnKeyDown = async (event) => {
-    context.setIsContentModified(true);
-    context.setIsContentSaved(false);
+    setIsContentModified(true);
+    setIsContentSaved(false);
     //  ArrowRight ArrowLeft ArrowUp ArrowUp
     if (event.key === 'Enter') {
       // intercept Enter, and handle timecodes when splitting a paragraph
@@ -391,7 +408,7 @@ function SlateTranscriptEditorInner(props: PropsWithChildren<Props>) {
       // console.info('For now disabling enter key to split a paragraph, while figuring out the alignment issue');
       // handleSetPauseWhileTyping();
       // TODO: Edge case, hit enters after having typed some other words?
-      const isSuccess = SlateHelpers.handleSplitParagraph(context.editor);
+      const isSuccess = SlateHelpers.handleSplitParagraph(editor);
       if (props.handleAnalyticsEvents) {
         // handles if click cancel and doesn't set speaker name
         props.handleAnalyticsEvents('ste_handle_split_paragraph', {
@@ -402,11 +419,11 @@ function SlateTranscriptEditorInner(props: PropsWithChildren<Props>) {
       if (isSuccess) {
         // as part of splitting paragraphs there's an alignment step
         // so content is not counted as modified
-        context.setIsContentModified(false);
+        setIsContentModified(false);
       }
     }
     if (event.key === 'Backspace') {
-      const isSuccess = SlateHelpers.handleDeleteInParagraph({ editor: context.editor, event });
+      const isSuccess = SlateHelpers.handleDeleteInParagraph({ editor: editor, event });
       // Commenting that out for now, as it might get called too often
       // if (props.handleAnalyticsEvents) {
       //   // handles if click cancel and doesn't set speaker name
@@ -418,7 +435,7 @@ function SlateTranscriptEditorInner(props: PropsWithChildren<Props>) {
       if (isSuccess) {
         // as part of splitting paragraphs there's an alignment step
         // so content is not counted as modified
-        context.setIsContentModified(false);
+        setIsContentModified(false);
       }
     }
     // if (event.key.length == 1 && ((event.keyCode >= 65 && event.keyCode <= 90) || (event.keyCode >= 49 && event.keyCode <= 57))) {
@@ -427,7 +444,7 @@ function SlateTranscriptEditorInner(props: PropsWithChildren<Props>) {
     //   setIsContentIsModified(false);
     // }
 
-    if (context.isPauseWhileTyping) {
+    if (isPauseWhileTyping) {
       // logic for pause while typing
       // https://schier.co/blog/wait-for-user-to-stop-typing-using-javascript
       // TODO: currently eve the video was paused, and pause while typing is on,
@@ -450,7 +467,7 @@ function SlateTranscriptEditorInner(props: PropsWithChildren<Props>) {
         <Paper elevation={3} />
         <style scoped>
           {`/* Next words */
-             .timecode[data-previous-timings*="${generatePreviousTimingsUpToCurrent(context.currentTime)}"]{
+             .timecode[data-previous-timings*="${generatePreviousTimingsUpToCurrent(currentTime)}"]{
                   color:  #9E9E9E;
               }
 
@@ -512,14 +529,14 @@ function SlateTranscriptEditorInner(props: PropsWithChildren<Props>) {
               <Grid container direction="row" justifyContent="space-between" alignItems="flex-start" spacing={1} item>
                 <Grid item>
                   <p>
-                    <code style={{ color: 'grey' }}>{shortTimecode(context.currentTime)}</code>
+                    <code style={{ color: 'grey' }}>{shortTimecode(currentTime)}</code>
                     <span style={{ color: 'grey' }}> {' | '}</span>
                     <code style={{ color: 'grey' }}>{context.duration ? `${shortTimecode(context.duration)}` : '00:00:00'}</code>
                   </p>
                 </Grid>
                 <Grid item>
                   <FormControl>
-                    <Select labelId="demo-simple-select-label" id="demo-simple-select" value={context.playbackRate} onChange={handleSetPlaybackRate}>
+                    <Select labelId="demo-simple-select-label" id="demo-simple-select" value={playbackRate} onChange={handleSetPlaybackRate}>
                       {PLAYBACK_RATE_VALUES.map((playbackRateValue, index) => {
                         return (
                           <MenuItem key={index + playbackRateValue} value={playbackRateValue}>
@@ -551,14 +568,14 @@ function SlateTranscriptEditorInner(props: PropsWithChildren<Props>) {
                       enterDelay={3000}
                       title={
                         <Typography variant="body1">
-                          {`Turn ${context.isPauseWhileTyping ? 'off' : 'on'} pause while typing functionality. As
+                          {`Turn ${isPauseWhileTyping ? 'off' : 'on'} pause while typing functionality. As
                       you start typing the media while pause playback until you stop. Not
                       recommended on longer transcript as it might present performance issues.`}
                         </Typography>
                       }
                     >
                       <Typography variant="subtitle2" gutterBottom>
-                        <Switch color="primary" checked={context.isPauseWhileTyping} onChange={handleSetPauseWhileTyping} />
+                        <Switch color="primary" checked={isPauseWhileTyping} onChange={handleSetPauseWhileTyping} />
                         Pause media while typing
                       </Typography>
                     </Tooltip>
@@ -577,19 +594,19 @@ function SlateTranscriptEditorInner(props: PropsWithChildren<Props>) {
           </Grid>
 
           <Grid item xs={12} sm={7} md={7} lg={7} xl={7}>
-            {context.value.length !== 0 ? (
+            {value.length !== 0 ? (
               <>
                 <Paper elevation={3}>
                   <section className="editor-wrapper-container">
                     <Slate
-                      editor={context.editor}
-                      value={context.value}
+                      editor={editor}
+                      value={value}
                       onChange={(value) => {
                         if (props.handleAutoSaveChanges) {
                           props.handleAutoSaveChanges(value);
-                          context.setIsContentSaved(true);
+                          setIsContentSaved(true);
                         }
-                        return context.setValue(value);
+                        return setValue(value);
                       }}
                     >
                       <Editable
