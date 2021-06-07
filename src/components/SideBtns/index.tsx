@@ -1,45 +1,37 @@
-import React, { useState, useEffect } from 'react';
+import Button from '@material-ui/core/Button';
 import Divider from '@material-ui/core/Divider';
+import Grid from '@material-ui/core/Grid';
+import Link from '@material-ui/core/Link';
+import Menu from '@material-ui/core/Menu';
+import MenuItem from '@material-ui/core/MenuItem';
 import Tooltip from '@material-ui/core/Tooltip';
 import Typography from '@material-ui/core/Typography';
-import Button from '@material-ui/core/Button';
-import Menu from '@material-ui/core/Menu';
-import Link from '@material-ui/core/Link';
-import Grid from '@material-ui/core/Grid';
-import MenuItem from '@material-ui/core/MenuItem';
+import EmojiSymbolsOutlinedIcon from '@material-ui/icons/EmojiSymbolsOutlined';
+import ImportExportIcon from '@material-ui/icons/ImportExport';
+import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
+import MusicNoteOutlinedIcon from '@material-ui/icons/MusicNoteOutlined';
+import RedoIcon from '@material-ui/icons/Redo';
 import SaveAltIcon from '@material-ui/icons/SaveAlt';
 import SaveOutlinedIcon from '@material-ui/icons/SaveOutlined';
-import KeyboardReturnOutlinedIcon from '@material-ui/icons/KeyboardReturnOutlined';
-import MusicNoteOutlinedIcon from '@material-ui/icons/MusicNoteOutlined';
-import HelpOutlineOutlinedIcon from '@material-ui/icons/HelpOutlineOutlined';
-import ImportExportIcon from '@material-ui/icons/ImportExport';
-import CachedOutlinedIcon from '@material-ui/icons/CachedOutlined';
-import InfoOutlined from '@material-ui/icons/InfoOutlined';
-import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
-import RedoIcon from '@material-ui/icons/Redo';
 import UndoOutlinedIcon from '@material-ui/icons/UndoOutlined';
-import EmojiSymbolsOutlinedIcon from '@material-ui/icons/EmojiSymbolsOutlined';
+import { useTranscriptEditorContext } from 'components/TranscriptEditorContext.js';
+import React, { PropsWithChildren, useState } from 'react';
+import { ExportData } from 'util/export-adapters/index.js';
 import subtitlesExportOptionsList from '../../util/export-adapters/subtitles-generator/list.js';
 
 function SideBtns({
   handleExport,
-  isProcessing,
-  isContentModified,
-  isContentSaved,
-  setIsProcessing,
-  insertTextInaudible,
-  handleInsertMusicNote,
-  handleSplitParagraph,
-  handleRestoreTimecodes,
   handleReplaceText,
   handleSave,
-  handleAnalyticsEvents,
   REPLACE_WHOLE_TEXT_INSTRUCTION,
-  optionalBtns,
-  handleUndo,
-  handleRedo,
-  isEditable,
-}) {
+  children,
+}: PropsWithChildren<{
+  handleExport: (data: ExportData) => Promise<string>;
+  handleReplaceText: () => void;
+  handleSave: () => void;
+  REPLACE_WHOLE_TEXT_INSTRUCTION: string;
+}>): JSX.Element {
+  const { editor, isProcessing, isContentSaved, isEditable, insertMusicNote, insertTextInaudible } = useTranscriptEditorContext();
   const [anchorMenuEl, setAnchorMenuEl] = useState(null);
 
   // used by MUI export menu
@@ -50,6 +42,14 @@ function SideBtns({
   // used by MUI export menu
   const handleMenuClick = (event) => {
     setAnchorMenuEl(event.currentTarget);
+  };
+
+  const handleUndo = () => {
+    editor.undo();
+  };
+
+  const handleRedo = () => {
+    editor.redo();
   };
 
   return (
@@ -120,7 +120,7 @@ function SideBtns({
               handleMenuClose();
             }}
           >
-            <Link color="primary"> Text (Speakers & Timecodes)</Link>
+            <Link color="primary"> Text (Speakers &amp; Timecodes)</Link>
           </MenuItem>
           <MenuItem
             onClick={() => {
@@ -279,9 +279,9 @@ function SideBtns({
       </Grid>
       {isEditable && (
         <>
-          {/* TODO: Disabiling until find a way to handle timecodes and alignment on paragraph break */}
+          {/* TODO: disabling until find a way to handle timecodes and alignment on paragraph break */}
           {/* <Tooltip
-        title={`To insert a paragraph break, and split a pargraph in two, put the cursor at a point where you'd want to add a paragraph break in the text and either click this button or hit enter key`}
+        title={`To insert a paragraph break, and split a paragraph in two, put the cursor at a point where you'd want to add a paragraph break in the text and either click this button or hit enter key`}
       >
         <Button disabled={isProcessing} onClick={handleSplitParagraph} color="primary">
           <KeyboardReturnOutlinedIcon color="primary" />
@@ -294,7 +294,9 @@ function SideBtns({
           <Grid item>
             <Tooltip
               title={
-                <Typography variant="body1">Put the cursor at a point where you'd want to add [INAUDIBLE] text, and click this button</Typography>
+                <Typography variant="body1">
+                  Put the cursor at a point where you&apos;d want to add [INAUDIBLE] text, and click this button
+                </Typography>
               }
             >
               <Button disabled={isProcessing} onClick={insertTextInaudible} color="primary">
@@ -303,7 +305,7 @@ function SideBtns({
             </Tooltip>
 
             <Tooltip title={<Typography variant="body1">Insert a ♪ in the text</Typography>}>
-              <Button disabled={isProcessing} onClick={handleInsertMusicNote} color="primary">
+              <Button disabled={isProcessing} onClick={insertMusicNote} color="primary">
                 <MusicNoteOutlinedIcon color="primary" />
               </Button>
             </Tooltip>
@@ -389,7 +391,7 @@ function SideBtns({
       <Grid item>
         <br />
       </Grid>
-      <Grid item>{optionalBtns}</Grid>
+      <Grid item>{children}</Grid>
     </Grid>
   );
 }

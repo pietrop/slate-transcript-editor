@@ -1,12 +1,10 @@
 import {
   Button,
-  Collapse,
   Container,
   CssBaseline,
   FormControl,
   FormHelperText,
   Grid,
-  Link,
   MenuItem,
   Paper,
   Select,
@@ -14,7 +12,7 @@ import {
   Tooltip,
   Typography,
 } from '@material-ui/core';
-import { Forward10, InfoOutlined, Keyboard, KeyboardReturnOutlined, People, Replay10, Save, SaveAlt } from '@material-ui/icons';
+import { Forward10, Replay10 } from '@material-ui/icons';
 import debounce from 'lodash/debounce';
 import path from 'path';
 import React, { PropsWithChildren, useCallback, useEffect } from 'react';
@@ -29,8 +27,10 @@ import plainTextalignToSlateJs from '../util/export-adapters/slate-to-dpe/update
 import updateBlocksTimestamps from '../util/export-adapters/slate-to-dpe/update-timestamps/update-blocks-timestamps';
 import insertTimecodesInLineInSlateJs from '../util/insert-timecodes-in-line-in-words-list';
 import { shortTimecode } from '../util/timecode-converter';
+import { Instructions } from './Instructions/index.js';
 import SideBtns from './SideBtns';
 import SlateHelpers from './slate-helpers';
+import { SpeakersCheatSheet } from './SpeakersCheatSheet/index.js';
 import { TimedTextElement } from './TimedTextElement';
 import { TranscriptEditorContextProvider, useTranscriptEditorContext } from './TranscriptEditorContext.js';
 
@@ -106,7 +106,7 @@ function SlateTranscriptEditorInner(props: PropsWithChildren<Props>) {
       const res = convertDpeToSlate(props.transcriptData);
       context.setValue(res);
     }
-  }, []);
+  }, [context, props.transcriptData]);
 
   // handles interim results for working with a Live STT
   useEffect(() => {
@@ -133,37 +133,20 @@ function SlateTranscriptEditorInner(props: PropsWithChildren<Props>) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.transcriptDataLive]);
 
-  const insertTextInaudible = () => {
-    Transforms.insertText(context.editor, '[INAUDIBLE]');
-
-    props.handleAnalyticsEvents?.('ste_clicked_on_insert', {
-      btn: '[INAUDIBLE]',
-      fn: 'insertTextInaudible',
-    });
-  };
-
-  const handleInsertMusicNote = () => {
-    Transforms.insertText(context.editor, '♪'); // or ♫
-
-    props.handleAnalyticsEvents?.('ste_clicked_on_insert', {
-      btn: '♫',
-      fn: 'handleInsertMusicNote',
-    });
-  };
-
-  const getSlateContent = () => {
+  const getSlateContent = useCallback(() => {
     return context.value;
-  };
+  }, [context.value]);
 
-  const getFileName = () => {
+  const getFileName = useCallback(() => {
     return path.basename(props.mediaUrl).trim();
-  };
-  const getFileTitle = () => {
+  }, [props.mediaUrl]);
+
+  const getFileTitle = useCallback(() => {
     if (props.title) {
       return props.title;
     }
     return getFileName();
-  };
+  }, [getFileName, props.title]);
 
   const handleSetPlaybackRate = useCallback(
     (e) => {
@@ -351,7 +334,7 @@ function SlateTranscriptEditorInner(props: PropsWithChildren<Props>) {
         context.setIsProcessing(false);
       }
     },
-    [context, getFileTitle, handleRestoreTimecodes, props]
+    [context, getFileTitle, getSlateContent, handleRestoreTimecodes, props]
   );
 
   const handleSave = useCallback(async () => {
@@ -359,13 +342,12 @@ function SlateTranscriptEditorInner(props: PropsWithChildren<Props>) {
       context.setIsProcessing(true);
       const format = props.autoSaveContentType ? props.autoSaveContentType : 'digitalpaperedit';
       const editorContent = await handleExport({ type: `json-${format}`, isDownload: false });
-      if (props.handleAnalyticsEvents) {
-        // handles if click cancel and doesn't set speaker name
-        props.handleAnalyticsEvents('ste_handle_save', {
-          fn: 'handleSave',
-          format,
-        });
-      }
+
+      // handles if click cancel and doesn't set speaker name
+      props.handleAnalyticsEvents?.('ste_handle_save', {
+        fn: 'handleSave',
+        format,
+      });
 
       if (props.handleSaveEditor && props.isEditable) {
         props.handleSaveEditor(editorContent);
@@ -388,22 +370,10 @@ function SlateTranscriptEditorInner(props: PropsWithChildren<Props>) {
       // handles if click cancel and doesn't set speaker name
       props.handleAnalyticsEvents('ste_handle_set_pause_while_typing', {
         fn: 'handleSetPauseWhileTyping',
-        isPauseWhiletyping: !context.isPauseWhileTyping,
+        isPauseWhileTyping: !context.isPauseWhileTyping,
       });
     }
     context.setIsPauseWhileTyping(!context.isPauseWhileTyping);
-  };
-
-  const handleSplitParagraph = () => {
-    SlateHelpers.handleSplitParagraph(context.editor);
-  };
-
-  const handleUndo = () => {
-    context.editor.undo();
-  };
-
-  const handleRedo = () => {
-    context.editor.redo();
   };
 
   // const debounced_version = throttle(handleRestoreTimecodes, 3000, { leading: false, trailing: true });
@@ -597,76 +567,11 @@ function SlateTranscriptEditorInner(props: PropsWithChildren<Props>) {
               </Grid>
 
               <Grid item>
-                <Tooltip
-                  enterDelay={100}
-                  title={
-                    <Typography variant="body1">
-                      {!props.isEditable && (
-                        <>
-                          You are in read only mode. <br />
-                        </>
-                      )}
-                      Double click on a word or time stamp to jump to the corresponding point in the media. <br />
-                      {props.isEditable && (
-                        <>
-                          <Keyboard /> Start typing to edit text.
-                          <br />
-                          <People /> You can add and change names of speakers in your transcript.
-                          <br />
-                          <KeyboardReturnOutlined /> Hit enter in between words to split a paragraph.
-                          <br />
-                          <Save />
-                          Remember to save regularly.
-                          <br />
-                        </>
-                      )}
-                      <SaveAlt /> Export to get a copy.
-                    </Typography>
-                  }
-                >
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      flexWrap: 'wrap',
-                    }}
-                  >
-                    <InfoOutlined fontSize="small" color="primary" />
-                    <Typography color="primary" variant="body1">
-                      How Does this work?
-                    </Typography>
-                  </div>
-                </Tooltip>
+                <Instructions />
               </Grid>
               <Grid item>
-                <Link
-                  color="inherit"
-                  onClick={() => {
-                    context.setShowSpeakersCheatSheet(!context.showSpeakersCheatSheet);
-                  }}
-                >
-                  <Typography variant="subtitle2" gutterBottom>
-                    <b>Speakers</b>
-                  </Typography>
-                </Link>
-
-                <Collapse in={context.showSpeakersCheatSheet}>
-                  {context.speakerOptions.map((speakerName, index) => {
-                    return (
-                      <Typography
-                        variant="body2"
-                        gutterBottom
-                        key={index + speakerName}
-                        className={'text-truncate'}
-                        title={speakerName.toUpperCase()}
-                      >
-                        {speakerName}
-                      </Typography>
-                    );
-                  })}
-                </Collapse>
+                <SpeakersCheatSheet />
               </Grid>
-              {/* <Grid item>{props.children}</Grid> */}
             </Grid>
             <Grid item>{props.children}</Grid>
           </Grid>
@@ -707,23 +612,12 @@ function SlateTranscriptEditorInner(props: PropsWithChildren<Props>) {
           <Grid container item xs={12} sm={1} md={1} lg={1} xl={1}>
             <SideBtns
               handleExport={handleExport}
-              isProcessing={context.isProcessing}
-              isContentModified={context.isContentModified}
-              isContentSaved={context.isContentSaved}
-              setIsProcessing={context.setIsProcessing}
-              insertTextInaudible={insertTextInaudible}
-              handleInsertMusicNote={handleInsertMusicNote}
-              handleSplitParagraph={handleSplitParagraph}
-              handleRestoreTimecodes={handleRestoreTimecodes}
               handleReplaceText={handleReplaceText}
               handleSave={handleSave}
               REPLACE_WHOLE_TEXT_INSTRUCTION={REPLACE_WHOLE_TEXT_INSTRUCTION}
-              handleAnalyticsEvents={props.handleAnalyticsEvents}
-              optionalBtns={props.optionalBtns}
-              handleUndo={handleUndo}
-              handleRedo={handleRedo}
-              isEditable={props.isEditable}
-            />
+            >
+              {props.optionalBtns}
+            </SideBtns>
           </Grid>
         </Grid>
       </Container>

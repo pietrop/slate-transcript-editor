@@ -1,6 +1,6 @@
 import * as R from 'ramda';
 import React, { createContext, PropsWithChildren, RefObject, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { BaseEditor, createEditor, Descendant } from 'slate';
+import { BaseEditor, createEditor, Descendant, Transforms } from 'slate';
 import { HistoryEditor, withHistory } from 'slate-history';
 import { ReactEditor, withReact } from 'slate-react';
 import SlateHelpers from './slate-helpers';
@@ -21,6 +21,14 @@ interface TranscriptEditorCtx {
   isContentSaved: boolean;
   setIsPauseWhileTyping: React.Dispatch<React.SetStateAction<boolean>>;
   isPauseWhileTyping: boolean;
+  setShowSpeakersCheatSheet: React.Dispatch<React.SetStateAction<boolean>>;
+  showSpeakersCheatSheet: boolean;
+  currentTime: number;
+  duration: number;
+  speakerOptions: string[];
+  insertTextInaudible: () => void;
+  insertMusicNote: () => void;
+  handleAnalyticsEvents: (eventName: string, properties: { fn: string; [key: string]: any }) => void;
 }
 
 const TranscriptEditorContext = createContext<TranscriptEditorCtx | undefined>(undefined);
@@ -52,11 +60,8 @@ export function TranscriptEditorContextProvider({
   const [playbackRate, setPlaybackRate] = useState(1);
   const editor = useMemo(() => withReact(withHistory(createEditor())), []);
   const [value, setValue] = useState<Descendant[]>([]);
-  const [showSpeakers, setShowSpeakers] = useState(defaultShowSpeakers);
-  const [showTimecodes, setShowTimecodes] = useState(defaultShowTimecodes);
   const [speakerOptions, setSpeakerOptions] = useState<string[]>([]);
   const [showSpeakersCheatSheet, setShowSpeakersCheatSheet] = useState(true);
-  const [saveTimer, setSaveTimer] = useState(null);
   const [isPauseWhileTyping, setIsPauseWhileTyping] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   // used isContentModified to avoid unnecessarily running alignment if the slate value content has not been modified by the user since
@@ -158,6 +163,24 @@ export function TranscriptEditorContextProvider({
     [editor, handleAnalyticsEvents, mediaRef]
   );
 
+  const insertTextInaudible = useCallback(() => {
+    Transforms.insertText(editor, '[INAUDIBLE]');
+
+    handleAnalyticsEvents?.('ste_clicked_on_insert', {
+      btn: '[INAUDIBLE]',
+      fn: 'insertTextInaudible',
+    });
+  }, [editor, handleAnalyticsEvents]);
+
+  const insertMusicNote = useCallback(() => {
+    Transforms.insertText(editor, '♪'); // or ♫
+
+    handleAnalyticsEvents?.('ste_clicked_on_insert', {
+      btn: '♫',
+      fn: 'handleInsertMusicNote',
+    });
+  }, [editor, handleAnalyticsEvents]);
+
   const ctx = useMemo(
     (): TranscriptEditorCtx => ({
       handleTimedTextClick,
@@ -175,8 +198,33 @@ export function TranscriptEditorContextProvider({
       isContentSaved,
       setIsPauseWhileTyping,
       isPauseWhileTyping,
+      currentTime,
+      duration,
+      setShowSpeakersCheatSheet,
+      showSpeakersCheatSheet,
+      speakerOptions,
+      insertTextInaudible,
+      insertMusicNote,
+      handleAnalyticsEvents,
     }),
-    [editor, handleTimedTextClick, isContentModified, isContentSaved, isEditable, isPauseWhileTyping, isProcessing, playbackRate, value]
+    [
+      currentTime,
+      duration,
+      editor,
+      handleTimedTextClick,
+      insertMusicNote,
+      insertTextInaudible,
+      isContentModified,
+      isContentSaved,
+      isEditable,
+      isPauseWhileTyping,
+      isProcessing,
+      playbackRate,
+      showSpeakersCheatSheet,
+      speakerOptions,
+      value,
+      handleAnalyticsEvents,
+    ]
   );
 
   return <TranscriptEditorContext.Provider value={ctx}>{children}</TranscriptEditorContext.Provider>;
