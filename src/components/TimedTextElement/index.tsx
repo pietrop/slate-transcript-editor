@@ -2,7 +2,7 @@ import { Grid, GridProps, GridSize, Typography } from '@material-ui/core';
 import React from 'react';
 import { Editor, Element, Transforms } from 'slate';
 import { ReactEditor } from 'slate-react';
-import { useTranscriptEditorContext } from '../TranscriptEditorContext.js';
+import { useTranscriptEditorContext } from '../TranscriptEditorContext';
 
 export function TimedTextElement({
   showSpeakers,

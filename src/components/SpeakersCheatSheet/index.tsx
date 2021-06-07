@@ -1,6 +1,6 @@
 import { Collapse, Link, Typography } from '@material-ui/core';
-import { useTranscriptEditorContext } from 'components/TranscriptEditorContext';
 import React from 'react';
+import { useTranscriptEditorContext } from '../TranscriptEditorContext';
 
 export function SpeakersCheatSheet(): JSX.Element {
   const context = useTranscriptEditorContext();

@@ -1,23 +1,18 @@
-import Button from '@material-ui/core/Button';
-import Divider from '@material-ui/core/Divider';
-import Grid from '@material-ui/core/Grid';
-import Link from '@material-ui/core/Link';
-import Menu from '@material-ui/core/Menu';
-import MenuItem from '@material-ui/core/MenuItem';
-import Tooltip from '@material-ui/core/Tooltip';
-import Typography from '@material-ui/core/Typography';
-import EmojiSymbolsOutlinedIcon from '@material-ui/icons/EmojiSymbolsOutlined';
-import ImportExportIcon from '@material-ui/icons/ImportExport';
-import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
-import MusicNoteOutlinedIcon from '@material-ui/icons/MusicNoteOutlined';
-import RedoIcon from '@material-ui/icons/Redo';
-import SaveAltIcon from '@material-ui/icons/SaveAlt';
-import SaveOutlinedIcon from '@material-ui/icons/SaveOutlined';
-import UndoOutlinedIcon from '@material-ui/icons/UndoOutlined';
-import { useTranscriptEditorContext } from 'components/TranscriptEditorContext.js';
+import { Button, Divider, Grid, Link, Menu, MenuItem, Tooltip, Typography } from '@material-ui/core';
+import {
+  EmojiSymbolsOutlined,
+  ImportExport,
+  KeyboardArrowDown,
+  MusicNoteOutlined,
+  Redo,
+  SaveAlt,
+  SaveOutlined,
+  UndoOutlined,
+} from '@material-ui/icons';
 import React, { PropsWithChildren, useState } from 'react';
 import { ExportData } from 'util/export-adapters/index.js';
 import subtitlesExportOptionsList from '../../util/export-adapters/subtitles-generator/list.js';
+import { useTranscriptEditorContext } from '../TranscriptEditorContext';
 
 function SideBtns({
   handleExport,
@@ -57,7 +52,7 @@ function SideBtns({
       <Grid item>
         <Tooltip title={<Typography variant="body1">Export options</Typography>}>
           <Button aria-controls="simple-menu" aria-haspopup="true" onClick={handleMenuClick}>
-            <SaveAltIcon color="primary" /> <KeyboardArrowDownIcon color="primary" />
+            <SaveAlt color="primary" /> <KeyboardArrowDown color="primary" />
           </Button>
         </Tooltip>
         <Menu id="simple-menu" anchorEl={anchorMenuEl} keepMounted open={Boolean(anchorMenuEl)} onClose={handleMenuClose}>
@@ -272,7 +267,7 @@ function SideBtns({
         {isEditable && (
           <Tooltip title={<Typography variant="body1">save</Typography>}>
             <Button disabled={isProcessing} onClick={handleSave} color="primary">
-              <SaveOutlinedIcon color={isContentSaved ? 'primary' : 'secondary'} />
+              <SaveOutlined color={isContentSaved ? 'primary' : 'secondary'} />
             </Button>
           </Tooltip>
         )}
@@ -300,13 +295,13 @@ function SideBtns({
               }
             >
               <Button disabled={isProcessing} onClick={insertTextInaudible} color="primary">
-                <EmojiSymbolsOutlinedIcon color="primary" />
+                <EmojiSymbolsOutlined color="primary" />
               </Button>
             </Tooltip>
 
             <Tooltip title={<Typography variant="body1">Insert a ♪ in the text</Typography>}>
               <Button disabled={isProcessing} onClick={insertMusicNote} color="primary">
-                <MusicNoteOutlinedIcon color="primary" />
+                <MusicNoteOutlined color="primary" />
               </Button>
             </Tooltip>
           </Grid>
@@ -325,7 +320,7 @@ function SideBtns({
               }
             >
               <Button onClick={handleUndo} color="primary">
-                <UndoOutlinedIcon color="primary" />
+                <UndoOutlined color="primary" />
               </Button>
             </Tooltip>
 
@@ -337,7 +332,7 @@ function SideBtns({
               }
             >
               <Button onClick={handleRedo} color="primary">
-                <RedoIcon color="primary" />
+                <Redo color="primary" />
               </Button>
             </Tooltip>
           </Grid>
@@ -377,7 +372,7 @@ function SideBtns({
           <Grid item>
             <Tooltip title={<Typography variant="body1">{REPLACE_WHOLE_TEXT_INSTRUCTION}</Typography>}>
               <Button onClick={handleReplaceText} color="primary">
-                <ImportExportIcon color="primary" />
+                <ImportExport color="primary" />
               </Button>
             </Tooltip>
           </Grid>

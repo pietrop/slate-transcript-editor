@@ -2,7 +2,7 @@ import { action } from '@storybook/addon-actions';
 import { Story } from '@storybook/react';
 import 'fontsource-roboto';
 import React, { ComponentProps } from 'react';
-import SlateTranscriptEditor from '.';
+import { SlateTranscriptEditor } from '../components/TranscriptEditor';
 import DEMO_SOLEIO from '../sample-data/soleio-dpe.json';
 
 export default {

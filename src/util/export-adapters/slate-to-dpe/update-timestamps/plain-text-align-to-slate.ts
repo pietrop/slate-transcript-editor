@@ -1,11 +1,11 @@
+import assert from 'assert';
+import { TranscriptData } from 'components/TranscriptEditor';
+import { Descendant, Element } from 'slate';
 import { alignSTT } from 'stt-align-node';
-import { shortTimecode } from '../../../timecode-converter';
+import { TranscriptWord } from 'types/slate';
 import countWords from '../../../count-words';
 import generatePreviousTimingsUpToCurrent from '../../../dpe-to-slate/generate-previous-timings-up-to-current';
-import { Descendant, Element } from 'slate';
-import { TranscriptWord } from 'types/slate';
-import assert from 'assert';
-import { TranscriptData } from 'components';
+import { shortTimecode } from '../../../timecode-converter';
 
 const createSlateContentFromSlateJsParagraphs = (currentContent: Descendant[], newEntities: TranscriptWord[]): Descendant[] => {
   // Update entites to block structure.
@@ -22,7 +22,7 @@ const createSlateContentFromSlateJsParagraphs = (currentContent: Descendant[], n
     const wordsInBlock = countWords(text);
     const blockEntites = newEntities.slice(totalWords, totalWords + wordsInBlock);
     let speaker = block.speaker;
-    const start = parseFloat((blockEntites[0].start as unknown) as string);
+    const start = parseFloat(blockEntites[0].start as unknown as string);
     // const end = parseFloat(blockEntites[blockEntites.length - 1].end);
     // const currentParagraph = { start, end };
     // The speakers would also not exist. unles in future iteration

@@ -1,18 +1,13 @@
 import { action } from '@storybook/addon-actions';
 import React, { useEffect, useState } from 'react';
-import SlateTranscriptEditor, { TranscriptData } from '.';
+import { SlateTranscriptEditor, TranscriptData } from '../components/TranscriptEditor';
 import DEMO_SOLEIO_LIVE from '../sample-data/segmented-transcript-soleio-dpe.json';
-
-export default {
-  title: 'Live',
-  component: Example,
-};
 
 const DEMO_MEDIA_URL_SOLEIO =
   'https://digital-paper-edit-demo.s3.eu-west-2.amazonaws.com/PBS-Frontline/The+Facebook+Dilemma+-+interviews/The+Facebook+Dilemma+-+Soleio+Cuervo-OIAUfZBd_7w.mp4';
 
 // Parent component to simulate results from a live STT stream.
-const Example = (props) => {
+const Example = (props: any) => {
   // Declare a new state variable, which we'll call "count"
   const [jsonData] = useState<TranscriptData>({ words: [], paragraphs: [] });
   const [interimResults, setInterimResults] = useState({});
@@ -55,7 +50,12 @@ const Example = (props) => {
   );
 };
 
-export const NotEditable = () => {
+export default {
+  title: 'Live',
+  component: Example,
+};
+
+export const NotEditable = (): JSX.Element => {
   return (
     <Example
       isEditable={false}
@@ -65,7 +65,7 @@ export const NotEditable = () => {
   );
 };
 
-export const Editable = () => {
+export const Editable = (): JSX.Element => {
   return (
     <Example
       isEditable={true}

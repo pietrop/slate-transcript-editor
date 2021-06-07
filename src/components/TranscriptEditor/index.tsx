@@ -19,20 +19,20 @@ import React, { PropsWithChildren, useCallback, useEffect } from 'react';
 import { Descendant, Transforms } from 'slate';
 import { Editable, RenderLeafProps, Slate } from 'slate-react';
 import { TranscriptWord } from 'types/slate';
-import download from '../util/download/index.js';
-import convertDpeToSlate from '../util/dpe-to-slate';
-import generatePreviousTimingsUpToCurrent from '../util/dpe-to-slate/generate-previous-timings-up-to-current';
-import exportAdapter, { ExportData, isCaptionType } from '../util/export-adapters';
-import plainTextalignToSlateJs from '../util/export-adapters/slate-to-dpe/update-timestamps/plain-text-align-to-slate';
-import updateBlocksTimestamps from '../util/export-adapters/slate-to-dpe/update-timestamps/update-blocks-timestamps';
-import insertTimecodesInLineInSlateJs from '../util/insert-timecodes-in-line-in-words-list';
-import { shortTimecode } from '../util/timecode-converter';
-import { Instructions } from './Instructions/index.js';
-import SideBtns from './SideBtns';
-import SlateHelpers from './slate-helpers';
-import { SpeakersCheatSheet } from './SpeakersCheatSheet/index.js';
-import { TimedTextElement } from './TimedTextElement';
-import { TranscriptEditorContextProvider, useTranscriptEditorContext } from './TranscriptEditorContext.js';
+import download from '../../util/download/index.js';
+import convertDpeToSlate from '../../util/dpe-to-slate';
+import generatePreviousTimingsUpToCurrent from '../../util/dpe-to-slate/generate-previous-timings-up-to-current';
+import exportAdapter, { ExportData, isCaptionType } from '../../util/export-adapters';
+import plainTextalignToSlateJs from '../../util/export-adapters/slate-to-dpe/update-timestamps/plain-text-align-to-slate';
+import updateBlocksTimestamps from '../../util/export-adapters/slate-to-dpe/update-timestamps/update-blocks-timestamps';
+import insertTimecodesInLineInSlateJs from '../../util/insert-timecodes-in-line-in-words-list';
+import { shortTimecode } from '../../util/timecode-converter';
+import { Instructions } from '../Instructions';
+import SideBtns from '../SideBtns';
+import SlateHelpers from '../slate-helpers';
+import { SpeakersCheatSheet } from '../SpeakersCheatSheet';
+import { TimedTextElement } from '../TimedTextElement';
+import { TranscriptEditorContextProvider, useTranscriptEditorContext } from '../TranscriptEditorContext';
 
 const PLAYBACK_RATE_VALUES = [0.2, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 3, 3.5];
 const SEEK_BACK_SEC = 10;
@@ -77,7 +77,7 @@ export interface Props {
   mediaType?: string;
 }
 
-function SlateTranscriptEditor(props: PropsWithChildren<Props>): JSX.Element {
+export function SlateTranscriptEditor(props: PropsWithChildren<Props>): JSX.Element {
   return (
     <TranscriptEditorContextProvider
       defaultShowSpeakers={props.showSpeakers}
@@ -624,8 +624,6 @@ function SlateTranscriptEditorInner(props: PropsWithChildren<Props>) {
     </div>
   );
 }
-
-export default SlateTranscriptEditor;
 
 SlateTranscriptEditor.defaultProps = {
   showTitle: false,

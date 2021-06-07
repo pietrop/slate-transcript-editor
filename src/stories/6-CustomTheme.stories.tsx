@@ -1,11 +1,11 @@
 import { deepOrange, lightBlue, orange, red } from '@material-ui/core/colors';
-import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
+import { createTheme, ThemeProvider } from '@material-ui/core/styles';
 import { action } from '@storybook/addon-actions';
 import 'fontsource-roboto';
 import React from 'react';
-// import purple from '@material-ui/core/colors/purple';
-import SlateTranscriptEditor from '.';
 import { version } from '../../package.json';
+// import purple from '@material-ui/core/colors/purple';
+import { SlateTranscriptEditor } from '../components/TranscriptEditor';
 import DEMO_SOLEIO from '../sample-data/soleio-dpe.json';
 
 export default {
@@ -18,7 +18,7 @@ const DEMO_MEDIA_URL_SOLEIO =
 const DEMO_TITLE_SOLEIO = 'Soleio Interview, PBS Frontline';
 
 export const CustomTheme = () => {
-  const theme = createMuiTheme({
+  const theme = createTheme({
     palette: {
       background: {
         // paper: '#424242',
@@ -54,7 +54,7 @@ export const CustomTheme = () => {
 };
 
 export const CustomThemeExampleTwo = () => {
-  const theme = createMuiTheme({
+  const theme = createTheme({
     palette: {
       background: {
         // paper: '#424242',

@@ -1,7 +1,7 @@
 import { Tooltip, Typography } from '@material-ui/core';
 import { InfoOutlined, Keyboard, KeyboardReturnOutlined, People, Save, SaveAlt } from '@material-ui/icons';
-import { useTranscriptEditorContext } from 'components/TranscriptEditorContext';
 import React from 'react';
+import { useTranscriptEditorContext } from '../TranscriptEditorContext';
 
 export function Instructions(): JSX.Element {
   const context = useTranscriptEditorContext();

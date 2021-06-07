@@ -1,5 +1,5 @@
-import { shortTimecode } from '../timecode-converter';
-
+import { TranscriptData } from 'components/TranscriptEditor';
+import { Descendant } from 'slate';
 /**
  *
  * `generatePreviousTimingsUpToCurrent` is used to
@@ -11,11 +11,9 @@ import { shortTimecode } from '../timecode-converter';
  * where `listOfPreviousTimingsUpToCurrentOne` is dinamically generated up to the current one.
  * eg if current time is `3` then `listOfPreviousTimingsUpToCurrentOne` "0 1 2"
  */
-
 import getWordsForParagraph from '../get-words-for-paragraph';
+import { shortTimecode } from '../timecode-converter';
 import generatePreviousTimingsUpToCurrent from './generate-previous-timings-up-to-current';
-import { TranscriptData } from 'components';
-import { Descendant } from 'slate';
 
 /**
  * splices a list of times, int, up to a certain, index current time.
