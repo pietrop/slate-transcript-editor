@@ -4,17 +4,15 @@ import { Editor, Element, Transforms } from 'slate';
 import { ReactEditor } from 'slate-react';
 import { useTranscriptEditorContext } from '../TranscriptEditorContext';
 
-export function TimedTextElement({
-  showSpeakers,
-  showTimecodes,
-  ...props
-}: {
+export interface TimedTextElementProps {
   element: Element;
   attributes: GridProps;
   children: React.ReactNode;
   showSpeakers: boolean;
   showTimecodes: boolean;
-}): JSX.Element {
+}
+
+export function TimedTextElement({ showSpeakers, showTimecodes, ...props }: TimedTextElementProps): JSX.Element {
   const { editor, isEditable, handleAnalyticsEvents, handleTimedTextClick } = useTranscriptEditorContext();
 
   /**

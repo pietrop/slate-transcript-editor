@@ -17,7 +17,7 @@ import debounce from 'lodash/debounce';
 import path from 'path';
 import React, { PropsWithChildren, useCallback, useEffect } from 'react';
 import { Descendant, Transforms } from 'slate';
-import { Editable, RenderLeafProps, Slate } from 'slate-react';
+import { DefaultElement, Editable, RenderElementProps, RenderLeafProps, Slate } from 'slate-react';
 import { TranscriptWord } from 'types/slate';
 import download from '../../util/download/index.js';
 import convertDpeToSlate from '../../util/dpe-to-slate';
@@ -91,7 +91,7 @@ export function SlateTranscriptEditor(props: PropsWithChildren<Props>): JSX.Elem
   );
 }
 
-function SlateTranscriptEditorInner(props: PropsWithChildren<Props>) {
+function SlateTranscriptEditorInner({ showSpeakers, showTimecodes, ...props }: PropsWithChildren<Props>) {
   const {
     setValue,
     value,
@@ -210,14 +210,17 @@ function SlateTranscriptEditorInner(props: PropsWithChildren<Props>) {
     }
   };
 
-  const renderElement = useCallback((props) => {
-    switch (props.element.type) {
-      case 'timedText':
-        return <TimedTextElement {...props} />;
-      default:
-        return <DefaultElement {...props} />;
-    }
-  }, []);
+  const renderElement = useCallback(
+    (elementProps: RenderElementProps) => {
+      switch (elementProps.element.type) {
+        case 'timedText':
+          return <TimedTextElement showSpeakers={showSpeakers} showTimecodes={showTimecodes} {...elementProps} />;
+        default:
+          return <DefaultElement {...elementProps} />;
+      }
+    },
+    [showSpeakers, showTimecodes]
+  );
 
   const renderLeaf = useCallback(
     ({ attributes, children }: RenderLeafProps): JSX.Element => {
@@ -236,15 +239,6 @@ function SlateTranscriptEditorInner(props: PropsWithChildren<Props>) {
     },
     [handleTimedTextClick]
   );
-
-  //
-
-  const DefaultElement = (props: {
-    attributes: React.DetailedHTMLProps<React.HTMLAttributes<HTMLParagraphElement>, HTMLParagraphElement>;
-    children: React.ReactNode;
-  }) => {
-    return <p {...props.attributes}>{props.children}</p>;
-  };
 
   const handleReplaceText = useCallback(() => {
     const newText = prompt(`Paste the text to replace here.\n\n${REPLACE_WHOLE_TEXT_INSTRUCTION}`);
