@@ -1,10 +1,10 @@
-import { alignSTT } from 'stt-align-node';
-import countWords, { removeExtraWhiteSpaces, splitOnWhiteSpaces, countChar } from '../../../count-words';
-import convertWordsToText from '../../../convert-words-to-text';
-import { Descendant, Element } from 'slate';
 import assert from 'assert';
 import * as R from 'ramda';
+import { Descendant, Element } from 'slate';
+import { alignSTT } from 'stt-align-node';
 import { TranscriptWord } from 'types/slate';
+import convertWordsToText from '../../../convert-words-to-text';
+import { countChar, removeExtraWhiteSpaces, splitOnWhiteSpaces } from '../../../count-words';
 
 export function isTextAndWordsListChanged({ text, words }) {
   const wordsText = convertWordsToText(words);

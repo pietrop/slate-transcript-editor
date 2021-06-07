@@ -1,10 +1,10 @@
-import isSameBlock from '../handle-split-paragraph/is-same-block';
-import isBeginningOftheBlock from '../handle-split-paragraph/is-beginning-of-the-block';
-import isSelectionCollapsed from '../handle-split-paragraph/is-selection-collapsed';
-import { isTextAndWordsListChanged, alignBlock } from '../../../util/export-adapters/slate-to-dpe/update-timestamps/update-bloocks-timestamps';
-import SlateHelpers from '../index';
-import { Element, Location } from 'slate';
 import assert from 'assert';
+import { Element, Location } from 'slate';
+import { alignBlock, isTextAndWordsListChanged } from '../../../util/export-adapters/slate-to-dpe/update-timestamps/update-blocks-timestamps';
+import isBeginningOftheBlock from '../handle-split-paragraph/is-beginning-of-the-block';
+import isSameBlock from '../handle-split-paragraph/is-same-block';
+import isSelectionCollapsed from '../handle-split-paragraph/is-selection-collapsed';
+import SlateHelpers from '../index';
 
 /**
  *

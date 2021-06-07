@@ -4,7 +4,6 @@
  * similar to "update Timestamps" function
  */
 import countWords from '../../count-words';
-import updateBloocksTimestamps from './update-timestamps/update-bloocks-timestamps';
 /**
  * Transposes the timecodes from stt json list of words onto
  * dpe transcript with paragraphs and words

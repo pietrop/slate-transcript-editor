@@ -1,68 +1,52 @@
-import * as R from 'ramda';
-import type { Descendant, Node } from 'slate';
-import type { GridSize } from '@material-ui/core';
-import React, { useState, useEffect, useMemo, useCallback, PropsWithChildren } from 'react';
-import PropTypes, { string } from 'prop-types';
-import path from 'path';
-import CssBaseline from '@material-ui/core/CssBaseline';
-import Button from '@material-ui/core/Button';
-import Container from '@material-ui/core/Container';
-import Grid from '@material-ui/core/Grid';
-import Paper from '@material-ui/core/Paper';
-import Typography from '@material-ui/core/Typography';
-import MenuItem from '@material-ui/core/MenuItem';
-import FormControl from '@material-ui/core/FormControl';
-import Select from '@material-ui/core/Select';
-import Link from '@material-ui/core/Link';
-import Replay10Icon from '@material-ui/icons/Replay10';
-import Forward10Icon from '@material-ui/icons/Forward10';
-import Collapse from '@material-ui/core/Collapse';
-import Tooltip from '@material-ui/core/Tooltip';
-import KeyboardReturnOutlinedIcon from '@material-ui/icons/KeyboardReturnOutlined';
-import KeyboardIcon from '@material-ui/icons/Keyboard';
-import PeopleIcon from '@material-ui/icons/People';
-import FormLabel from '@material-ui/core/FormLabel';
-import Switch from '@material-ui/core/Switch';
-import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
-import FormHelperText from '@material-ui/core/FormHelperText';
-import EditIcon from '@material-ui/icons/Edit';
-import SaveAltIcon from '@material-ui/icons/SaveAlt';
-import SaveIcon from '@material-ui/icons/Save';
+import {
+  Button,
+  Collapse,
+  Container,
+  CssBaseline,
+  FormControl,
+  FormHelperText,
+  Grid,
+  Link,
+  MenuItem,
+  Paper,
+  Select,
+  Switch,
+  Tooltip,
+  Typography,
+} from '@material-ui/core';
+import { Forward10, InfoOutlined, Keyboard, KeyboardReturnOutlined, People, Replay10, Save, SaveAlt } from '@material-ui/icons';
 import debounce from 'lodash/debounce';
-import { createEditor, Editor, Transforms, Element } from 'slate';
-// https://docs.slatejs.org/walkthroughs/01-installing-slate
-// Import the Slate components and React plugin.
-import { Slate, Editable, withReact, ReactEditor, RenderElementProps, RenderLeafProps } from 'slate-react';
-import { withHistory } from 'slate-history';
-
-import SideBtns from './SideBtns';
-import { shortTimecode } from '../util/timecode-converter';
-import download from '../util/downlaod/index.js';
-import convertDpeToSlate from '../util/dpe-to-slate';
-// TODO: This should be moved in export utils
-import insertTimecodesInLineInSlateJs from '../util/insert-timecodes-in-line-in-words-list';
-import pluck from '../util/pluk';
-import plainTextalignToSlateJs from '../util/export-adapters/slate-to-dpe/update-timestamps/plain-text-align-to-slate';
-import updateBloocksTimestamps from '../util/export-adapters/slate-to-dpe/update-timestamps/update-bloocks-timestamps';
-import exportAdapter, { ExportData, isCaptionType } from '../util/export-adapters';
-import generatePreviousTimingsUpToCurrent from '../util/dpe-to-slate/generate-previous-timings-up-to-current';
-import SlateHelpers from './slate-helpers';
-import { GridProps } from '@material-ui/core';
+import path from 'path';
+import React, { PropsWithChildren, useCallback, useEffect } from 'react';
+import { Descendant, Transforms } from 'slate';
+import { Editable, RenderLeafProps, Slate } from 'slate-react';
 import { TranscriptWord } from 'types/slate';
+import download from '../util/download/index.js';
+import convertDpeToSlate from '../util/dpe-to-slate';
+import generatePreviousTimingsUpToCurrent from '../util/dpe-to-slate/generate-previous-timings-up-to-current';
+import exportAdapter, { ExportData, isCaptionType } from '../util/export-adapters';
+import plainTextalignToSlateJs from '../util/export-adapters/slate-to-dpe/update-timestamps/plain-text-align-to-slate';
+import updateBlocksTimestamps from '../util/export-adapters/slate-to-dpe/update-timestamps/update-blocks-timestamps';
+import insertTimecodesInLineInSlateJs from '../util/insert-timecodes-in-line-in-words-list';
+import { shortTimecode } from '../util/timecode-converter';
+import SideBtns from './SideBtns';
+import SlateHelpers from './slate-helpers';
+import { TimedTextElement } from './TimedTextElement';
+import { TranscriptEditorContextProvider, useTranscriptEditorContext } from './TranscriptEditorContext.js';
 
 const PLAYBACK_RATE_VALUES = [0.2, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 3, 3.5];
 const SEEK_BACK_SEC = 10;
-const PAUSE_WHILTE_TYPING_TIMEOUT_MILLISECONDS = 1500;
+const PAUSE_WHILE_TYPING_TIMEOUT_MILLISECONDS = 1500;
 // const MAX_DURATION_FOR_PERFORMANCE_OPTIMIZATION_IN_SECONDS = 3600;
 const REPLACE_WHOLE_TEXT_INSTRUCTION =
   'Replace whole text. \n\nAdvanced feature, if you already have an accurate transcription for the whole text, and you want to restore timecodes for it, you can use this to replace the text in this transcript. \n\nFor now this is an experimental feature. \n\nIt expects plain text, with paragraph breaks as new line breaks but no speakers.';
 
 const mediaRef = React.createRef<HTMLVideoElement>();
 
-const pauseWhileTypeing = (current) => {
+const pauseWhileTyping = (current) => {
   current.play();
 };
-const debouncePauseWhileTyping = debounce(pauseWhileTypeing, PAUSE_WHILTE_TYPING_TIMEOUT_MILLISECONDS);
+const debouncePauseWhileTyping = debounce(pauseWhileTyping, PAUSE_WHILE_TYPING_TIMEOUT_MILLISECONDS);
 
 export interface TranscriptData {
   words?: TranscriptWord[];
@@ -80,7 +64,7 @@ export interface Props {
   transcriptData: TranscriptData;
   mediaUrl: string;
   handleSaveEditor: (value: string) => void;
-  handleAutoSaveChanges?: Function;
+  handleAutoSaveChanges?: (value: Descendant[]) => void;
   autoSaveContentType: string;
   isEditable?: boolean;
   showTimecodes?: boolean;
@@ -93,53 +77,49 @@ export interface Props {
   mediaType?: string;
 }
 
-function SlateTranscriptEditor(props: PropsWithChildren<Props>) {
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
-  const [playbackRate, setPlaybackRate] = useState(1);
-  const editor = useMemo(() => withReact(withHistory(createEditor())), []);
-  const [value, setValue] = useState<Descendant[]>([]);
-  const defaultShowSpeakersPreference = typeof props.showSpeakers === 'boolean' ? props.showSpeakers : true;
-  const defaultShowTimecodesPreference = typeof props.showTimecodes === 'boolean' ? props.showTimecodes : true;
-  const [showSpeakers, setShowSpeakers] = useState(defaultShowSpeakersPreference);
-  const [showTimecodes, setShowTimecodes] = useState(defaultShowTimecodesPreference);
-  const [speakerOptions, setSpeakerOptions] = useState<string[]>([]);
-  const [showSpeakersCheatShet, setShowSpeakersCheatShet] = useState(true);
-  const [saveTimer, setSaveTimer] = useState(null);
-  const [isPauseWhiletyping, setIsPauseWhiletyping] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
-  // used isContentModified to avoid unecessarily run alignment if the slate value contnet has not been modified by the user since
-  // last save or alignment
-  const [isContentModified, setIsContentIsModified] = useState(false);
-  const [isContentSaved, setIsContentSaved] = useState(true);
+function SlateTranscriptEditor(props: PropsWithChildren<Props>): JSX.Element {
+  return (
+    <TranscriptEditorContextProvider
+      defaultShowSpeakers={props.showSpeakers}
+      mediaRef={mediaRef}
+      defaultShowTimecodes={props.showTimecodes}
+      handleAnalyticsEvents={props.handleAnalyticsEvents}
+    >
+      <SlateTranscriptEditorInner {...props} />
+    </TranscriptEditorContextProvider>
+  );
+}
+
+function SlateTranscriptEditorInner(props: PropsWithChildren<Props>) {
+  const context = useTranscriptEditorContext();
 
   useEffect(() => {
-    if (isProcessing) {
+    if (context.isProcessing) {
       document.body.style.cursor = 'wait';
     } else {
       document.body.style.cursor = 'default';
     }
-  }, [isProcessing]);
+  }, [context.isProcessing]);
 
   useEffect(() => {
     if (props.transcriptData) {
       const res = convertDpeToSlate(props.transcriptData);
-      setValue(res);
+      context.setValue(res);
     }
   }, []);
 
-  // handles interim results for worrking with a Live STT
+  // handles interim results for working with a Live STT
   useEffect(() => {
     if (props.transcriptDataLive) {
       const nodes = convertDpeToSlate(props.transcriptDataLive);
       // if the user is selecting the / typing the text
-      // Transforms.insertNodes would insert the node at seleciton point
+      // Transforms.insertNodes would insert the node at selection point
       // instead we check if they are in the editor
-      if (editor.selection) {
+      if (context.editor.selection) {
         // get the position of the last node
-        const positionLastNode = [editor.children.length];
+        const positionLastNode = [context.editor.children.length];
         // insert the new nodes at the end of the document
-        Transforms.insertNodes(editor, nodes, {
+        Transforms.insertNodes(context.editor, nodes, {
           at: positionLastNode,
         });
       }
@@ -147,70 +127,32 @@ function SlateTranscriptEditor(props: PropsWithChildren<Props>) {
       // where the might be no initial results
       else {
         // if there is no selection the default for insertNodes is to add the nodes at the end
-        Transforms.insertNodes(editor, nodes);
+        Transforms.insertNodes(context.editor, nodes);
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.transcriptDataLive]);
 
-  useEffect(() => {
-    const getUniqueSpeakers = R.pipe(R.pluck('speaker'), R.uniq);
-    // @ts-ignore
-    const uniqueSpeakers = getUniqueSpeakers(value);
-    setSpeakerOptions(uniqueSpeakers);
-  }, [value]);
-
-  //  useEffect(() => {
-  //    const getUniqueSpeakers = pluck('speaker');
-  //    const uniqueSpeakers = getUniqueSpeakers(value);
-  //    setSpeakerOptions(uniqueSpeakers);
-  //  }, [showSpeakersCheatShet]);
-
-  useEffect(() => {
-    // Update the document title using the browser API
-    if (mediaRef && mediaRef.current) {
-      // setDuration(mediaRef.current.duration);
-      mediaRef.current.addEventListener('timeupdate', handleTimeUpdated);
-    }
-    return function cleanup() {
-      // removeEventListener
-      mediaRef.current.removeEventListener('timeupdate', handleTimeUpdated);
-    };
-  }, []);
-
-  // useEffect(() => {
-  //   // Update the document title using the browser API
-  //   if (mediaRef && mediaRef.current) {
-  //     // Not working
-  //     setDuration(mediaRef.current.duration);
-  //     if (mediaRef.current.duration >= MAX_DURATION_FOR_PERFORMANCE_OPTIMIZATION_IN_SECONDS) {
-  //       setShowSpeakers(false);
-  //       showTimecodes(false);
-  //     }
-  //   }
-  // }, [mediaRef]);
-
   const insertTextInaudible = () => {
-    Transforms.insertText(editor, '[INAUDIBLE]');
-    if (props.handleAnalyticsEvents) {
-      props.handleAnalyticsEvents('ste_clicked_on_insert', {
-        btn: '[INAUDIBLE]',
-        fn: 'insertTextInaudible',
-      });
-    }
+    Transforms.insertText(context.editor, '[INAUDIBLE]');
+
+    props.handleAnalyticsEvents?.('ste_clicked_on_insert', {
+      btn: '[INAUDIBLE]',
+      fn: 'insertTextInaudible',
+    });
   };
 
   const handleInsertMusicNote = () => {
-    Transforms.insertText(editor, '♪'); // or ♫
-    if (props.handleAnalyticsEvents) {
-      props.handleAnalyticsEvents('ste_clicked_on_insert', {
-        btn: '♫',
-        fn: 'handleInsertMusicNote',
-      });
-    }
+    Transforms.insertText(context.editor, '♪'); // or ♫
+
+    props.handleAnalyticsEvents?.('ste_clicked_on_insert', {
+      btn: '♫',
+      fn: 'handleInsertMusicNote',
+    });
   };
 
   const getSlateContent = () => {
-    return value;
+    return context.value;
   };
 
   const getFileName = () => {
@@ -223,51 +165,35 @@ function SlateTranscriptEditor(props: PropsWithChildren<Props>) {
     return getFileName();
   };
 
-  const handleTimeUpdated = (e) => {
-    setCurrentTime(e.target.currentTime);
-    // TODO: setting duration here as a workaround
-    setDuration(mediaRef.current.duration);
-    //  TODO: commenting this out for now, not sure if it will fire to often?
-    // if (props.handleAnalyticsEvents) {
-    //   // handles if click cancel and doesn't set speaker name
-    //   props.handleTimeUpdated('ste_handle_time_update', {
-    //     fn: 'handleTimeUpdated',
-    //     duration: mediaRef.current.duration,
-    //     currentTime: e.target.currentTime,
-    //   });
-    // }
-  };
+  const handleSetPlaybackRate = useCallback(
+    (e) => {
+      const previousPlaybackRate = context.playbackRate;
+      const n = e.target.value;
+      const tmpNewPlaybackRateValue = parseFloat(n);
+      if (mediaRef && mediaRef.current) {
+        mediaRef.current.playbackRate = tmpNewPlaybackRateValue;
+        context.setPlaybackRate(tmpNewPlaybackRateValue);
 
-  const handleSetPlaybackRate = (e) => {
-    const previousPlaybackRate = playbackRate;
-    const n = e.target.value;
-    const tmpNewPlaybackRateValue = parseFloat(n);
-    if (mediaRef && mediaRef.current) {
-      mediaRef.current.playbackRate = tmpNewPlaybackRateValue;
-      setPlaybackRate(tmpNewPlaybackRateValue);
-
-      if (props.handleAnalyticsEvents) {
-        props.handleAnalyticsEvents('ste_handle_set_playback_rate', {
+        props.handleAnalyticsEvents?.('ste_handle_set_playback_rate', {
           fn: 'handleSetPlaybackRate',
           previousPlaybackRate,
           newPlaybackRate: tmpNewPlaybackRateValue,
         });
       }
-    }
-  };
+    },
+    [context, props]
+  );
 
   const handleSeekBack = () => {
     if (mediaRef && mediaRef.current) {
       const newCurrentTime = mediaRef.current.currentTime - SEEK_BACK_SEC;
       mediaRef.current.currentTime = newCurrentTime;
 
-      if (props.handleAnalyticsEvents) {
-        props.handleAnalyticsEvents('ste_handle_seek_back', {
-          fn: 'handleSeekBack',
-          newCurrentTimeInSeconds: newCurrentTime,
-          seekBackValue: SEEK_BACK_SEC,
-        });
-      }
+      props.handleAnalyticsEvents?.('ste_handle_seek_back', {
+        fn: 'handleSeekBack',
+        newCurrentTimeInSeconds: newCurrentTime,
+        seekBackValue: SEEK_BACK_SEC,
+      });
     }
   };
 
@@ -276,13 +202,11 @@ function SlateTranscriptEditor(props: PropsWithChildren<Props>) {
       const newCurrentTime = mediaRef.current.currentTime + SEEK_BACK_SEC;
       mediaRef.current.currentTime = newCurrentTime;
 
-      if (props.handleAnalyticsEvents) {
-        props.handleAnalyticsEvents('ste_handle_fast_forward', {
-          fn: 'handleFastForward',
-          newCurrentTimeInSeconds: newCurrentTime,
-          seekBackValue: SEEK_BACK_SEC,
-        });
-      }
+      props.handleAnalyticsEvents?.('ste_handle_fast_forward', {
+        fn: 'handleFastForward',
+        newCurrentTimeInSeconds: newCurrentTime,
+        seekBackValue: SEEK_BACK_SEC,
+      });
     }
   };
 
@@ -295,134 +219,25 @@ function SlateTranscriptEditor(props: PropsWithChildren<Props>) {
     }
   }, []);
 
-  const renderLeaf = useCallback(({ attributes, children }: RenderLeafProps): JSX.Element => {
-    return (
-      <span
-        onDoubleClick={handleTimedTextClick}
-        className={'timecode text'}
-        data-start={children.props.parent.start}
-        data-previous-timings={children.props.parent.previousTimings}
-        // title={'double click on a word to jump to the corresponding point in the media'}
-        {...attributes}
-      >
-        {children}
-      </span>
-    );
-  }, []);
+  const renderLeaf = useCallback(
+    ({ attributes, children }: RenderLeafProps): JSX.Element => {
+      return (
+        <span
+          onDoubleClick={context.handleTimedTextClick}
+          className={'timecode text'}
+          data-start={children.props.parent.start}
+          data-previous-timings={children.props.parent.previousTimings}
+          // title={'double click on a word to jump to the corresponding point in the media'}
+          {...attributes}
+        >
+          {children}
+        </span>
+      );
+    },
+    [context.handleTimedTextClick]
+  );
 
   //
-
-  /**
-   * `handleSetSpeakerName` is outside of TimedTextElement
-   * to improve the overall performance of the editor,
-   * especially on long transcripts
-   * @param {*} element - props.element, from `renderElement` function
-   */
-  const handleSetSpeakerName = (element) => {
-    if (props.isEditable) {
-      const pathToCurrentNode = ReactEditor.findPath(editor, element);
-      const oldSpeakerName = element.speaker;
-      const newSpeakerName = prompt('Change speaker name', oldSpeakerName);
-      if (newSpeakerName) {
-        const isUpdateAllSpeakerInstances = confirm(`Would you like to replace all occurrences of ${oldSpeakerName} with ${newSpeakerName}?`);
-        if (props.handleAnalyticsEvents) {
-          // handles if set speaker name, and whether updates one or multiple
-          props.handleAnalyticsEvents('ste_set_speaker_name', {
-            fn: 'handleSetSpeakerName',
-            changeSpeaker: true,
-            updateMultiple: isUpdateAllSpeakerInstances,
-          });
-        }
-        if (isUpdateAllSpeakerInstances) {
-          const rangeForTheWholeEditor = Editor.range(editor, []);
-          // Apply transformation to the whole doc, where speaker matches old spekaer name, and set it to new one
-          Transforms.setNodes(
-            editor,
-            { type: 'timedText', speaker: newSpeakerName },
-            {
-              at: rangeForTheWholeEditor,
-              match: (node: Element) => node.type === 'timedText' && node.speaker.toLowerCase() === oldSpeakerName.toLowerCase(),
-            }
-          );
-        } else {
-          // only apply speaker name transformation to current element
-          Transforms.setNodes(editor, { type: 'timedText', speaker: newSpeakerName }, { at: pathToCurrentNode });
-        }
-      } else {
-        if (props.handleAnalyticsEvents) {
-          // handles if click cancel and doesn't set speaker name
-          props.handleAnalyticsEvents('ste_set_speaker_name', {
-            fn: 'handleSetSpeakerName',
-            changeSpeaker: false,
-            updateMultiple: false,
-          });
-        }
-      }
-    }
-  };
-
-  const TimedTextElement = (props: { element: Element; attributes: GridProps; children: React.ReactNode }) => {
-    let textLg: GridSize = 12;
-    let textXl: GridSize = 12;
-    if (!showSpeakers && !showTimecodes) {
-      textLg = 12;
-      textXl = 12;
-    } else if (showSpeakers && !showTimecodes) {
-      textLg = 9;
-      textXl = 9;
-    } else if (!showSpeakers && showTimecodes) {
-      textLg = 9;
-      textXl = 10;
-    } else if (showSpeakers && showTimecodes) {
-      textLg = 6;
-      textXl = 7;
-    }
-
-    return (
-      <Grid container direction="row" justifyContent="flex-start" alignItems="flex-start" {...props.attributes}>
-        {showTimecodes && (
-          <Grid item contentEditable={false} xs={4} sm={3} md={3} lg={2} xl={2} className={'p-t-2 text-truncate'}>
-            <code
-              contentEditable={false}
-              style={{ cursor: 'pointer' }}
-              className={'timecode text-muted unselectable'}
-              onClick={handleTimedTextClick}
-              // onClick={(e) => {
-              //   e.preventDefault();
-              // }}
-              onDoubleClick={handleTimedTextClick}
-              title={props.element.startTimecode}
-              data-start={props.element.start}
-            >
-              {props.element.startTimecode}
-            </code>
-          </Grid>
-        )}
-        {showSpeakers && (
-          <Grid item contentEditable={false} xs={8} sm={9} md={9} lg={3} xl={3} className={'p-t-2 text-truncate'}>
-            <Typography
-              noWrap
-              contentEditable={false}
-              className={'text-truncate text-muted unselectable'}
-              style={{
-                cursor: 'pointer',
-                width: '100%',
-                textTransform: 'uppercase',
-              }}
-              // title={props.element.speaker.toUpperCase()}
-              title={props.element.speaker}
-              onClick={handleSetSpeakerName.bind(this, props.element)}
-            >
-              {props.element.speaker}
-            </Typography>
-          </Grid>
-        )}
-        <Grid item xs={12} sm={12} md={12} lg={textLg} xl={textXl} className={'p-b-1 mx-auto'}>
-          {props.children}
-        </Grid>
-      </Grid>
-    );
-  };
 
   const DefaultElement = (props: {
     attributes: React.DetailedHTMLProps<React.HTMLAttributes<HTMLParagraphElement>, HTMLParagraphElement>;
@@ -431,176 +246,119 @@ function SlateTranscriptEditor(props: PropsWithChildren<Props>) {
     return <p {...props.attributes}>{props.children}</p>;
   };
 
-  const handleTimedTextClick = (e: any) => {
-    if (e.target.classList.contains('timecode')) {
-      const start = e.target.dataset.start;
-      if (mediaRef && mediaRef.current) {
-        mediaRef.current.currentTime = parseFloat(start);
-        mediaRef.current.play();
-
-        if (props.handleAnalyticsEvents) {
-          // handles if click cancel and doesn't set speaker name
-          props.handleAnalyticsEvents('ste_handle_timed_text_click', {
-            fn: 'handleTimedTextClick',
-            clickOrigin: 'timecode',
-            timeInSeconds: mediaRef.current.currentTime,
-          });
-        }
-      }
-    } else if (e.target.dataset.slateString) {
-      if (e.target.parentNode.dataset.start) {
-        const { startWord } = SlateHelpers.getSelectionNodes(editor, editor.selection);
-        if (mediaRef && mediaRef.current && startWord && startWord.start) {
-          mediaRef.current.currentTime = parseFloat(startWord.start);
-          mediaRef.current.play();
-
-          if (props.handleAnalyticsEvents) {
-            // handles if click cancel and doesn't set speaker name
-            props.handleAnalyticsEvents('ste_handle_timed_text_click', {
-              fn: 'handleTimedTextClick',
-              clickOrigin: 'word',
-              timeInSeconds: mediaRef.current.currentTime,
-            });
-          }
-        } else {
-          // fallback in case there's some misalignment with the words
-          // use the start of paragraph instead
-          const start = parseFloat(e.target.parentNode.dataset.start);
-          if (mediaRef && mediaRef.current && start) {
-            mediaRef.current.currentTime = start;
-            mediaRef.current.play();
-
-            if (props.handleAnalyticsEvents) {
-              // handles if click cancel and doesn't set speaker name
-              props.handleAnalyticsEvents('ste_handle_timed_text_click', {
-                fn: 'handleTimedTextClick',
-                origin: 'paragraph-fallback',
-                timeInSeconds: mediaRef.current.currentTime,
-              });
-            }
-          }
-        }
-      }
-    }
-  };
-
-  const handleReplaceText = () => {
+  const handleReplaceText = useCallback(() => {
     const newText = prompt(`Paste the text to replace here.\n\n${REPLACE_WHOLE_TEXT_INSTRUCTION}`);
     if (newText) {
-      const newValue = plainTextalignToSlateJs(props.transcriptData, newText, value);
-      setValue(newValue);
+      const newValue = plainTextalignToSlateJs(props.transcriptData, newText, context.value);
+      context.setValue(newValue);
 
       // TODO: consider adding some kind of word count here?
-      if (props.handleAnalyticsEvents) {
-        // handles if click cancel and doesn't set speaker name
-        props.handleAnalyticsEvents('ste_handle_replace_text', {
-          fn: 'handleReplaceText',
-        });
-      }
-    }
-  };
 
-  // TODO: refacto this function, to be cleaner and easier to follow.
-  const handleRestoreTimecodes = async (inlineTimecodes = false) => {
-    // if nothing as changed and you don't need to modify the data
-    // to get inline timecodes, then just return as is
-    if (!isContentModified && !inlineTimecodes) {
-      return value;
-    }
-    // only used by Word (OHMS) export
-    // const alignedSlateData = await updateBloocksTimestamps(value, inlineTimecodes);
-    const alignedSlateData = await updateBloocksTimestamps(value);
-    setValue(alignedSlateData);
-    setIsContentIsModified(false);
-
-    if (inlineTimecodes) {
-      // we don't want to show the inline timecode in the editor, but we want to return them to export function
-      const alignedSlateDataWithInlineTimecodes = insertTimecodesInLineInSlateJs(alignedSlateData);
-      return alignedSlateDataWithInlineTimecodes;
-    }
-
-    return alignedSlateData;
-  };
-
-  // TODO: this could be refactore, and brought some of this logic inside the exportAdapter (?)
-  // To make this a little cleaner
-  const handleExport = async ({
-    type,
-    ext,
-    speakers,
-    timecodes,
-    inlineTimecodes,
-    hideTitle,
-    atlasFormat,
-    isDownload,
-  }: ExportData): Promise<string> => {
-    if (props.handleAnalyticsEvents) {
       // handles if click cancel and doesn't set speaker name
-      props.handleAnalyticsEvents('ste_handle_export', {
-        fn: 'handleExport',
-        type,
-        ext,
-        speakers,
-        timecodes,
-        inlineTimecodes,
-        hideTitle,
-        atlasFormat,
-        isDownload,
+      props.handleAnalyticsEvents?.('ste_handle_replace_text', {
+        fn: 'handleReplaceText',
       });
     }
+  }, [context, props]);
 
-    try {
-      setIsProcessing(true);
-      let tmpValue = getSlateContent();
-      if (timecodes) {
-        tmpValue = await handleRestoreTimecodes();
+  // TODO: refactor this function, to be cleaner and easier to follow.
+  const handleRestoreTimecodes = useCallback(
+    async (inlineTimecodes = false) => {
+      // if nothing as changed and you don't need to modify the data
+      // to get inline timecodes, then just return as is
+      if (!context.isContentModified && !inlineTimecodes) {
+        return context.value;
       }
+      // only used by Word (OHMS) export
+      // const alignedSlateData = await updateBloocksTimestamps(value, inlineTimecodes);
+      const alignedSlateData = await updateBlocksTimestamps(context.value);
+      context.setValue(alignedSlateData);
+      context.setIsContentModified(false);
 
       if (inlineTimecodes) {
-        tmpValue = await handleRestoreTimecodes(inlineTimecodes);
+        // we don't want to show the inline timecode in the editor, but we want to return them to export function
+        const alignedSlateDataWithInlineTimecodes = insertTimecodesInLineInSlateJs(alignedSlateData);
+        return alignedSlateDataWithInlineTimecodes;
       }
 
-      if (isContentModified && type === 'json-slate') {
-        tmpValue = await handleRestoreTimecodes();
+      return alignedSlateData;
+    },
+    [context]
+  );
+
+  // TODO: this could be refactored, and brought some of this logic inside the exportAdapter (?)
+  // To make this a little cleaner
+  const handleExport = useCallback(
+    async ({ type, ext, speakers, timecodes, inlineTimecodes, hideTitle, atlasFormat, isDownload }: ExportData): Promise<string> => {
+      if (props.handleAnalyticsEvents) {
+        // handles if click cancel and doesn't set speaker name
+        props.handleAnalyticsEvents('ste_handle_export', {
+          fn: 'handleExport',
+          type,
+          ext,
+          speakers,
+          timecodes,
+          inlineTimecodes,
+          hideTitle,
+          atlasFormat,
+          isDownload,
+        });
       }
 
-      if (isContentModified && type === 'json-digitalpaperedit') {
-        tmpValue = await handleRestoreTimecodes();
-      }
+      try {
+        context.setIsProcessing(true);
+        let tmpValue = getSlateContent();
+        if (timecodes) {
+          tmpValue = await handleRestoreTimecodes();
+        }
 
-      if (isContentModified && isCaptionType(type)) {
-        tmpValue = await handleRestoreTimecodes();
-      }
-      // export adapter does not doo any alignment
-      // just converts between formats
-      let editorContnet = exportAdapter({
-        slateValue: tmpValue,
-        type,
-        transcriptTitle: getFileTitle(),
-        speakers,
-        timecodes,
-        inlineTimecodes,
-        hideTitle,
-        atlasFormat,
-      });
+        if (inlineTimecodes) {
+          tmpValue = await handleRestoreTimecodes(inlineTimecodes);
+        }
 
-      if (ext === 'json') {
-        editorContnet = JSON.stringify(editorContnet, null, 2);
-      }
-      if (ext !== 'docx' && isDownload) {
-        download(editorContnet, `${getFileTitle()}.${ext}`);
-      }
-      return editorContnet;
-    } finally {
-      setIsProcessing(false);
-    }
-  };
+        if (context.isContentModified && type === 'json-slate') {
+          tmpValue = await handleRestoreTimecodes();
+        }
 
-  const handleSave = async () => {
+        if (context.isContentModified && type === 'json-digitalpaperedit') {
+          tmpValue = await handleRestoreTimecodes();
+        }
+
+        if (context.isContentModified && isCaptionType(type)) {
+          tmpValue = await handleRestoreTimecodes();
+        }
+        // export adapter does not doo any alignment
+        // just converts between formats
+        let editorContent = exportAdapter({
+          slateValue: tmpValue,
+          type,
+          transcriptTitle: getFileTitle(),
+          speakers,
+          timecodes,
+          inlineTimecodes,
+          hideTitle,
+          atlasFormat,
+        });
+
+        if (ext === 'json') {
+          editorContent = JSON.stringify(editorContent, null, 2);
+        }
+        if (ext !== 'docx' && isDownload) {
+          download(editorContent, `${getFileTitle()}.${ext}`);
+        }
+        return editorContent;
+      } finally {
+        context.setIsProcessing(false);
+      }
+    },
+    [context, getFileTitle, handleRestoreTimecodes, props]
+  );
+
+  const handleSave = useCallback(async () => {
     try {
-      setIsProcessing(true);
+      context.setIsProcessing(true);
       const format = props.autoSaveContentType ? props.autoSaveContentType : 'digitalpaperedit';
-      const editorContnet = await handleExport({ type: `json-${format}`, isDownload: false });
+      const editorContent = await handleExport({ type: `json-${format}`, isDownload: false });
       if (props.handleAnalyticsEvents) {
         // handles if click cancel and doesn't set speaker name
         props.handleAnalyticsEvents('ste_handle_save', {
@@ -610,18 +368,18 @@ function SlateTranscriptEditor(props: PropsWithChildren<Props>) {
       }
 
       if (props.handleSaveEditor && props.isEditable) {
-        props.handleSaveEditor(editorContnet);
+        props.handleSaveEditor(editorContent);
       }
-      setIsContentIsModified(false);
-      setIsContentSaved(true);
+      context.setIsContentModified(false);
+      context.setIsContentSaved(true);
     } finally {
-      setIsProcessing(false);
+      context.setIsProcessing(false);
     }
-  };
+  }, [context, handleExport, props]);
 
   /**
    * See explanation in `src/utils/dpe-to-slate/index.js` for how this function works with css injection
-   * to provide current paragaph's highlight.
+   * to provide current paragraph's highlight.
    * @param {Number} currentTime - float in seconds
    */
 
@@ -630,22 +388,22 @@ function SlateTranscriptEditor(props: PropsWithChildren<Props>) {
       // handles if click cancel and doesn't set speaker name
       props.handleAnalyticsEvents('ste_handle_set_pause_while_typing', {
         fn: 'handleSetPauseWhileTyping',
-        isPauseWhiletyping: !isPauseWhiletyping,
+        isPauseWhiletyping: !context.isPauseWhileTyping,
       });
     }
-    setIsPauseWhiletyping(!isPauseWhiletyping);
+    context.setIsPauseWhileTyping(!context.isPauseWhileTyping);
   };
 
   const handleSplitParagraph = () => {
-    SlateHelpers.handleSplitParagraph(editor);
+    SlateHelpers.handleSplitParagraph(context.editor);
   };
 
   const handleUndo = () => {
-    editor.undo();
+    context.editor.undo();
   };
 
   const handleRedo = () => {
-    editor.redo();
+    context.editor.redo();
   };
 
   // const debounced_version = throttle(handleRestoreTimecodes, 3000, { leading: false, trailing: true });
@@ -654,16 +412,16 @@ function SlateTranscriptEditor(props: PropsWithChildren<Props>) {
   // - merging paragraph via delete
   // - merging paragraphs via deleting across paragraphs
   const handleOnKeyDown = async (event) => {
-    setIsContentIsModified(true);
-    setIsContentSaved(false);
+    context.setIsContentModified(true);
+    context.setIsContentSaved(false);
     //  ArrowRight ArrowLeft ArrowUp ArrowUp
     if (event.key === 'Enter') {
       // intercept Enter, and handle timecodes when splitting a paragraph
       event.preventDefault();
-      // console.info('For now disabling enter key to split a paragraph, while figuring out the aligment issue');
+      // console.info('For now disabling enter key to split a paragraph, while figuring out the alignment issue');
       // handleSetPauseWhileTyping();
       // TODO: Edge case, hit enters after having typed some other words?
-      const isSuccess = SlateHelpers.handleSplitParagraph(editor);
+      const isSuccess = SlateHelpers.handleSplitParagraph(context.editor);
       if (props.handleAnalyticsEvents) {
         // handles if click cancel and doesn't set speaker name
         props.handleAnalyticsEvents('ste_handle_split_paragraph', {
@@ -672,13 +430,13 @@ function SlateTranscriptEditor(props: PropsWithChildren<Props>) {
         });
       }
       if (isSuccess) {
-        // as part of splitting paragraphs there's an alignement step
+        // as part of splitting paragraphs there's an alignment step
         // so content is not counted as modified
-        setIsContentIsModified(false);
+        context.setIsContentModified(false);
       }
     }
     if (event.key === 'Backspace') {
-      const isSuccess = SlateHelpers.handleDeleteInParagraph({ editor, event });
+      const isSuccess = SlateHelpers.handleDeleteInParagraph({ editor: context.editor, event });
       // Commenting that out for now, as it might get called too often
       // if (props.handleAnalyticsEvents) {
       //   // handles if click cancel and doesn't set speaker name
@@ -688,9 +446,9 @@ function SlateTranscriptEditor(props: PropsWithChildren<Props>) {
       //   });
       // }
       if (isSuccess) {
-        // as part of splitting paragraphs there's an alignement step
+        // as part of splitting paragraphs there's an alignment step
         // so content is not counted as modified
-        setIsContentIsModified(false);
+        context.setIsContentModified(false);
       }
     }
     // if (event.key.length == 1 && ((event.keyCode >= 65 && event.keyCode <= 90) || (event.keyCode >= 49 && event.keyCode <= 57))) {
@@ -699,14 +457,14 @@ function SlateTranscriptEditor(props: PropsWithChildren<Props>) {
     //   setIsContentIsModified(false);
     // }
 
-    if (isPauseWhiletyping) {
+    if (context.isPauseWhileTyping) {
       // logic for pause while typing
       // https://schier.co/blog/wait-for-user-to-stop-typing-using-javascript
       // TODO: currently eve the video was paused, and pause while typing is on,
       // it will play it when stopped typing. so added btn to turn feature on off.
       // and disabled as default.
       // also pause while typing might introduce performance issues on longer transcripts
-      // if on every keystroke it's creating and destroing a timer.
+      // if on every keystroke it's creating and destroying a timer.
       // should find a more efficient way to "debounce" or "throttle" this functionality
       if (mediaRef && mediaRef.current && !mediaRef.current.paused) {
         mediaRef.current.pause();
@@ -722,7 +480,7 @@ function SlateTranscriptEditor(props: PropsWithChildren<Props>) {
         <Paper elevation={3} />
         <style scoped>
           {`/* Next words */
-             .timecode[data-previous-timings*="${generatePreviousTimingsUpToCurrent(currentTime)}"]{
+             .timecode[data-previous-timings*="${generatePreviousTimingsUpToCurrent(context.currentTime)}"]{
                   color:  #9E9E9E;
               }
 
@@ -784,14 +542,14 @@ function SlateTranscriptEditor(props: PropsWithChildren<Props>) {
               <Grid container direction="row" justifyContent="space-between" alignItems="flex-start" spacing={1} item>
                 <Grid item>
                   <p>
-                    <code style={{ color: 'grey' }}>{shortTimecode(currentTime)}</code>
-                    <span style={{ color: 'grey' }}> {` | `}</span>
-                    <code style={{ color: 'grey' }}>{duration ? `${shortTimecode(duration)}` : '00:00:00'}</code>
+                    <code style={{ color: 'grey' }}>{shortTimecode(context.currentTime)}</code>
+                    <span style={{ color: 'grey' }}> {' | '}</span>
+                    <code style={{ color: 'grey' }}>{context.duration ? `${shortTimecode(context.duration)}` : '00:00:00'}</code>
                   </p>
                 </Grid>
                 <Grid item>
                   <FormControl>
-                    <Select labelId="demo-simple-select-label" id="demo-simple-select" value={playbackRate} onChange={handleSetPlaybackRate}>
+                    <Select labelId="demo-simple-select-label" id="demo-simple-select" value={context.playbackRate} onChange={handleSetPlaybackRate}>
                       {PLAYBACK_RATE_VALUES.map((playbackRateValue, index) => {
                         return (
                           <MenuItem key={index + playbackRateValue} value={playbackRateValue}>
@@ -807,12 +565,12 @@ function SlateTranscriptEditor(props: PropsWithChildren<Props>) {
                 <Grid item>
                   <Tooltip title={<Typography variant="body1">{` Seek back by ${SEEK_BACK_SEC} seconds`}</Typography>}>
                     <Button color="primary" onClick={handleSeekBack}>
-                      <Replay10Icon color="primary" fontSize="large" />
+                      <Replay10 color="primary" fontSize="large" />
                     </Button>
                   </Tooltip>
                   <Tooltip title={<Typography variant="body1">{` Fast forward by ${SEEK_BACK_SEC} seconds`}</Typography>}>
                     <Button color="primary" onClick={handleFastForward}>
-                      <Forward10Icon color="primary" fontSize="large" />
+                      <Forward10 color="primary" fontSize="large" />
                     </Button>
                   </Tooltip>
                 </Grid>
@@ -823,14 +581,14 @@ function SlateTranscriptEditor(props: PropsWithChildren<Props>) {
                       enterDelay={3000}
                       title={
                         <Typography variant="body1">
-                          {`Turn ${isPauseWhiletyping ? 'off' : 'on'} pause while typing functionality. As
+                          {`Turn ${context.isPauseWhileTyping ? 'off' : 'on'} pause while typing functionality. As
                       you start typing the media while pause playback until you stop. Not
-                      reccomended on longer transcript as it might present performance issues.`}
+                      recommended on longer transcript as it might present performance issues.`}
                         </Typography>
                       }
                     >
                       <Typography variant="subtitle2" gutterBottom>
-                        <Switch color="primary" checked={isPauseWhiletyping} onChange={handleSetPauseWhileTyping} />
+                        <Switch color="primary" checked={context.isPauseWhileTyping} onChange={handleSetPauseWhileTyping} />
                         Pause media while typing
                       </Typography>
                     </Tooltip>
@@ -851,18 +609,18 @@ function SlateTranscriptEditor(props: PropsWithChildren<Props>) {
                       Double click on a word or time stamp to jump to the corresponding point in the media. <br />
                       {props.isEditable && (
                         <>
-                          <KeyboardIcon /> Start typing to edit text.
+                          <Keyboard /> Start typing to edit text.
                           <br />
-                          <PeopleIcon /> You can add and change names of speakers in your transcript.
+                          <People /> You can add and change names of speakers in your transcript.
                           <br />
-                          <KeyboardReturnOutlinedIcon /> Hit enter in between words to split a paragraph.
+                          <KeyboardReturnOutlined /> Hit enter in between words to split a paragraph.
                           <br />
-                          <SaveIcon />
+                          <Save />
                           Remember to save regularly.
                           <br />
                         </>
                       )}
-                      <SaveAltIcon /> Export to get a copy.
+                      <SaveAlt /> Export to get a copy.
                     </Typography>
                   }
                 >
@@ -873,7 +631,7 @@ function SlateTranscriptEditor(props: PropsWithChildren<Props>) {
                       flexWrap: 'wrap',
                     }}
                   >
-                    <InfoOutlinedIcon fontSize="small" color="primary" />
+                    <InfoOutlined fontSize="small" color="primary" />
                     <Typography color="primary" variant="body1">
                       How Does this work?
                     </Typography>
@@ -884,7 +642,7 @@ function SlateTranscriptEditor(props: PropsWithChildren<Props>) {
                 <Link
                   color="inherit"
                   onClick={() => {
-                    setShowSpeakersCheatShet(!showSpeakersCheatShet);
+                    context.setShowSpeakersCheatSheet(!context.showSpeakersCheatSheet);
                   }}
                 >
                   <Typography variant="subtitle2" gutterBottom>
@@ -892,8 +650,8 @@ function SlateTranscriptEditor(props: PropsWithChildren<Props>) {
                   </Typography>
                 </Link>
 
-                <Collapse in={showSpeakersCheatShet}>
-                  {speakerOptions.map((speakerName, index) => {
+                <Collapse in={context.showSpeakersCheatSheet}>
+                  {context.speakerOptions.map((speakerName, index) => {
                     return (
                       <Typography
                         variant="body2"
@@ -914,19 +672,19 @@ function SlateTranscriptEditor(props: PropsWithChildren<Props>) {
           </Grid>
 
           <Grid item xs={12} sm={7} md={7} lg={7} xl={7}>
-            {value.length !== 0 ? (
+            {context.value.length !== 0 ? (
               <>
                 <Paper elevation={3}>
                   <section className="editor-wrapper-container">
                     <Slate
-                      editor={editor}
-                      value={value}
+                      editor={context.editor}
+                      value={context.value}
                       onChange={(value) => {
                         if (props.handleAutoSaveChanges) {
                           props.handleAutoSaveChanges(value);
-                          setIsContentSaved(true);
+                          context.setIsContentSaved(true);
                         }
-                        return setValue(value);
+                        return context.setValue(value);
                       }}
                     >
                       <Editable
@@ -949,10 +707,10 @@ function SlateTranscriptEditor(props: PropsWithChildren<Props>) {
           <Grid container item xs={12} sm={1} md={1} lg={1} xl={1}>
             <SideBtns
               handleExport={handleExport}
-              isProcessing={isProcessing}
-              isContentModified={isContentModified}
-              isContentSaved={isContentSaved}
-              setIsProcessing={setIsProcessing}
+              isProcessing={context.isProcessing}
+              isContentModified={context.isContentModified}
+              isContentSaved={context.isContentSaved}
+              setIsProcessing={context.setIsProcessing}
               insertTextInaudible={insertTextInaudible}
               handleInsertMusicNote={handleInsertMusicNote}
               handleSplitParagraph={handleSplitParagraph}

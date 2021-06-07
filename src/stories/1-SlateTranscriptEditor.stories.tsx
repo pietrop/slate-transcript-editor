@@ -1,10 +1,10 @@
-import React, { ComponentProps, PropsWithChildren } from 'react';
+import Button from '@material-ui/core/Button';
 import { action } from '@storybook/addon-actions';
 import { Story } from '@storybook/react';
-
-import Button from '@material-ui/core/Button';
-import SlateTranscriptEditor, { Props as SlateTranscriptEditorProps } from '.';
 import 'fontsource-roboto';
+import React, { ComponentProps } from 'react';
+import SlateTranscriptEditor from '../components';
+import DEMO_SOLEIO from '../sample-data/soleio-dpe.json';
 
 export default {
   title: 'SlateTranscriptEditor',
@@ -32,7 +32,6 @@ const AUDIO_URL = 'https://www.w3schools.com/tags/horse.ogg';
 const DEMO_MEDIA_URL_SOLEIO =
   'https://digital-paper-edit-demo.s3.eu-west-2.amazonaws.com/PBS-Frontline/The+Facebook+Dilemma+-+interviews/The+Facebook+Dilemma+-+Soleio+Cuervo-OIAUfZBd_7w.mp4';
 const DEMO_TITLE_SOLEIO = 'Soleio Interview, PBS Frontline';
-import DEMO_SOLEIO from '../sample-data/soleio-dpe.json';
 
 export const demo = Template.bind({});
 demo.args = {

@@ -1,13 +1,12 @@
-import React from 'react';
-import { action } from '@storybook/addon-actions';
-import { version } from '../../package.json';
-
+import { deepOrange, lightBlue, orange, red } from '@material-ui/core/colors';
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
-import { lightBlue, red, orange, deepOrange } from '@material-ui/core/colors';
-// import purple from '@material-ui/core/colors/purple';
-
-import SlateTranscriptEditor from '.';
+import { action } from '@storybook/addon-actions';
 import 'fontsource-roboto';
+import React from 'react';
+// import purple from '@material-ui/core/colors/purple';
+import SlateTranscriptEditor from '.';
+import { version } from '../../package.json';
+import DEMO_SOLEIO from '../sample-data/soleio-dpe.json';
 
 export default {
   title: 'Custom Theme',
@@ -17,7 +16,6 @@ export default {
 const DEMO_MEDIA_URL_SOLEIO =
   'https://digital-paper-edit-demo.s3.eu-west-2.amazonaws.com/PBS-Frontline/The+Facebook+Dilemma+-+interviews/The+Facebook+Dilemma+-+Soleio+Cuervo-OIAUfZBd_7w.mp4';
 const DEMO_TITLE_SOLEIO = 'Soleio Interview, PBS Frontline';
-import DEMO_SOLEIO from '../sample-data/soleio-dpe.json';
 
 export const CustomTheme = () => {
   const theme = createMuiTheme({

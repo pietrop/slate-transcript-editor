@@ -4,18 +4,18 @@
  * and adjusting start time for the paragraph etc..
  */
 // import getClosestBlock from '../get-closest-block';
-import isSameBlock from './is-same-block';
-import isBeginningOftheBlock from './is-beginning-of-the-block.js';
-import isEndOftheBlock from './is-end-of-the-block.js';
-import isSelectionCollapsed from './is-selection-collapsed';
-import splitTextAtOffset from './split-text-at-offset';
-import splitWordsListAtOffset from './split-words-list-at-offset';
-import countWords from '../../../util/count-words';
-import SlateHelpers from '../index';
-import isTextSameAsWordsList from './is-text-same-as-words-list';
-import { isTextAndWordsListChanged, alignBlock } from '../../../util/export-adapters/slate-to-dpe/update-timestamps/update-bloocks-timestamps';
 import assert from 'assert';
 import { Element } from 'slate';
+import countWords from '../../../util/count-words';
+import { alignBlock, isTextAndWordsListChanged } from '../../../util/export-adapters/slate-to-dpe/update-timestamps/update-blocks-timestamps';
+import SlateHelpers from '../index';
+import isBeginningOftheBlock from './is-beginning-of-the-block.js';
+import isEndOftheBlock from './is-end-of-the-block.js';
+import isSameBlock from './is-same-block';
+import isSelectionCollapsed from './is-selection-collapsed';
+import isTextSameAsWordsList from './is-text-same-as-words-list';
+import splitTextAtOffset from './split-text-at-offset';
+import splitWordsListAtOffset from './split-words-list-at-offset';
 
 /**
  *

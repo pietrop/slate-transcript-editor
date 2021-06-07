@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { action } from '@storybook/addon-actions';
+import React, { useEffect, useState } from 'react';
 import SlateTranscriptEditor, { TranscriptData } from '.';
+import DEMO_SOLEIO_LIVE from '../sample-data/segmented-transcript-soleio-dpe.json';
 
 export default {
   title: 'Live',
@@ -9,7 +10,6 @@ export default {
 
 const DEMO_MEDIA_URL_SOLEIO =
   'https://digital-paper-edit-demo.s3.eu-west-2.amazonaws.com/PBS-Frontline/The+Facebook+Dilemma+-+interviews/The+Facebook+Dilemma+-+Soleio+Cuervo-OIAUfZBd_7w.mp4';
-import DEMO_SOLEIO_LIVE from '../sample-data/segmented-transcript-soleio-dpe.json';
 
 // Parent component to simulate results from a live STT stream.
 const Example = (props) => {

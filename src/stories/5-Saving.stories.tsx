@@ -1,9 +1,9 @@
-import React, { ComponentProps } from 'react';
 import { action } from '@storybook/addon-actions';
-import { version } from '../../package.json';
-
-import SlateTranscriptEditor from '.';
+import { Story } from '@storybook/react';
 import 'fontsource-roboto';
+import React, { ComponentProps } from 'react';
+import SlateTranscriptEditor from '.';
+import DEMO_SOLEIO from '../sample-data/soleio-dpe.json';
 
 export default {
   title: 'Saving indicator',
@@ -25,8 +25,6 @@ const Template: Story<ComponentProps<typeof SlateTranscriptEditor>> = (args) => 
 const DEMO_MEDIA_URL_SOLEIO =
   'https://digital-paper-edit-demo.s3.eu-west-2.amazonaws.com/PBS-Frontline/The+Facebook+Dilemma+-+interviews/The+Facebook+Dilemma+-+Soleio+Cuervo-OIAUfZBd_7w.mp4';
 const DEMO_TITLE_SOLEIO = 'Soleio Interview, PBS Frontline';
-import DEMO_SOLEIO from '../sample-data/soleio-dpe.json';
-import { Story } from '@storybook/react';
 
 export const NoAutoSave = Template.bind({});
 NoAutoSave.args = {
