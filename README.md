@@ -279,6 +279,10 @@ Following storybook [Distribute UI across an organization](https://www.learnstor
 ### build storybook
 
 ```
+nvm use 12
+```
+
+```
 npm run build-storybook
 ```
 
@@ -286,7 +290,17 @@ npm run build-storybook
 
 <!-- _How to carry out tests_ -->
 
-_TBC_
+```
+nvm use 14
+```
+
+```
+npm run test
+```
+
+🚧 Wok in progress 🚧
+
+(_for now only localized to CSV composer module - and not fully working_)
 
 ## Deployment
 
