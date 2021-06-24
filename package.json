@@ -3,8 +3,9 @@
   "version": "0.1.6-alpha.14",
   "description": "A React component to make correcting automated transcriptions of audio and video easier and faster. Using the Slate Editor",
   "main": "index.js",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "NODE_OPTIONS=--experimental-vm-modules npx jest --findRelatedTests ./src/util/export-adapters/subtitles-generator/compose-subtitles/csv/index.js",
     "start": "npm run storybook",
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook -c .storybook -o .out",
@@ -40,6 +41,7 @@
     "@storybook/addon-info": "^5.3.18",
     "@storybook/addon-knobs": "^5.3.18",
     "@storybook/addon-links": "^5.3.18",
+    "@storybook/addon-storysource": "^6.3.0",
     "@storybook/addons": "^5.3.18",
     "@storybook/react": "^5.3.18",
     "babel-loader": "^8.1.0",
@@ -47,12 +49,10 @@
     "cross-env": "^7.0.2",
     "gh-pages": "^2.2.0",
     "husky": "^4.2.5",
-    "prettier": "2.0.5",
-    "pretty-quick": "^2.0.1",
-    "@storybook/addon-storysource": "^5.3.18",
+    "jest": "^27.0.5",
     "node-fetch": ">=2.6.1",
-    "immer": ">=8.0.1",
-    "highlight.js": ">=10.4.1"
+    "prettier": "2.0.5",
+    "pretty-quick": "^2.0.1"
   },
   "dependencies": {
     "@material-ui/core": "^4.11.3",

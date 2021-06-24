@@ -11,7 +11,7 @@ import ittGenerator from './compose-subtitles/itt.js';
 import ttmlGenerator from './compose-subtitles/ttml.js';
 import srtGenerator from './compose-subtitles/srt.js';
 import vttGenerator from './compose-subtitles/vtt.js';
-import csvGenerator from './compose-subtitles/csv.js';
+import csvGenerator from './compose-subtitles/csv/index.js';
 import countWords from '../../count-words';
 
 function segmentedTextToList(text) {
@@ -24,7 +24,11 @@ function segmentedTextToList(text) {
 }
 
 function addTimecodesToLines(wordsList, paragraphs, lines) {
-  wordsList = wordsList.filter((w) => w.text.length > 0);
+  // console.log('addTimecodesToLines', wordsList, paragraphs, lines);
+  wordsList = wordsList.filter((w) => {
+    // console.log('addTimecodesToLines w', w);
+    return w.text && w.text.length > 0;
+  });
   let startWordCounter = 0;
   let endWordCounter = 0;
   console.log('lines', lines);
