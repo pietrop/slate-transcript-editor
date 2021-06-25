@@ -36,6 +36,7 @@ function csvGenerator(srtJsonContent) {
     .join('\n');
 
   const csvContent = `${csvHeader}\n${csvBody}`;
+  return csvContent;
 }
 
 export default csvGenerator;
