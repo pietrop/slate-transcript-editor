@@ -3,7 +3,6 @@
   "version": "0.1.6-alpha.16",
   "description": "A React component to make correcting automated transcriptions of audio and video easier and faster. Using the Slate Editor",
   "main": "index.js",
-  "type": "module",
   "scripts": {
     "test": "NODE_OPTIONS=--experimental-vm-modules npx jest --findRelatedTests ./src/util/export-adapters/subtitles-generator/compose-subtitles/csv/index.js",
     "start": "npm run storybook",
