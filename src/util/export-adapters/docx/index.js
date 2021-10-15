@@ -1,5 +1,5 @@
 import { Document, Paragraph, TextRun, Packer } from 'docx';
-import { shortTimecode } from '../../timecode-converter/';
+import { shortTimecode } from '@pietrop/timecode-converter';
 import { Node } from 'slate';
 export default slateToDocx;
 

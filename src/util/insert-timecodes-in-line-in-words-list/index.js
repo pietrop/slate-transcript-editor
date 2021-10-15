@@ -1,4 +1,4 @@
-import { shortTimecode } from '../timecode-converter';
+import { shortTimecode } from '@pietrop/timecode-converter';
 /**
  * Helper function for OHMS format
  * OHMS is an open source indexing tool created by the University of Kentucky,
