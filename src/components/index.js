@@ -346,7 +346,7 @@ function SlateTranscriptEditor(props) {
     }
 
     return (
-      <Grid container direction="row" justify="flex-start" alignItems="flex-start" {...props.attributes}>
+      <Grid container direction="row" justifyContent="flex-start" alignItems="flex-start" {...props.attributes}>
         {showTimecodes && (
           <Grid item contentEditable={false} xs={4} sm={3} md={3} lg={2} xl={2} className={'p-t-2 text-truncate'}>
             <code
@@ -721,9 +721,9 @@ function SlateTranscriptEditor(props) {
           </Tooltip>
         )}
 
-        <Grid container direction="row" justify="center" alignItems="stretch" spacing={2}>
-          <Grid item xs={12} sm={4} md={4} lg={4} xl={4} container direction="column" justify="space-between" alignItems="stretch">
-            <Grid container direction="column" justify="flex-start" alignItems="stretch" spacing={2}>
+        <Grid container direction="row" justifyContent="center" alignItems="stretch" spacing={2}>
+          <Grid item xs={12} sm={4} md={4} lg={4} xl={4} container direction="column" justifyContent="space-between" alignItems="stretch">
+            <Grid container direction="column" justifyContent="flex-start" alignItems="stretch" spacing={2}>
               <Grid item container>
                 <video
                   style={{ backgroundColor: 'black' }}
@@ -735,7 +735,7 @@ function SlateTranscriptEditor(props) {
                   playsInline
                 ></video>
               </Grid>
-              <Grid container direction="row" justify="space-between" alignItems="flex-start" spacing={1} item>
+              <Grid container direction="row" justifyContent="space-between" alignItems="flex-start" spacing={1} item>
                 <Grid item>
                   <p>
                     <code style={{ color: 'grey' }}>{shortTimecode(currentTime)}</code>
