@@ -138,7 +138,9 @@ function SlateTranscriptEditor(props) {
     }
     return function cleanup() {
       // removeEventListener
-      mediaRef.current.removeEventListener('timeupdate', handleTimeUpdated);
+      if (mediaRef && mediaRef.current) {
+        mediaRef.current.removeEventListener('timeupdate', handleTimeUpdated);
+      }
     };
   }, []);
 
