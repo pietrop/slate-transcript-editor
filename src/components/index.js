@@ -33,7 +33,7 @@ import { Slate, Editable, withReact, ReactEditor } from 'slate-react';
 import { withHistory } from 'slate-history';
 
 import SideBtns from './SideBtns';
-import { shortTimecode } from '../util/timecode-converter';
+import { shortTimecode } from '@pietrop/timecode-converter';
 import download from '../util/downlaod/index.js';
 import convertDpeToSlate from '../util/dpe-to-slate';
 // TODO: This should be moved in export utils

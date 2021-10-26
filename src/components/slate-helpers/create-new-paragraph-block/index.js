@@ -1,4 +1,4 @@
-import { shortTimecode } from '../../../util/timecode-converter'; //'../../../timecode-converter';
+import { shortTimecode } from '@pietrop/timecode-converter';
 import generatePreviousTimingsUpToCurrent from '../../../util/dpe-to-slate/generate-previous-timings-up-to-current';
 
 function createNewParagraphBlock({ speaker, start, text = '', words = [], previousTimings, startTimecode }) {

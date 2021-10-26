@@ -1,4 +1,4 @@
-import { shortTimecode } from '../timecode-converter';
+import { shortTimecode } from '@pietrop/timecode-converter';
 
 /**
  *

@@ -1,5 +1,5 @@
 import { alignSTT } from 'stt-align-node';
-import { shortTimecode } from '../../../timecode-converter';
+import { shortTimecode } from '@pietrop/timecode-converter';
 import countWords from '../../../count-words';
 import generatePreviousTimingsUpToCurrent from '../../../dpe-to-slate/generate-previous-timings-up-to-current';
 const createSlateContentFromSlateJsParagraphs = (currentContent, newEntities) => {
