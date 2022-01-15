@@ -6,19 +6,19 @@ _Screenshot of UI - optional_ -->
 _Work in progress_
 
 Building on the success and lessons learned from [`@bbc/react-transcript-editor`](https://github.com/bbc/react-transcript-editor).
-Mostly to be used in the context of [autoEdit 3](http://autoedit.io)(digital paper edit), and other proejcts.
+Mostly to be used in the context of [autoEdit 3](http://autoedit.io) (digital paper edit), and other proejcts.
 
-Criterias/Principles
+Criterias/Principles:
 
-- Easy to reason around
-- Can handle transcript and media over 1 hour without loss in performance
-- Only essential features for correction of timed text
-- adapters to and from other STT services, are external, except for dpe (digital paper edit, adapter).
-- leverages existing libraries, such as [Material UI](https://material-ui.com), to focus on the diffuclt problems, and not wasting time re-inventing the wheel or fiddling around with css.
+- Easy to reason around.
+- Can handle transcript and media over 1 hour without loss in performance.
+- Only essential features for correction of timed text.
+- Adapters to and from other STT services, are external, except for dpe (digital paper edit, adapter).
+- Leverages existing libraries, such as [Material UI](https://material-ui.com), to focus on the difficult problems, and not wasting time re-inventing the wheel or fiddling around with CSS.
 
 [See project board for more details](https://github.com/pietrop/slate-transcript-editor/projects/1) of ongoing work.
 
-See [draftJs vs slateJs](/docs/notes/draftJs-vs-slateJs.md) in doc/notes for some considerations that inspired this version.
+See [draftJs vs slateJs](./docs/notes/draftjs-vs-slatejs.md) in docs/notes for some considerations that inspired this version.
 
 [Storybook](https://pietropassarelli.com/slate-transcript-editor)
 
@@ -79,8 +79,8 @@ See storybook `*.stories.js` in `src/components`/ for more examples
 
 | Attributes              | Description                                                                                                                                                                                                     | required |   type   |
 | :---------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------: | :------: |
-| transcriptData          | Transcript json                                                                                                                                                                                                 |   yes    |   Json   |
-| mediaUrl                | string url to media file - audio or video                                                                                                                                                                       |   yes    |  String  |
+| `transcriptData`        | Transcript json                                                                                                                                                                                                 |   yes    |   Json   |
+| `mediaUrl`              | string url to media file - audio or video                                                                                                                                                                       |   yes    |  String  |
 | `handleSaveEditor`      | function to handle when user clicks save btn in the UI                                                                                                                                                          |    no    | Function |
 | `handleAutoSaveChanges` | returns content of transcription after there's a change, auto save has condierable performance lag on longer files, sudgest to not use for files over 45 min/1hour.                                             |    no    | Function |
 | `autoSaveContentType`   | specify the file format for data returned by `handleAutoSaveChanges` and `handleSaveEditor`,falls default to `digitalpaperedit`, and runs alignement before export. Other option is `slate`,without alignement. |    no    |  String  |
@@ -234,11 +234,11 @@ There's a [docs](./docs) folder in this repository.
 
 - [docs/notes](./docs/notes) contains dev draft notes on various aspects of the project. This would generally be converted either into ADRs or guides when ready.
 - [docs/guides](./docs/guides) contains walk through / how to.
-- [docs/adr](./docs/adr) contains [Architecture Decision Record](https://github.com/joelparkerhenderson/architecture_decision_record).
+- [docs/adr](./docs/adr) contains [Architecture Decision Record](https://github.com/joelparkerhenderson/architecture-decision-record).
 
-The [docs folder syncs with gitbook](https://docs.gitbook.com/integrations/github/content-configuration#root) to make the documentation more pleasent to browse at [autoedit.gitbook.io/slate-transcript-editor-docs/](https://autoedit.gitbook.io/slate-transcript-editor-docs/) - _Work in progress_
+The [docs folder syncs with gitbook](https://docs.gitbook.com/integrations/git-sync/content-configuration#root) to make the documentation more pleasent to browse at [autoedit.gitbook.io/slate-transcript-editor-docs/](https://autoedit.gitbook.io/slate-transcript-editor-docs/) - _Work in progress_
 
-The `doc` folder syncs with gitbook for ease of browsing at [gitbook `slate-transcript-editor-docs`](https://autoedit.gitbook.io/slate-transcript-editor-docs/)
+The `docs` folder syncs with gitbook for ease of browsing at [gitbook `slate-transcript-editor-docs`](https://autoedit.gitbook.io/slate-transcript-editor-docs/)
 
 <!-- > An architectural decision record (ADR) is a document that captures an important architectural decision made along with its context and consequences.
 
@@ -272,11 +272,11 @@ and there's also a [pre-commit hook](https://github.com/typicode/husky) that run
 
 <!-- _How to run build_ -->
 
-### build module
+### Build module
 
-Following storybook [Distribute UI across an organization](https://www.learnstorybook.com/design-systems-for-developers/react/en/distribute/) guide.
+Following storybook [Distribute UI across an organization](https://storybook.js.org/tutorials/design-systems-for-developers/react/en/distribute/) guide.
 
-### build storybook
+### Build storybook
 
 ```
 nvm use 12
